@@ -1,6 +1,6 @@
 # Job Opportunity Automation
 
-**Version:** 0.1  
+**Version:** 0.2  
 **Status:** Discovery / Concept Exploration  
 **Last updated:** 2026-10-15
 
@@ -62,7 +62,7 @@ Identify potentially relevant employers, research their technologies and busines
 
 Both approaches could share application intelligence, professional background information, and performance tracking.
 
-The exact workflow, architecture, and degree of autonomy remain undecided.
+Autonomous execution is the eventual goal, reached through initial supervised and testing phases. The exact workflow, architecture, and conditions for autonomy remain undecided.
 
 ## 5. Guiding Principles
 
@@ -120,6 +120,8 @@ The representation, storage mechanism, and maintenance strategy have not yet bee
 - The project will also serve as a documented engineering portfolio.
 - Personalization, factual accuracy, efficiency, and simplicity are core principles.
 - Both advertised vacancies and proactive outreach are worth exploring.
+- Opportunity matching should reflect demonstrated capabilities and transferable skills, allowing justified gaps in advertised requirements without inventing qualifications or pursuing clearly unsuitable roles.
+- Execution autonomy should depend on verified behavior and agreed rules: clear matches may proceed independently, while uncertain or exceptional cases require review.
 - Architectural and technical decisions will remain open until sufficiently justified.
 
 ### Working Hypotheses
@@ -146,7 +148,7 @@ These hypotheses have not yet been validated.
 
 **Current phase:** Concept exploration and initial system design.
 
-The next step is to investigate the desired end-to-end behavior of the system, identify its essential responsibilities, and explore alternative ways to achieve them.
+The next step is to explore the professional knowledge base: what information it needs and its responsibilities in supporting opportunity matching and truthful, personalized applications.
 
 The first implementation should be selected based on its ability to validate an important assumption with minimal complexity and effort.
 
