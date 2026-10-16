@@ -1,0 +1,155 @@
+{
+  "id": "free-grape-society",
+  "company": "Free Grape Society",
+  "role": "Full-stack Development Intern",
+  "type": "internship",
+
+  "summary": "Worked as a full-stack developer in a small, fully remote startup, independently designing and implementing production features involving expert matching, product relevance scoring, data validation and analytics.",
+
+  "context": {
+    "company": "A European wine marketplace connecting customers directly with wine producers, without maintaining its own inventory or warehouses. The platform also aimed to build a community around wine reviews, tastings and expert advice.",
+    "product": "An e-commerce and community platform serving consumers, restaurants and wine experts.",
+    "team": "Six developers, including four interns and two more experienced developers who had previously joined as interns.",
+    "environment": "Fully remote startup with considerable individual responsibility and frequent production releases.",
+    "technologies": [
+      "Next.js",
+      "React",
+      "TypeScript",
+      "MongoDB",
+      "Zod",
+      "Google Tag Manager",
+      "Google Cloud Scheduler",
+      "Claude"
+    ]
+  },
+
+  "contributions": [
+    {
+      "name": "Wine Expert Matching",
+      "status": "Implemented and deployed",
+
+      "problem": "Wine advice requests were originally routed to a single in-house expert. The platform needed a scalable solution for distributing requests among registered experts based on their availability and areas of expertise.",
+
+      "solution": "Designed and implemented a permanent, rule-based matching system that selected suitable wine experts based on availability and country-specific expertise.",
+
+      "implementation": [
+        "Extracted preferred wine countries from submitted customer request forms.",
+        "Retrieved registered, active experts whose open_to_help_user setting was true.",
+        "Compared requested countries against each expert's areas of expertise.",
+        "Assigned one matching point per country.",
+        "Ranked experts according to their matching scores.",
+        "Randomly selected an expert when multiple candidates shared the highest qualifying score.",
+        "Implemented a fallback to an in-house account when no suitable expert was found."
+      ],
+
+      "extensibility": "Designed the matching approach to accommodate additional criteria in the future, such as food-pairing expertise and other expert qualifications.",
+
+      "ownership": "Responsible for designing and implementing the feature end-to-end, discussing relevant technical decisions with the CTO and other team members when appropriate."
+    },
+
+    {
+      "name": "Product Relevance Scoring",
+      "status": "Implemented and deployed",
+
+      "problem": "The platform needed a meaningful and maintainable way to determine which products should appear most prominently across listings and highlighted sections.",
+
+      "solution": "Designed and implemented a rule-based relevance scoring algorithm combining weighted product signals into a sortable score, with automated weekly recalculation.",
+
+      "implementation": [
+        "Explored signals such as product reviews, sales and recency.",
+        "Assigned different weights to signals based on their intended importance.",
+        "Weighted expert reviews four times more heavily than regular user reviews.",
+        "Introduced a temporary cold-start boost for newly added products during an initial eligibility period.",
+        "Implemented time-based decay affecting the total calculated relevance score.",
+        "Calculated and stored product relevance scores to support sorting.",
+        "Implemented a Google Cloud Scheduler job to update relevance scores for all products weekly."
+      ],
+
+      "extensibility": "Designed the scoring approach to allow additional product signals and parameters to be incorporated over time.",
+
+      "ownership": "Took a loosely defined feature request from concept to production implementation, consulting the CTO and other developers on meaningful technical and architectural decisions.",
+
+      "verificationNeeded": [
+        "Confirm whether the mathematical scoring approach was based on a Bayesian model.",
+        "Confirm the exact formula and decay behavior before documenting mathematical details."
+      ]
+    },
+
+    {
+      "name": "Product Analytics Integration",
+      "status": "Implemented and deployed",
+
+      "problem": "The platform needed analytics instrumentation to track product activity and user interactions.",
+
+      "solution": "Implemented Google Tag Manager functionality for tracking product-related events and verified the integration using the company's Google Analytics dashboard.",
+
+      "implementation": [
+        "Worked with Google Tag Manager to integrate product activity tracking.",
+        "Implemented tracking relating to product views and sales activity.",
+        "Accessed Google Analytics to verify that the integration functioned."
+      ]
+    },
+
+    {
+      "name": "Data Validation",
+      "status": "Implemented and deployed",
+
+      "summary": "Worked with Zod schemas to validate application data as part of full-stack feature development."
+    }
+  ],
+
+  "workingMethods": {
+    "dailyRoutine": "Participated in daily standups to communicate progress, planned work and blockers.",
+
+    "developmentProcess": "Worked independently on assigned features, from conceptualization and design through backend, database and frontend implementation.",
+
+    "collaboration": "Discussed problems, implementation approaches and architectural decisions with the CTO and other developers. Features underwent testing and peer review before production deployment.",
+
+    "aiTools": "Used Claude as a primary AI-assisted development tool, provided through the company."
+  },
+
+  "collaborationAndInitiative": [
+    {
+      "topic": "Pair-programming and knowledge sharing",
+
+      "description": "Proactively suggested closer collaboration and more opportunities for developers to work together on problems.",
+
+      "actions": "Reached out individually to the two more experienced developers and arranged a full working day with each to observe and discuss their development approaches.",
+
+      "outcome": "Both developers later expressed appreciation for the initiative."
+    },
+
+    {
+      "topic": "Improving developer onboarding",
+
+      "description": "Identified opportunities to improve how new interns were introduced to the development team, particularly regarding guidance, collaboration and knowledge sharing.",
+
+      "actions": "Presented observations and suggestions to the CTO, who subsequently brought the subject to the full development team for discussion.",
+
+      "outcome": "The suggestions sparked a team-wide discussion. The internship ended before the new interns joined, so the eventual impact is unknown."
+    }
+  ],
+
+  "reflection": {
+    "challenges": [
+      "Adapting to a large unfamiliar codebase with limited previous professional experience.",
+      "Balancing significant technical ownership with the need for guidance and knowledge sharing.",
+      "Navigating the pace and expectations of a fully remote startup."
+    ],
+
+    "lessons": [
+      "Developed experience taking responsibility for complete production features.",
+      "Learned to identify when independent problem-solving was appropriate and when technical discussion was valuable.",
+      "Recognized the importance of mentorship, collaboration and shared engineering knowledge.",
+      "Gained experience communicating concerns and proposing constructive improvements."
+    ],
+
+    "personalAssessment": "The independence provided valuable practical experience but could also be overwhelming. The experience reinforced a strong appreciation for collaborative engineering environments."
+  },
+
+  "outcomes": [
+    "Implemented features that passed review and testing and were deployed to the production platform.",
+    "Gained first-hand experience working within a professional development team.",
+    "Received a positive recommendation from the CTO highlighting leadership qualities and eagerness to learn."
+  ]
+}

@@ -1,8 +1,8 @@
 # Job Opportunity Automation
 
-**Version:** 0.2  
-**Status:** Discovery / Concept Exploration  
-**Last updated:** 2026-10-15
+**Version:** 0.3  
+**Status:** Initial Prototype Preparation  
+**Last updated:** 2026-10-16
 
 ## 1. Vision
 
@@ -87,21 +87,30 @@ Preserve factual accuracy, protect personal information, respect platform restri
 **Transparent engineering**  
 Document meaningful decisions, alternatives, tradeoffs, experiments, and lessons learned throughout development.
 
-## 6. Professional Knowledge Base — Working Hypothesis
+## 6. Professional Knowledge Base — Initial Design Direction
 
-A structured collection of verified professional information could act as the system's single source of truth.
+A structured collection of verified professional information will act as the system's single source of truth.
 
-It could include:
+The initial implementation will use **JSON combining structured fields with rich natural-language descriptions**. This approach was selected for its simplicity, maintainability, and ability to preserve more detailed information than a conventional CV.
 
-- Technical skills and demonstrated competencies.
-- Education, professional experience, and projects.
-- Specific responsibilities, achievements, and supporting examples.
-- Professional interests, career goals, and preferences.
-- Existing CV information and reusable application material.
+The knowledge base will organize information across four main areas:
 
-The system could use this information to select relevant evidence and generate context-specific applications without inventing qualifications.
+- **Skills and competencies:** Technical skills, tools, frameworks, and demonstrated engineering capabilities.
+- **Experiences:** Education, employment, projects, responsibilities, contributions, challenges, solutions, and outcomes.
+- **Personality and interests:** Personal background, motivations, interests, and relevant characteristics.
+- **Career preferences:** Professional goals, preferred working environments, and areas of interest.
 
-The representation, storage mechanism, and maintenance strategy have not yet been determined.
+Individual experiences may contain detailed descriptions of problems, implementations, technical decisions, and reflections. The system should be able to select relevant evidence from multiple experiences and adapt its presentation to different opportunities.
+
+Verified facts must remain distinguishable from interpretations, transferable capabilities, and unconfirmed information.
+
+The knowledge base will evolve as new experiences are acquired. Significant experiences may be preserved in detail, while older or less relevant information can be consolidated when appropriate.
+
+A traditional CV remains useful as an application attachment and experimental comparison baseline, but will not serve as the primary source of truth.
+
+The detailed JSON schema remains flexible. More advanced data relationships, retrieval mechanisms, or database infrastructure should only be introduced when demonstrated requirements justify them.
+
+Personal and confidential information must be kept separate from public portfolio documentation.
 
 ## 7. Main Risks and Uncertainties
 
@@ -122,6 +131,9 @@ The representation, storage mechanism, and maintenance strategy have not yet bee
 - Both advertised vacancies and proactive outreach are worth exploring.
 - Opportunity matching should reflect demonstrated capabilities and transferable skills, allowing justified gaps in advertised requirements without inventing qualifications or pursuing clearly unsuitable roles.
 - Execution autonomy should depend on verified behavior and agreed rules: clear matches may proceed independently, while uncertain or exceptional cases require review.
+- Structured JSON will serve as the initial professional knowledge base, preserving detailed experiences and verified information independently of the traditional CV.
+- Application generation should prioritize accurate, relevant, concise, and sufficiently personalized responses, emphasizing demonstrated problem-solving and contributions over unnecessary technology lists or employer name-dropping.
+- Application quality should be balanced against generation cost, complexity, and manual effort. The goal is reliable, useful output at scale rather than perfect prose.
 - Architectural and technical decisions will remain open until sufficiently justified.
 
 ### Working Hypotheses
@@ -131,8 +143,9 @@ The representation, storage mechanism, and maintenance strategy have not yet bee
 - Automating the coordination between tasks may provide greater value than optimizing individual tasks alone.
 - Platsbanken's public API may offer a low-friction initial technical experiment.
 - Tracking outcomes across different strategies could support future optimization.
+- A simple LLM-based generation workflow may provide sufficient application quality without requiring sophisticated retrieval or multi-model architectures.
 
-These hypotheses have not yet been validated.
+These hypotheses have not yet been fully validated.
 
 ## 9. Open Questions
 
@@ -146,10 +159,11 @@ These hypotheses have not yet been validated.
 
 ## 10. Current Focus & Next Steps
 
-**Current phase:** Concept exploration and initial system design.
+**Current phase:** Initial prototype preparation.
 
-The next step is to explore the professional knowledge base: what information it needs and its responsibilities in supporting opportunity matching and truthful, personalized applications.
+The first implementation milestone is a minimal **AI-assisted application generation prototype**.
 
-The first implementation should be selected based on its ability to validate an important assumption with minimal complexity and effort.
+The prototype will:
 
-Technology selection and detailed architecture will follow once the relevant requirements and tradeoffs are better understood.
+1. Load a structured professional profile containing verified skills, experiences, and preferences.
+2.
