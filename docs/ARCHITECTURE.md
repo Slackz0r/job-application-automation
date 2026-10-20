@@ -65,6 +65,8 @@ Retrieves job advertisements from supported external sources.
 
 Platsbanken's public JobSearch API is the intended initial integration.
 
+The server-only connector in `src/lib/job-search.ts` now fetches one batch using search text and an optional municipality identifier. It converts source fields to our opportunity format using shared validation from the persistence module, preserves plain advertisement text, and returns the API's total match count together with valid opportunities and a count of skipped invalid advertisements. Requests have a ten-second timeout and bypass caching. Network, HTTP, or malformed-response failures stop the search with an error; individual invalid advertisements are skipped. It performs no database writes. The search interface and workflow connecting discovery to persistence are still pending.
+
 Responsibilities include:
 
 - Fetching available opportunities.
@@ -164,7 +166,7 @@ Schema changes are versioned as numbered SQL files in `migrations/` and applied 
 
 The initial `opportunities` table stores advertisement facts, with a unique `(source, source_id)` pair. Source identifiers, title, URL, and discovery time are required and checked for empty or ordinary-space-only values. Company, description, publication date, and application deadline may be unknown.
 
-The server-only `src/lib/opportunities.ts` module validates and saves opportunities and reads them by internal ID. Callers pass an open database connection and close it after use. Required text is trimmed and must remain nonblank; URLs must use HTTP or HTTPS. Optional text is trimmed, with blank values stored as `null`. Dates accept ISO calendar dates or timestamps with an explicit timezone. The module generates the discovery timestamp and returns the existing record unchanged for duplicate source identifiers. Input validation errors and database failures propagate to the caller; reading a missing record returns `null`. Tests use temporary databases, including closing and reopening connections. No discovery integration or opportunity interface is implemented yet.
+The server-only `src/lib/opportunities.ts` module validates and saves opportunities and reads them by internal ID. Callers pass an open database connection and close it after use. Required text is trimmed and must remain nonblank; URLs must use HTTP or HTTPS. Optional text is trimmed, with blank values stored as `null`. Dates accept ISO calendar dates or timestamps with or without a timezone and are preserved unchanged; a missing timezone must not be assumed to mean UTC or the host computer's timezone. The module generates its own UTC discovery timestamp and returns the existing record unchanged for duplicate source identifiers. Input validation errors and database failures propagate to the caller; reading a missing record returns `null`. Tests use temporary databases, including closing and reopening connections. The discovery connector is not yet connected to persistence or an opportunity interface.
 
 ### External Data
 

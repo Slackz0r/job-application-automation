@@ -1,8 +1,8 @@
 # Job Opportunity Automation
 
 **Version:** 0.4  
-**Status:** MVP Implementation — Project Foundation Complete
-**Last updated:** 2026-10-20
+**Status:** MVP Implementation — Opportunity Discovery
+**Last updated:** 2026-10-21
 
 ## 1. Vision
 
@@ -159,9 +159,9 @@ These hypotheses have not yet been fully validated.
 
 ## 10. Current Focus & Next Steps
 
-**Current phase:** MVP implementation — project foundation complete.
+**Current phase:** MVP implementation — opportunity discovery.
 
-The initial Next.js/TypeScript application, server-side professional profile loading, SQLite migrations, and opportunity save/read logic are implemented. The next milestone is discovering and browsing real job advertisements from Platsbanken.
+The initial Next.js/TypeScript application, server-side professional profile loading, SQLite migrations, and opportunity save/read logic are implemented. The JobSearch connector now fetches and prepares real advertisements from Platsbanken. Connecting searches to the interface and persistence workflow is the next increment.
 
 The MVP will support job discovery, opportunity evaluation, AI-assisted application generation, manual application submission, and tracking.
 

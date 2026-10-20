@@ -100,7 +100,7 @@ Future autonomous submissions should depend on verified reliability, clear execu
 
 **Rationale:** Identifiers and timestamps support traceability and processing, but a saved opportunity must also support useful browsing and verification. Incomplete source data alone is not a reason to create unusable records.
 
-**Initial scope:** Company, description, publication date, and application deadline may be unknown. Evaluation and generation require sufficient advertisement text before proceeding. The schema enforces required and nonblank fields; the save workflow validates HTTP/HTTPS URLs and ISO dates or timestamps with an explicit timezone, and generates the discovery timestamp.
+**Initial scope:** Company, description, publication date, and application deadline may be unknown. Evaluation and generation require sufficient advertisement text before proceeding. The schema enforces required and nonblank fields; the save workflow validates HTTP/HTTPS URLs and ISO dates or timestamps, and generates the discovery timestamp. Source timezone handling is defined in D013.
 
 **Revisit if:** Real source data or workflow requirements reveal a concrete need to change the minimum requirements or add fields.
 
@@ -119,6 +119,14 @@ Applied migration files remain unchanged; subsequent changes use new files. Migr
 **Rationale:** Repeated discovery should avoid duplicates and preserve the saved advertisement. Updating advertisements needs an explicit policy rather than silently replacing existing data.
 
 **Revisit if:** Real discovery reveals a need to refresh changed or expired advertisements.
+
+### D013 — Preserve Source Dates Without Guessing Timezones
+
+**Decision:** Accept valid ISO calendar dates and timestamps with or without a timezone for publication dates and application deadlines. Keep supplied values unchanged. The application-generated discovery timestamp remains UTC.
+
+**Rationale:** Live JobSearch responses supply publication dates and deadlines without timezone information. Preserving the supplied date and time avoids losing information or inventing a timezone. This extends the initial validation rule, which required a timezone on full timestamps.
+
+**Revisit if:** Deadline reminders, comparisons across sources, or other time-sensitive behavior require verified timezone interpretation. A timestamp without a timezone must not automatically be treated as UTC or the host computer's local time.
 
 ## 3. Under Evaluation
 

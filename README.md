@@ -25,9 +25,9 @@ Technical decisions are driven by actual requirements and validated assumptions 
 
 ## Current Status
 
-**Phase:** MVP Implementation — Project Foundation Complete
+**Phase:** MVP Implementation — Opportunity Discovery
 
-The Next.js/TypeScript application loads and validates the private professional profile on the server. The initial page reports whether the profile is ready without displaying its full contents. SQLite setup includes a repeatable migration command, the first opportunities table, and tested application logic for saving and reading opportunities. The next milestone is discovering and browsing real advertisements from Platsbanken.
+The Next.js/TypeScript application loads and validates the private professional profile on the server. The initial page reports whether the profile is ready without displaying its full contents. SQLite setup includes a repeatable migration command, the first opportunities table, and tested application logic for saving and reading opportunities. A server-only JobSearch connector now fetches and prepares real advertisements from Platsbanken. Connecting searches to the interface and database is next.
 
 The initial stack consists of Next.js, React, Node.js, TypeScript, SQLite, and a structured JSON professional knowledge base.
 
@@ -46,7 +46,7 @@ npm.cmd run dev
 
 Copy the sanitized example only if you do not already have a private `professional-profile.json`. Replace its example contents with your verified professional information. The private file is ignored by Git and must remain outside `public/`.
 
-Open [http://127.0.0.1:3000](http://127.0.0.1:3000). Both development and production start commands bind to the local computer. No environment variables or external services are needed for this increment.
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000). Both development and production start commands bind to the local computer. Profile and database setup require no environment variables or external services. The JobSearch connector needs internet access but no API key.
 
 ```powershell
 npm.cmd run lint
@@ -64,7 +64,9 @@ The server-only `src/lib/db.ts` module exports `openDatabase()`, which creates `
 
 The first migration creates `opportunities`; setup adds no sample job records. Keep applied migration files unchanged and add a new numbered SQL file for later schema changes. Each file should contain its SQL changes; the runner handles the transaction.
 
-`src/lib/opportunities.ts` exports `saveOpportunity(db, input)` and `getOpportunity(db, id)`. Pass an open connection from `openDatabase()` and close it when finished. Saving validates required fields, accepts only HTTP/HTTPS URLs, and records the first discovery time automatically. Optional dates accept `YYYY-MM-DD` or ISO timestamps with a timezone; missing values are stored as `null`. A duplicate source/source ID returns the original record without overwriting it. Reading an unknown ID returns `null`. Invalid input throws a validation error, while database failures propagate to the caller. These functions are server-only and are not connected to the interface yet.
+`src/lib/opportunities.ts` exports `saveOpportunity(db, input)` and `getOpportunity(db, id)`. Pass an open connection from `openDatabase()` and close it when finished. Saving validates required fields, accepts only HTTP/HTTPS URLs, and records the first discovery time automatically. Optional dates accept `YYYY-MM-DD` or ISO timestamps with or without a timezone; supplied values are preserved unchanged and missing values are stored as `null`. A duplicate source/source ID returns the original record without overwriting it. Reading an unknown ID returns `null`. Invalid input throws a validation error, while database failures propagate to the caller. These functions are server-only and are not connected to the interface yet.
+
+`src/lib/job-search.ts` exports `searchJobs({ query, municipality?, limit? })`. The optional municipality is an API location identifier, not a place name. Searches request one batch of 20 advertisements by default (up to 100), with a ten-second request timeout and no cached response. The result contains `total` matches reported by the API, prepared `opportunities`, and a `skippedCount` for invalid advertisements in this batch. Empty searches succeed with an empty list; network, HTTP, and malformed-response failures throw errors. The connector uses plain advertisement text, retains only the fields needed by our opportunity format, and shares validation with the save module. It does not write to the database. Tests use sanitized responses; a live check also verified three advertisements through an in-memory database without changing local application data.
 
 Tooling limitation: ESLint 9 is retained for compatibility with the plugins in Next.js's lint configuration, although ESLint marks that release as unsupported. The development dependency audit reports five high-severity entries from one unpatched [braces advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) in the lint dependency chain. The production dependency audit reports no vulnerabilities. Revisit this when compatible upstream releases become available.
 

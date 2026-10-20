@@ -109,6 +109,25 @@ test("returns the original opportunity for duplicates without overwriting any fi
   assert.deepEqual(db.prepare("SELECT COUNT(*) AS count FROM opportunities").get(), { count: 2 });
 });
 
+test("preserves source timestamps without adding or converting a timezone", (t) => {
+  const { db, path } = createFixture(t);
+  const saved = saveOpportunity(db, {
+    ...example,
+    publishedAt: "2026-10-21T10:30:00",
+    applicationDeadline: "2026-11-30T23:59:59",
+  });
+  db.close();
+  const reopened = new Database(path, { fileMustExist: true });
+  try {
+    const loaded = getOpportunity(reopened, saved.id);
+    assert.equal(loaded?.publishedAt, "2026-10-21T10:30:00");
+    assert.equal(loaded?.applicationDeadline, "2026-11-30T23:59:59");
+    assert.match(saved.discoveredAt, /Z$/);
+  } finally {
+    reopened.close();
+  }
+});
+
 test("rejects incomplete or invalid advertisements before saving anything", (t) => {
   const { db } = createFixture(t);
   for (const field of ["source", "sourceId", "title", "url"]) {
@@ -120,7 +139,7 @@ test("rejects incomplete or invalid advertisements before saving anything", (t) 
     assert.throws(() => saveOpportunity(db, { ...example, url }), ZodError);
   }
   for (const field of ["applicationDeadline", "publishedAt"]) {
-    for (const value of ["", "tomorrow", "2026-02-30", "2026-10-21T10:30:00", 123]) {
+    for (const value of ["", "tomorrow", "2026-02-30", "2026-02-30T10:30:00", "2026-10-21T25:30:00", 123]) {
       assert.throws(() => saveOpportunity(db, { ...example, [field]: value }), ZodError);
     }
   }

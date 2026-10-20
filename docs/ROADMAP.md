@@ -1,7 +1,7 @@
 # Development Roadmap
 
 **Version:** 0.1  
-**Status:** Milestone 1 complete — Milestone 2 next
+**Status:** Milestone 1 complete — Milestone 2 in progress
 **Last updated:** 2026-10-21
 
 ## 1. Purpose
@@ -58,6 +58,8 @@ Scope:
 ### Milestone 2 — Opportunity Discovery
 
 **Goal:** Retrieve and browse real job opportunities.
+
+**Current progress:** The server-only JobSearch connector supports search text and an optional municipality identifier, validates and prepares one batch of advertisements, and reports invalid records that were skipped. Automated tests cover results and failures. A live check verified three advertisements through an in-memory database, including repeat saves and unchanged source dates. The search interface, municipality picker, and application workflow connecting searches to persistence remain to be implemented.
 
 Scope:
 
