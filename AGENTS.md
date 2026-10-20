@@ -32,6 +32,7 @@ Do not reread the entire document for every small, well-understood implementatio
 
 ## Working with Files
 
+- Follow the [Git Workflow](README.md#git-workflow): create a dedicated branch before editing files for a new task. Reuse an existing task branch only when continuing unfinished work; after merging, start subsequent work on a new branch. Small documentation or wording fixes may be made directly on the default branch.
 - Use the local repository as the primary source of project information.
 - Resolve file paths relative to the repository root.
 - Read only files relevant to the current task.

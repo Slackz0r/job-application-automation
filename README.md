@@ -68,6 +68,14 @@ The first migration creates `opportunities`; setup adds no sample job records. K
 
 Tooling limitation: ESLint 9 is retained for compatibility with the plugins in Next.js's lint configuration, although ESLint marks that release as unsupported. The development dependency audit reports five high-severity entries from one unpatched [braces advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) in the lint dependency chain. The production dependency audit reports no vulnerabilities. Revisit this when compatible upstream releases become available.
 
+## Git Workflow
+
+- Before changing files for a new task, create a dedicated branch from the default branch. Continue unfinished work on its existing task branch. Once the task is merged, use a new branch for subsequent work.
+- Small documentation or wording fixes may be made directly on the default branch when a separate task branch would add little value.
+- Use short, descriptive branch names with the `codex/` prefix and hyphens between words, such as `codex/job-search-api`.
+- Keep related code, tests, and documentation together on the task branch. A task may span several implementation steps and small, clear commits; individual edits do not need separate branches.
+- Review the changes and run checks appropriate to the task before merging into the default branch.
+
 ## Documentation
 
 - [Project Overview](docs/PROJECT.md) — Vision, objectives, principles, and product direction.
