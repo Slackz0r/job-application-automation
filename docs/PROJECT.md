@@ -1,8 +1,8 @@
 # Job Opportunity Automation
 
-**Version:** 0.3  
-**Status:** Initial Prototype Preparation  
-**Last updated:** 2026-10-16
+**Version:** 0.4  
+**Status:** MVP Implementation Preparation  
+**Last updated:** 2026-10-20
 
 ## 1. Vision
 
@@ -134,14 +134,14 @@ Personal and confidential information must be kept separate from public portfoli
 - Structured JSON will serve as the initial professional knowledge base, preserving detailed experiences and verified information independently of the traditional CV.
 - Application generation should prioritize accurate, relevant, concise, and sufficiently personalized responses, emphasizing demonstrated problem-solving and contributions over unnecessary technology lists or employer name-dropping.
 - Application quality should be balanced against generation cost, complexity, and manual effort. The goal is reliable, useful output at scale rather than perfect prose.
-- Architectural and technical decisions will remain open until sufficiently justified.
+- Remaining architectural and technical decisions will be made when sufficiently justified.
 
 ### Working Hypotheses
 
 - Shared application intelligence could support multiple employment strategies.
 - A structured professional knowledge base could improve personalization and consistency.
 - Automating the coordination between tasks may provide greater value than optimizing individual tasks alone.
-- Platsbanken's public API may offer a low-friction initial technical experiment.
+- Platsbanken's public API may offer a low-friction initial integration.
 - Tracking outcomes across different strategies could support future optimization.
 - A simple LLM-based generation workflow may provide sufficient application quality without requiring sophisticated retrieval or multi-model architectures.
 
@@ -155,15 +155,18 @@ These hypotheses have not yet been fully validated.
 - How should opportunities be discovered, evaluated, and prioritized?
 - Which parts of the workflow genuinely benefit from AI?
 - How can we compare the effectiveness of different employment strategies?
-- What is the smallest useful experiment that could validate our assumptions?
+- How can the MVP's real-world results guide the development of greater autonomy?
 
 ## 10. Current Focus & Next Steps
 
-**Current phase:** Initial prototype preparation.
+**Current phase:** MVP implementation preparation.
 
-The first implementation milestone is a minimal **AI-assisted application generation prototype**.
+The initial architecture and development roadmap have been established. The next step is to begin implementing the application, starting with the project foundation and progressing toward a usable end-to-end workflow.
 
-The prototype will:
+The MVP will support job discovery, opportunity evaluation, AI-assisted application generation, manual application submission, and tracking.
 
-1. Load a structured professional profile containing verified skills, experiences, and preferences.
-2.
+It will also provide a practical environment for evaluating and improving matching behavior, application quality, and overall efficiency.
+
+The implementation sequence, milestone scope, and completion criteria are defined in [ROADMAP.md](ROADMAP.md).
+
+Remaining technical decisions will be made progressively as concrete implementation requirements emerge, following the project's principles of simplicity and evidence-driven development.

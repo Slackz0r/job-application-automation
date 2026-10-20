@@ -1,12 +1,12 @@
 # System Architecture
 
-**Version:** 0.1  
+**Version:** 0.2  
 **Status:** Initial Architecture  
-**Last updated:** 2026-10-19
+**Last updated:** 2026-10-20
 
 ## 1. Overview
 
-Job Opportunity Automation is a local-first application designed to discover, evaluate, and pursue relevant employment opportunities with minimal manual effort.
+Job Opportunity Automation is an application designed to discover, evaluate, and pursue relevant employment opportunities with minimal manual effort.
 
 The initial MVP focuses on advertised job vacancies, using AI to evaluate opportunities and generate personalized application material based on a structured professional knowledge base.
 
@@ -37,15 +37,11 @@ Python and separate backend services are excluded from the initial architecture 
 
 ## 3. Execution Environment
 
-The application will initially run locally and be accessed through a web browser.
+The application will initially run locally and be accessed through a web browser, minimizing infrastructure requirements during development and early usage.
 
-This allows development, testing, and operation without requiring deployment infrastructure.
+External services will be used for job discovery and LLM functionality.
 
-External services will still be used where necessary, including job discovery APIs and LLM providers.
-
-Future hosting should remain possible, but deployment-specific infrastructure will not be introduced prematurely.
-
-Application functionality should not depend unnecessarily on local-only behavior. Database access, external integrations, and execution logic should remain reasonably separated so they can be adapted if requirements change.
+Hosted deployment remains a future option rather than an initial requirement. The architecture should avoid unnecessary dependencies on a specific execution environment, without introducing abstractions solely to support hypothetical deployment scenarios.
 
 ## 4. System Responsibilities
 
@@ -126,7 +122,7 @@ The specific execution mechanism will be determined during implementation.
 
 Stores discovered opportunities, evaluations, generated application material, and application statuses.
 
-The MVP will use SQLite.
+The application uses SQLite for persistent operational data.
 
 Application records should support:
 
@@ -154,11 +150,11 @@ The initial representation combines structured fields with rich natural-language
 
 ### Operational Data — SQLite
 
-SQLite stores information generated or accumulated through application usage.
+SQLite serves as the application's relational database, storing opportunities, evaluations, generated application material, processing history, and statuses.
 
-This includes opportunities, evaluations, application material, processing history, and statuses.
+SQLite is expected to support both the MVP and the full application, including future autonomous workflows. The database choice should only be reconsidered if new requirements, such as distributed execution or hosting constraints, justify a change.
 
-Database interactions should be kept reasonably separate from business logic without introducing unnecessary abstraction.
+Database interactions should remain reasonably separate from business logic without introducing unnecessary abstraction.
 
 ### External Data
 
@@ -223,18 +219,9 @@ These exclusions define the initial scope, not permanent architectural limitatio
 
 ## 9. Open Technical Decisions
 
-The following decisions will be made when implementation creates a concrete need:
+Significant unresolved technical choices and their current evaluation status are maintained in [DECISIONS.md](DECISIONS.md).
 
-- LLM provider, model, and integration approach.
-- SQLite tooling and initial database schema.
-- Internal module and directory structure.
-- Workflow execution and progress tracking.
-- Opportunity evaluation and prioritization methods.
-- Generated output formats and validation requirements.
-- Error handling, retries, and external API rate limits.
-- Testing strategy for AI-generated results.
-
-Decisions should favor the simplest solution that meets the current requirements.
+Implementation details should be determined when concrete requirements emerge, prioritizing simplicity and avoiding premature complexity.
 
 ## 10. Future Evolution
 
@@ -247,7 +234,7 @@ Possible future developments include:
 - Automated application submission.
 - Scheduled and unattended workflows.
 - Expanded tracking and performance analysis.
-- Hosted execution and potentially a different persistence solution.
+- Hosted execution, with persistence requirements reassessed if the chosen hosting environment demands it.
 
 These capabilities should emerge from validated requirements rather than speculative architectural preparation.
 
