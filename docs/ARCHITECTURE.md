@@ -158,6 +158,8 @@ SQLite is expected to support both the MVP and the full application, including f
 
 Database interactions should remain reasonably separate from business logic without introducing unnecessary abstraction.
 
+Initial database access uses direct SQL through `better-sqlite3`. The server-only connection module, `src/lib/db.ts`, opens `data/app.sqlite` on demand and creates its directory if necessary. The caller closes the connection after use. The entire `data/` directory is local operational data and is excluded from Git.
+
 ### External Data
 
 Job advertisements and LLM responses originate from external services.

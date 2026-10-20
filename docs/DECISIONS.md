@@ -82,6 +82,18 @@ Application generation should prioritize relevance, concrete evidence, natural l
 
 Future autonomous submissions should depend on verified reliability, clear execution rules, and supported and permitted application channels.
 
+### D009 — Direct SQL and SQLite Driver
+
+**Decision:** Begin with direct SQL through `better-sqlite3`.
+
+**Alternatives considered:** An ORM and Node.js's built-in `node:sqlite` module.
+
+**Rationale:** Explicit SQL suits the initial storage requirements and supports learning how database operations work. The built-in SQLite integration is experimental in the installed Node.js 24.10.0 runtime; `better-sqlite3` provides an established API while keeping SQL visible.
+
+**Tradeoff:** The additional native dependency requires attention to installation and Node.js compatibility. Installation and a connection check succeeded on the current Windows environment without additional build tools.
+
+**Revisit if:** Repetitive mapping or schema maintenance justifies an ORM, or a stable built-in driver offers a practical maintenance advantage. Either change would require adapting and testing the database access code.
+
 ## 3. Under Evaluation
 
 ### AI Integration
@@ -94,7 +106,7 @@ Future autonomous submissions should depend on verified reliability, clear execu
 
 ### Persistence Implementation
 
-- SQLite integration tooling and schema design.
+- Database schema design.
 - Application status and processing-history representation.
 
 **Initial preference:** Support actual requirements without premature abstractions.

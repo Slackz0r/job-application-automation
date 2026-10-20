@@ -27,7 +27,7 @@ Technical decisions are driven by actual requirements and validated assumptions 
 
 **Phase:** MVP Implementation — Project Foundation
 
-The Next.js/TypeScript application loads and validates the private professional profile on the server. The initial page reports whether the profile is ready without displaying its full contents. SQLite persistence is the next foundation increment.
+The Next.js/TypeScript application loads and validates the private professional profile on the server. The initial page reports whether the profile is ready without displaying its full contents. The SQLite connection is implemented and verified; defining the first table and storing opportunities are the next foundation steps.
 
 The initial stack consists of Next.js, React, Node.js, TypeScript, SQLite, and a structured JSON professional knowledge base.
 
@@ -56,6 +56,8 @@ npm.cmd start
 ```
 
 The server loader is in `src/lib/professional-profile.ts`; the status page is in `src/app/page.tsx`. The loader validates the current single-experience format and preserves additional details, including `verificationNeeded`. This is an initial format, not the final schema for a complete career profile. Missing, invalid, or unreadable profiles produce a setup message, and the private file is read at request time rather than included in prerendered output.
+
+The server-only `src/lib/db.ts` module exports `openDatabase()`, which creates `data/` if needed and opens `data/app.sqlite` through `better-sqlite3`. The caller closes the connection with `db.close()` after use, including on failure. The whole `data/` folder is ignored by Git. The connection has been verified with `SELECT 1 AS connected`; no tables or application data have been created yet.
 
 Tooling limitation: ESLint 9 is retained for compatibility with the plugins in Next.js's lint configuration, although ESLint marks that release as unsupported. The development dependency audit reports five high-severity entries from one unpatched [braces advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) in the lint dependency chain. The production dependency audit reports no vulnerabilities. Revisit this when compatible upstream releases become available.
 
