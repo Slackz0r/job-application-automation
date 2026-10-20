@@ -1,4 +1,8 @@
 import { loadProfessionalProfile } from "@/lib/professional-profile";
+import { openDatabase } from "@/lib/db";
+import { getMunicipalities } from "@/lib/job-search";
+import { listOpportunities, type Opportunity } from "@/lib/opportunities";
+import { OpportunitySearch } from "./opportunity-search";
 
 // Read the private profile at request time, keeping it out of prerendered pages.
 export const dynamic = "force-dynamic";
@@ -11,7 +15,22 @@ const setupMessages = {
 };
 
 export default async function Home() {
-  const result = await loadProfessionalProfile();
+  const [result, municipalities] = await Promise.all([
+    loadProfessionalProfile(),
+    getMunicipalities().catch(() => []),
+  ]);
+  let savedOpportunities: Opportunity[] = [];
+  let savedError: string | null = null;
+  try {
+    const db = openDatabase();
+    try {
+      savedOpportunities = listOpportunities(db);
+    } finally {
+      db.close();
+    }
+  } catch {
+    savedError = "Saved opportunities could not be loaded. Check the database setup and refresh.";
+  }
 
   return (
     <main>
@@ -20,6 +39,8 @@ export default async function Home() {
         <h1>Job Opportunity Automation</h1>
         <p className="intro">Discover opportunities. Prepare thoughtful applications. Keep track of progress.</p>
       </header>
+
+      <OpportunitySearch municipalities={municipalities} savedOpportunities={savedOpportunities} savedError={savedError} />
 
       <section aria-labelledby="profile-heading" className="card">
         <p className="eyebrow">Project foundation</p>
@@ -40,7 +61,6 @@ export default async function Home() {
         )}
       </section>
 
-      <p className="next-step">Next: discover and browse job opportunities from Platsbanken.</p>
     </main>
   );
 }

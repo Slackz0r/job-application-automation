@@ -70,3 +70,11 @@ export function getOpportunity(db: Database.Database, id: number): Opportunity |
     SELECT ${opportunityColumns} FROM opportunities WHERE id = ?
   `).get(id) ?? null;
 }
+
+export function listOpportunities(db: Database.Database, limit = 20): Opportunity[] {
+  z.number().int().min(1).max(100).parse(limit);
+  return db.prepare<[number], Opportunity>(`
+    SELECT ${opportunityColumns} FROM opportunities
+    ORDER BY discovered_at DESC, id DESC LIMIT ?
+  `).all(limit);
+}

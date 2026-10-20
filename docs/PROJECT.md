@@ -161,7 +161,7 @@ These hypotheses have not yet been fully validated.
 
 **Current phase:** MVP implementation — opportunity discovery.
 
-The initial Next.js/TypeScript application, server-side professional profile loading, SQLite migrations, and opportunity save/read logic are implemented. The JobSearch connector now fetches and prepares real advertisements from Platsbanken. Connecting searches to the interface and persistence workflow is the next increment.
+The local application now supports Platsbanken searches, an optional municipality picker, SQLite persistence, and browsing saved advertisement text and original-source links. The initial foundation and opportunity-discovery milestones are implemented. Hands-on usage review is the next checkpoint before discussing AI evaluation.
 
 The MVP will support job discovery, opportunity evaluation, AI-assisted application generation, manual application submission, and tracking.
 

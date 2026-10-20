@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { ZodError } from "zod";
-import { searchJobs } from "./job-search.ts";
+import { getMunicipalities, searchJobs } from "./job-search.ts";
 
 const advertisement = {
   id: "example-001",
@@ -128,5 +128,30 @@ test("rejects invalid JSON and malformed search responses", async () => {
   );
   for (const payload of [null, {}, { total: { value: -1 }, hits: [] }, { total: { value: 1 }, hits: {} }]) {
     await assert.rejects(searchJobs({ query: "developer" }, respond(payload)), /unexpected search response/);
+  }
+});
+
+test("loads official municipality identifiers and sorts their names in Swedish order", async () => {
+  const locations = await getMunicipalities(async (input, options) => {
+    assert.equal(new URL(String(input)).hostname, "taxonomy.api.jobtechdev.se");
+    assert.deepEqual(options?.next, { revalidate: 86400 });
+    return Response.json([
+      { "taxonomy/id": "example-orebro", "taxonomy/preferred-label": "Örebro" },
+      { "taxonomy/id": "example-alvesta", "taxonomy/preferred-label": "Alvesta" },
+      { "taxonomy/id": "example-are", "taxonomy/preferred-label": "Åre" },
+    ]);
+  });
+  assert.deepEqual(locations, [
+    { id: "example-alvesta", name: "Alvesta" },
+    { id: "example-are", name: "Åre" },
+    { id: "example-orebro", name: "Örebro" },
+  ]);
+});
+
+test("rejects unavailable or malformed municipality lists so the page can offer national search", async () => {
+  await assert.rejects(getMunicipalities(async () => new Response(null, { status: 500 })));
+  await assert.rejects(getMunicipalities(async () => { throw new Error("Network unavailable"); }));
+  for (const payload of [[], null, [{ "taxonomy/id": "example-001" }]]) {
+    await assert.rejects(getMunicipalities(respond(payload)));
   }
 });

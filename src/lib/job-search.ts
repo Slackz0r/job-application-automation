@@ -32,6 +32,26 @@ export type JobSearchResult = {
   skippedCount: number;
 };
 
+export type Municipality = { id: string; name: string };
+
+export async function getMunicipalities(fetcher: typeof fetch = fetch): Promise<Municipality[]> {
+  const response = await fetcher(
+    "https://taxonomy.api.jobtechdev.se/v1/taxonomy/specific/concepts/municipality?limit=1000",
+    { headers: { Accept: "application/json" }, next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) },
+  );
+  if (!response.ok) throw new Error("The municipality list could not be loaded.");
+
+  const municipalities = z.array(z.object({
+    "taxonomy/id": z.string().trim().min(1),
+    "taxonomy/preferred-label": z.string().trim().min(1),
+  })).min(1).parse(await response.json());
+
+  return municipalities.map((municipality) => ({
+    id: municipality["taxonomy/id"],
+    name: municipality["taxonomy/preferred-label"],
+  })).sort((a, b) => a.name.localeCompare(b.name, "sv"));
+}
+
 export async function searchJobs(
   input: JobSearchInput,
   fetcher: typeof fetch = fetch,

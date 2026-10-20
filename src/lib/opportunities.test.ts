@@ -5,7 +5,7 @@ import { dirname, join, resolve } from "node:path";
 import { test, type TestContext } from "node:test";
 import Database from "better-sqlite3";
 import { ZodError } from "zod";
-import { getOpportunity, saveOpportunity } from "./opportunities.ts";
+import { getOpportunity, listOpportunities, saveOpportunity } from "./opportunities.ts";
 
 const initialMigration = readFileSync(
   new URL("../../migrations/001-create-opportunities.sql", import.meta.url),
@@ -151,4 +151,16 @@ test("rejects invalid internal IDs", (t) => {
   for (const id of [0, -1, 1.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1]) {
     assert.throws(() => getOpportunity(db, id), ZodError);
   }
+});
+
+test("lists the most recently discovered opportunities with a predictable limit", (t) => {
+  const { db } = createFixture(t);
+  assert.deepEqual(listOpportunities(db), []);
+  const first = saveOpportunity(db, example);
+  const second = saveOpportunity(db, { ...example, sourceId: "job-002" });
+  db.prepare("UPDATE opportunities SET discovered_at = ?").run("2026-10-21T12:00:00.000Z");
+  assert.deepEqual(listOpportunities(db, 1).map((opportunity) => opportunity.id), [second.id]);
+  assert.deepEqual(listOpportunities(db).map((opportunity) => opportunity.id), [second.id, first.id]);
+  db.prepare("UPDATE opportunities SET discovered_at = ? WHERE id = ?").run("2026-10-22T12:00:00.000Z", first.id);
+  assert.equal(listOpportunities(db, 1)[0]?.id, first.id);
 });

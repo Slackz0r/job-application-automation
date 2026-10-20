@@ -1,7 +1,7 @@
 # Development Roadmap
 
 **Version:** 0.1  
-**Status:** Milestone 1 complete — Milestone 2 in progress
+**Status:** Milestones 1–2 implemented — ready for hands-on review
 **Last updated:** 2026-10-21
 
 ## 1. Purpose
@@ -59,7 +59,7 @@ Scope:
 
 **Goal:** Retrieve and browse real job opportunities.
 
-**Current progress:** The server-only JobSearch connector supports search text and an optional municipality identifier, validates and prepares one batch of advertisements, and reports invalid records that were skipped. Automated tests cover results and failures. A live check verified three advertisements through an in-memory database, including repeat saves and unchanged source dates. The search interface, municipality picker, and application workflow connecting searches to persistence remain to be implemented.
+**Current progress:** Implemented. The homepage supports free-text search and an optional official municipality picker, saves valid results in SQLite, and displays advertisement text and original-source links. Recent records remain visible after refresh or application restart. Tests cover duplicate handling, source dates, form validation, API failures, and rollback of failed save batches. Browser checks verified live searches, retained search criteria, saved records after refresh, empty results, and readable advertisement details. The first interface searches and lists up to 20 records at a time; pagination is not implemented. Hands-on usage review is the next checkpoint before AI evaluation work.
 
 Scope:
 
