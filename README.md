@@ -74,11 +74,11 @@ Tooling limitation: ESLint 9 is retained for compatibility with the plugins in N
 
 ## Git Workflow
 
-- Before changing files for a new task, create a dedicated branch from the default branch. Continue unfinished work on its existing task branch. Once the task is merged, use a new branch for subsequent work.
-- Small documentation or wording fixes may be made directly on the default branch when a separate task branch would add little value.
-- Use short, descriptive branch names with the `codex/` prefix and hyphens between words, such as `codex/job-search-api`.
-- Keep related code, tests, and documentation together on the task branch. A task may span several implementation steps and small, clear commits; individual edits do not need separate branches.
-- Review the changes and run checks appropriate to the task before merging into the default branch.
+- Work directly on the default branch (`master`) for routine, sequential work on this solo project. A separate branch is optional.
+- Use a dedicated branch when it helps with a larger experiment, an alternative approach, parallel work, or review through a pull request.
+- When using a task branch, start from the default branch and continue unfinished work on that branch. After merging the completed task, return to the default branch; use a fresh branch for a later task if one is useful.
+- Use short, descriptive task branch names with the `codex/` prefix and hyphens between words, such as `codex/job-search-api`.
+- Keep related code, tests, and documentation together in small, clear commits. Review changes and run appropriate checks before committing or merging, whichever workflow is used.
 
 ## Documentation
 
