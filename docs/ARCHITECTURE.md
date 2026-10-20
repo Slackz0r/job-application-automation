@@ -162,7 +162,9 @@ Initial database access uses direct SQL through `better-sqlite3`. The server-onl
 
 Schema changes are versioned as numbered SQL files in `migrations/` and applied explicitly with `npm run db:migrate`. The runner in `scripts/migrate.ts` records completed files in `schema_migrations`. Each file's SQL and its tracking entry run in the same transaction; a failure rolls back that file and stops further processing.
 
-The initial `opportunities` table stores advertisement facts, with a unique `(source, source_id)` pair. Source identifiers, title, URL, and discovery time are required and checked for empty or ordinary-space-only values. Company, description, publication date, and application deadline may be unknown. URL syntax and date formatting still need application-level validation when the save workflow is added.
+The initial `opportunities` table stores advertisement facts, with a unique `(source, source_id)` pair. Source identifiers, title, URL, and discovery time are required and checked for empty or ordinary-space-only values. Company, description, publication date, and application deadline may be unknown.
+
+The server-only `src/lib/opportunities.ts` module validates and saves opportunities and reads them by internal ID. Callers pass an open database connection and close it after use. Required text is trimmed and must remain nonblank; URLs must use HTTP or HTTPS. Optional text is trimmed, with blank values stored as `null`. Dates accept ISO calendar dates or timestamps with an explicit timezone. The module generates the discovery timestamp and returns the existing record unchanged for duplicate source identifiers. Input validation errors and database failures propagate to the caller; reading a missing record returns `null`. Tests use temporary databases, including closing and reopening connections. No discovery integration or opportunity interface is implemented yet.
 
 ### External Data
 

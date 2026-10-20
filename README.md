@@ -25,9 +25,9 @@ Technical decisions are driven by actual requirements and validated assumptions 
 
 ## Current Status
 
-**Phase:** MVP Implementation — Project Foundation
+**Phase:** MVP Implementation — Project Foundation Complete
 
-The Next.js/TypeScript application loads and validates the private professional profile on the server. The initial page reports whether the profile is ready without displaying its full contents. SQLite setup includes a repeatable migration command and the first opportunities table. Saving and reading opportunities through application logic is the next foundation step.
+The Next.js/TypeScript application loads and validates the private professional profile on the server. The initial page reports whether the profile is ready without displaying its full contents. SQLite setup includes a repeatable migration command, the first opportunities table, and tested application logic for saving and reading opportunities. The next milestone is discovering and browsing real advertisements from Platsbanken.
 
 The initial stack consists of Next.js, React, Node.js, TypeScript, SQLite, and a structured JSON professional knowledge base.
 
@@ -63,6 +63,8 @@ The server-only `src/lib/db.ts` module exports `openDatabase()`, which creates `
 `npm.cmd run db:migrate` runs `scripts/migrate.ts`. It reads numbered `.sql` files from `migrations/` in filename order, checks `schema_migrations`, and applies each new file together with its tracking entry in one transaction. A failed migration rolls back its changes and stops the command; earlier successful migrations remain applied. Repeating the command skips files already recorded. Tests run against temporary databases and check both repeat runs and failure recovery.
 
 The first migration creates `opportunities`; setup adds no sample job records. Keep applied migration files unchanged and add a new numbered SQL file for later schema changes. Each file should contain its SQL changes; the runner handles the transaction.
+
+`src/lib/opportunities.ts` exports `saveOpportunity(db, input)` and `getOpportunity(db, id)`. Pass an open connection from `openDatabase()` and close it when finished. Saving validates required fields, accepts only HTTP/HTTPS URLs, and records the first discovery time automatically. Optional dates accept `YYYY-MM-DD` or ISO timestamps with a timezone; missing values are stored as `null`. A duplicate source/source ID returns the original record without overwriting it. Reading an unknown ID returns `null`. Invalid input throws a validation error, while database failures propagate to the caller. These functions are server-only and are not connected to the interface yet.
 
 Tooling limitation: ESLint 9 is retained for compatibility with the plugins in Next.js's lint configuration, although ESLint marks that release as unsupported. The development dependency audit reports five high-severity entries from one unpatched [braces advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) in the lint dependency chain. The production dependency audit reports no vulnerabilities. Revisit this when compatible upstream releases become available.
 

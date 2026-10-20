@@ -100,7 +100,7 @@ Future autonomous submissions should depend on verified reliability, clear execu
 
 **Rationale:** Identifiers and timestamps support traceability and processing, but a saved opportunity must also support useful browsing and verification. Incomplete source data alone is not a reason to create unusable records.
 
-**Initial scope:** Company, description, publication date, and application deadline may be unknown. Evaluation and generation require sufficient advertisement text before proceeding. The schema enforces required and nonblank fields; URL and date validation will be added with the save workflow.
+**Initial scope:** Company, description, publication date, and application deadline may be unknown. Evaluation and generation require sufficient advertisement text before proceeding. The schema enforces required and nonblank fields; the save workflow validates HTTP/HTTPS URLs and ISO dates or timestamps with an explicit timezone, and generates the discovery timestamp.
 
 **Revisit if:** Real source data or workflow requirements reveal a concrete need to change the minimum requirements or add fields.
 
@@ -111,6 +111,14 @@ Future autonomous submissions should depend on verified reliability, clear execu
 **Rationale:** Explicit setup keeps schema changes visible and repeatable. A tracking table prevents repeated execution, and a transaction keeps each change together with the record that it ran. Failed changes roll back and stop the command, preserving earlier successful work.
 
 Applied migration files remain unchanged; subsequent changes use new files. Migration filenames are tracked without content checksums in the initial implementation.
+
+### D012 — Preserve Opportunities on Duplicate Discovery
+
+**Decision:** Saving an opportunity with an existing `(source, source_id)` returns the original record without overwriting its contents or first discovery time.
+
+**Rationale:** Repeated discovery should avoid duplicates and preserve the saved advertisement. Updating advertisements needs an explicit policy rather than silently replacing existing data.
+
+**Revisit if:** Real discovery reveals a need to refresh changed or expired advertisements.
 
 ## 3. Under Evaluation
 

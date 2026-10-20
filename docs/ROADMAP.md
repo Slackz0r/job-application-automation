@@ -1,7 +1,7 @@
 # Development Roadmap
 
 **Version:** 0.1  
-**Status:** In progress — Milestone 1
+**Status:** Milestone 1 complete — Milestone 2 next
 **Last updated:** 2026-10-21
 
 ## 1. Purpose
@@ -37,7 +37,7 @@ Automated application submission is not required for the MVP.
 
 **Goal:** Establish the application and its essential infrastructure.
 
-**Current progress:** Next.js/TypeScript setup, server-side professional profile loading, the SQLite connection, and the first opportunities table are implemented. The migration command has been checked for repeat runs, preservation of saved data, and rollback on failure. Saving and reading opportunities through application logic remains the next increment; this milestone is not yet complete.
+**Current progress:** Complete. Next.js/TypeScript setup, server-side professional profile loading, the SQLite connection, and the first opportunities table are implemented. The migration command has been checked for repeat runs, preservation of saved data, and rollback on failure. Application logic validates, saves, and reads opportunities, preserves existing records on duplicate discovery, and has been tested across reopened connections using temporary databases. Real discovery and the opportunity interface belong to Milestone 2.
 
 Scope:
 

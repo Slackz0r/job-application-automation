@@ -1,7 +1,7 @@
 # Job Opportunity Automation
 
 **Version:** 0.4  
-**Status:** MVP Implementation — Project Foundation
+**Status:** MVP Implementation — Project Foundation Complete
 **Last updated:** 2026-10-20
 
 ## 1. Vision
@@ -159,9 +159,9 @@ These hypotheses have not yet been fully validated.
 
 ## 10. Current Focus & Next Steps
 
-**Current phase:** MVP implementation — project foundation.
+**Current phase:** MVP implementation — project foundation complete.
 
-The initial Next.js/TypeScript application and server-side professional profile loading are implemented. The next foundation increment is SQLite persistence, followed by progress toward a usable end-to-end workflow.
+The initial Next.js/TypeScript application, server-side professional profile loading, SQLite migrations, and opportunity save/read logic are implemented. The next milestone is discovering and browsing real job advertisements from Platsbanken.
 
 The MVP will support job discovery, opportunity evaluation, AI-assisted application generation, manual application submission, and tracking.
 

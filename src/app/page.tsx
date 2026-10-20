@@ -40,7 +40,7 @@ export default async function Home() {
         )}
       </section>
 
-      <p className="next-step">Next: add SQLite persistence for opportunities.</p>
+      <p className="next-step">Next: discover and browse job opportunities from Platsbanken.</p>
     </main>
   );
 }
