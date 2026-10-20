@@ -2,7 +2,7 @@
 
 **Version:** 0.1  
 **Status:** Living document  
-**Last updated:** 2026-10-20
+**Last updated:** 2026-10-21
 
 ## 1. Purpose
 
@@ -94,6 +94,24 @@ Future autonomous submissions should depend on verified reliability, clear execu
 
 **Revisit if:** Repetitive mapping or schema maintenance justifies an ORM, or a stable built-in driver offers a practical maintenance advantage. Either change would require adapting and testing the database access code.
 
+### D010 — Minimum Useful Opportunity Data
+
+**Decision:** Save discovered opportunities only when they have source identifiers, a meaningful title, and a usable URL for manual verification. Record when each opportunity was first discovered, and prevent duplicates with a unique `(source, source_id)` pair.
+
+**Rationale:** Identifiers and timestamps support traceability and processing, but a saved opportunity must also support useful browsing and verification. Incomplete source data alone is not a reason to create unusable records.
+
+**Initial scope:** Company, description, publication date, and application deadline may be unknown. Evaluation and generation require sufficient advertisement text before proceeding. The schema enforces required and nonblank fields; URL and date validation will be added with the save workflow.
+
+**Revisit if:** Real source data or workflow requirements reveal a concrete need to change the minimum requirements or add fields.
+
+### D011 — Explicit SQL Migrations
+
+**Decision:** Keep numbered SQL changes in `migrations/` and apply them with `scripts/migrate.ts` through `npm run db:migrate`.
+
+**Rationale:** Explicit setup keeps schema changes visible and repeatable. A tracking table prevents repeated execution, and a transaction keeps each change together with the record that it ran. Failed changes roll back and stop the command, preserving earlier successful work.
+
+Applied migration files remain unchanged; subsequent changes use new files. Migration filenames are tracked without content checksums in the initial implementation.
+
 ## 3. Under Evaluation
 
 ### AI Integration
@@ -106,7 +124,7 @@ Future autonomous submissions should depend on verified reliability, clear execu
 
 ### Persistence Implementation
 
-- Database schema design.
+- Additional database tables and schema changes as feature requirements emerge.
 - Application status and processing-history representation.
 
 **Initial preference:** Support actual requirements without premature abstractions.

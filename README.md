@@ -27,7 +27,7 @@ Technical decisions are driven by actual requirements and validated assumptions 
 
 **Phase:** MVP Implementation — Project Foundation
 
-The Next.js/TypeScript application loads and validates the private professional profile on the server. The initial page reports whether the profile is ready without displaying its full contents. The SQLite connection is implemented and verified; defining the first table and storing opportunities are the next foundation steps.
+The Next.js/TypeScript application loads and validates the private professional profile on the server. The initial page reports whether the profile is ready without displaying its full contents. SQLite setup includes a repeatable migration command and the first opportunities table. Saving and reading opportunities through application logic is the next foundation step.
 
 The initial stack consists of Next.js, React, Node.js, TypeScript, SQLite, and a structured JSON professional knowledge base.
 
@@ -40,6 +40,7 @@ npm.cmd ci
 if (-not (Test-Path professional-profile.json)) {
   Copy-Item professional-profile.example.json professional-profile.json
 }
+npm.cmd run db:migrate
 npm.cmd run dev
 ```
 
@@ -57,7 +58,11 @@ npm.cmd start
 
 The server loader is in `src/lib/professional-profile.ts`; the status page is in `src/app/page.tsx`. The loader validates the current single-experience format and preserves additional details, including `verificationNeeded`. This is an initial format, not the final schema for a complete career profile. Missing, invalid, or unreadable profiles produce a setup message, and the private file is read at request time rather than included in prerendered output.
 
-The server-only `src/lib/db.ts` module exports `openDatabase()`, which creates `data/` if needed and opens `data/app.sqlite` through `better-sqlite3`. The caller closes the connection with `db.close()` after use, including on failure. The whole `data/` folder is ignored by Git. The connection has been verified with `SELECT 1 AS connected`; no tables or application data have been created yet.
+The server-only `src/lib/db.ts` module exports `openDatabase()`, which creates `data/` if needed and opens `data/app.sqlite` through `better-sqlite3`. The caller closes the connection with `db.close()` after use, including on failure. The whole `data/` folder is ignored by Git.
+
+`npm.cmd run db:migrate` runs `scripts/migrate.ts`. It reads numbered `.sql` files from `migrations/` in filename order, checks `schema_migrations`, and applies each new file together with its tracking entry in one transaction. A failed migration rolls back its changes and stops the command; earlier successful migrations remain applied. Repeating the command skips files already recorded. Tests run against temporary databases and check both repeat runs and failure recovery.
+
+The first migration creates `opportunities`; setup adds no sample job records. Keep applied migration files unchanged and add a new numbered SQL file for later schema changes. Each file should contain its SQL changes; the runner handles the transaction.
 
 Tooling limitation: ESLint 9 is retained for compatibility with the plugins in Next.js's lint configuration, although ESLint marks that release as unsupported. The development dependency audit reports five high-severity entries from one unpatched [braces advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) in the lint dependency chain. The production dependency audit reports no vulnerabilities. Revisit this when compatible upstream releases become available.
 

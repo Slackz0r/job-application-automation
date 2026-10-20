@@ -2,7 +2,7 @@
 
 **Version:** 0.2  
 **Status:** Initial Architecture  
-**Last updated:** 2026-10-20
+**Last updated:** 2026-10-21
 
 ## 1. Overview
 
@@ -159,6 +159,10 @@ SQLite is expected to support both the MVP and the full application, including f
 Database interactions should remain reasonably separate from business logic without introducing unnecessary abstraction.
 
 Initial database access uses direct SQL through `better-sqlite3`. The server-only connection module, `src/lib/db.ts`, opens `data/app.sqlite` on demand and creates its directory if necessary. The caller closes the connection after use. The entire `data/` directory is local operational data and is excluded from Git.
+
+Schema changes are versioned as numbered SQL files in `migrations/` and applied explicitly with `npm run db:migrate`. The runner in `scripts/migrate.ts` records completed files in `schema_migrations`. Each file's SQL and its tracking entry run in the same transaction; a failure rolls back that file and stops further processing.
+
+The initial `opportunities` table stores advertisement facts, with a unique `(source, source_id)` pair. Source identifiers, title, URL, and discovery time are required and checked for empty or ordinary-space-only values. Company, description, publication date, and application deadline may be unknown. URL syntax and date formatting still need application-level validation when the save workflow is added.
 
 ### External Data
 
