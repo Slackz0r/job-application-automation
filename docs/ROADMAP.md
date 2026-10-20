@@ -1,7 +1,7 @@
 # Development Roadmap
 
 **Version:** 0.1  
-**Status:** Planned  
+**Status:** In progress — Milestone 1
 **Last updated:** 2026-10-20
 
 ## 1. Purpose
@@ -36,6 +36,8 @@ Automated application submission is not required for the MVP.
 ### Milestone 1 — Project Foundation
 
 **Goal:** Establish the application and its essential infrastructure.
+
+**Current progress:** Next.js/TypeScript setup and server-side professional profile loading are implemented. SQLite persistence remains the next increment; this milestone is not yet complete.
 
 Scope:
 

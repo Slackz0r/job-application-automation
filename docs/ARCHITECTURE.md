@@ -142,6 +142,8 @@ The system separates professional knowledge from operational application data.
 
 A structured JSON file serves as the primary source of truth for professional information.
 
+The local file is `professional-profile.json` in the repository root and is excluded from Git. A sanitized `professional-profile.example.json` documents the initial single-experience format. The server-only loader validates its core fields while preserving additional information. The interface reads it at request time and displays only loading status and a contribution count.
+
 It contains verified skills, experiences, contributions, interests, and career preferences.
 
 The knowledge base is maintained independently of generated application material.

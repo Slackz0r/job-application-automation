@@ -1,0 +1,14 @@
+{
+  "id": "example-internship",
+  "company": "Example Company",
+  "role": "Software Development Intern",
+  "type": "internship",
+  "summary": "Contributed to an internal application during an internship.",
+  "contributions": [
+    {
+      "name": "Form validation",
+      "summary": "Added validation messages to an existing form.",
+      "verificationNeeded": ["Confirm the release date before including it in an application."]
+    }
+  ]
+}

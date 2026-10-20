@@ -1,1 +1,21 @@
-professional-profile.json
+/professional-profile.json
+/docs/CV/
+
+# Dependencies and generated output
+/node_modules/
+/.next/
+/out/
+/coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local configuration and operational data
+.env*
+!.env.example
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+npm-debug.log*

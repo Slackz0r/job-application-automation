@@ -1,0 +1,80 @@
+:root {
+  color-scheme: light;
+  color: #20332f;
+  background: #f4f6f3;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 80px 24px;
+}
+
+h1 {
+  margin: 12px 0 20px;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+h2 {
+  margin: 10px 0 24px;
+  font-size: 1.5rem;
+}
+
+p {
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #53675f;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.intro {
+  max-width: 520px;
+  color: #53675f;
+  font-size: 1.125rem;
+}
+
+.card {
+  margin-top: 40px;
+  padding: clamp(20px, 5vw, 36px);
+  border: 1px solid #d7dfd9;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.status {
+  font-weight: 700;
+}
+
+.muted,
+.next-step {
+  color: #53675f;
+  font-size: 0.9375rem;
+}
+
+.next-step {
+  margin-top: 24px;
+}
+
+@media (max-width: 480px) {
+  main {
+    padding: 40px 20px;
+  }
+}

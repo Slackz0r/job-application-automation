@@ -1,7 +1,7 @@
 # Job Opportunity Automation
 
 **Version:** 0.4  
-**Status:** MVP Implementation Preparation  
+**Status:** MVP Implementation — Project Foundation
 **Last updated:** 2026-10-20
 
 ## 1. Vision
@@ -159,9 +159,9 @@ These hypotheses have not yet been fully validated.
 
 ## 10. Current Focus & Next Steps
 
-**Current phase:** MVP implementation preparation.
+**Current phase:** MVP implementation — project foundation.
 
-The initial architecture and development roadmap have been established. The next step is to begin implementing the application, starting with the project foundation and progressing toward a usable end-to-end workflow.
+The initial Next.js/TypeScript application and server-side professional profile loading are implemented. The next foundation increment is SQLite persistence, followed by progress toward a usable end-to-end workflow.
 
 The MVP will support job discovery, opportunity evaluation, AI-assisted application generation, manual application submission, and tracking.
 
