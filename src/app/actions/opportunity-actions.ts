@@ -1,8 +1,9 @@
 "use server";
 
-import { openDatabase } from "../lib/db.ts";
-import { searchJobs } from "../lib/job-search.ts";
-import { saveOpportunity, type Opportunity } from "../lib/opportunities.ts";
+import { openDatabase } from "../../lib/db.ts";
+import { searchJobs } from "../../lib/job-search.ts";
+import { saveOpportunity } from "../../lib/opportunities.ts";
+import type { Opportunity } from "../../schemas/opportunity.ts";
 
 export type SearchState =
   | { status: "success"; total: number; skippedCount: number; opportunities: Opportunity[] }

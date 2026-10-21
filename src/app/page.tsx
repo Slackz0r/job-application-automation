@@ -1,8 +1,9 @@
 import { loadProfessionalProfile } from "@/lib/professional-profile";
 import { openDatabase } from "@/lib/db";
 import { getMunicipalities } from "@/lib/job-search";
-import { listOpportunities, type Opportunity } from "@/lib/opportunities";
-import { OpportunitySearch } from "./opportunity-search";
+import { listOpportunities } from "@/lib/opportunities";
+import type { Opportunity } from "@/schemas/opportunity";
+import { OpportunityDiscovery } from "@/components/opportunities/opportunity-discovery";
 
 // Read the private profile at request time, keeping it out of prerendered pages.
 export const dynamic = "force-dynamic";
@@ -40,7 +41,7 @@ export default async function Home() {
         <p className="intro">Discover opportunities. Prepare thoughtful applications. Keep track of progress.</p>
       </header>
 
-      <OpportunitySearch municipalities={municipalities} savedOpportunities={savedOpportunities} savedError={savedError} />
+      <OpportunityDiscovery municipalities={municipalities} savedOpportunities={savedOpportunities} savedError={savedError} />
 
       <section aria-labelledby="profile-heading" className="card">
         <p className="eyebrow">Project foundation</p>

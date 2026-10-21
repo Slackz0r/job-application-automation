@@ -1,48 +1,15 @@
 import "server-only";
 
-import { z } from "zod";
-import { opportunityInputSchema, type OpportunityInput } from "./opportunities.ts";
-
-const searchInputSchema = z.object({
-  query: z.string().trim().min(1),
-  municipalities: z.array(z.string().trim().min(1)).default([])
-    .transform((values) => [...new Set(values)]),
-  limit: z.number().int().min(1).max(100).default(20),
-});
-
-const searchResponseSchema = z.object({
-  total: z.object({ value: z.number().int().nonnegative() }),
-  hits: z.array(z.unknown()),
-});
-
-const workplaceAddressSchema = z.object({
-  municipality: z.string().nullish(),
-  city: z.string().nullish(),
-  region: z.string().nullish(),
-  country: z.string().nullish(),
-}).nullish().catch(null);
-
-// Read only the fields we use; source advertisements can contain other data.
-const advertisementSchema = z.object({
-  id: z.string(),
-  headline: z.string(),
-  webpage_url: z.string(),
-  employer: z.object({ name: z.string().nullish() }).nullish(),
-  description: z.object({ text: z.string().nullish() }).nullish(),
-  application_deadline: z.string().nullish(),
-  publication_date: z.string().nullish(),
-  workplace_address: workplaceAddressSchema,
-  workplace_addresses: z.array(workplaceAddressSchema).nullish().catch(null),
-});
-
-export type JobSearchInput = z.input<typeof searchInputSchema>;
-export type JobSearchResult = {
-  total: number;
-  opportunities: OpportunityInput[];
-  skippedCount: number;
-};
-
-export type Municipality = { id: string; name: string };
+import { opportunityInputSchema, type OpportunityInput } from "../schemas/opportunity.ts";
+import {
+  searchInputSchema,
+  jobSearchResponseSchema,
+  jobSearchAdvertisementSchema,
+  municipalitiesResponseSchema,
+  type JobSearchInput,
+  type JobSearchResult,
+  type Municipality,
+} from "../schemas/job-search.ts";
 
 export async function getMunicipalities(fetcher: typeof fetch = fetch): Promise<Municipality[]> {
   const response = await fetcher(
@@ -51,10 +18,7 @@ export async function getMunicipalities(fetcher: typeof fetch = fetch): Promise<
   );
   if (!response.ok) throw new Error("The municipality list could not be loaded.");
 
-  const municipalities = z.array(z.object({
-    "taxonomy/id": z.string().trim().min(1),
-    "taxonomy/preferred-label": z.string().trim().min(1),
-  })).min(1).parse(await response.json());
+  const municipalities = municipalitiesResponseSchema.parse(await response.json());
 
   return municipalities.map((municipality) => ({
     id: municipality["taxonomy/id"],
@@ -94,7 +58,7 @@ export async function searchJobs(
   } catch (error) {
     throw new Error("Platsbanken returned an unreadable search response.", { cause: error });
   }
-  const result = searchResponseSchema.safeParse(payload);
+  const result = jobSearchResponseSchema.safeParse(payload);
   if (!result.success) {
     throw new Error("Platsbanken returned an unexpected search response.");
   }
@@ -102,7 +66,7 @@ export async function searchJobs(
   const opportunities: OpportunityInput[] = [];
   let skippedCount = 0;
   for (const hit of result.data.hits) {
-    const advertisement = advertisementSchema.safeParse(hit);
+    const advertisement = jobSearchAdvertisementSchema.safeParse(hit);
     if (!advertisement.success) {
       skippedCount++;
       continue;

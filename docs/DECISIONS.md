@@ -128,6 +128,12 @@ Applied migration files remain unchanged; subsequent changes use new files. Migr
 
 **Revisit if:** Deadline reminders, comparisons across sources, or other time-sensitive behavior require verified timezone interpretation. A timestamp without a timezone must not automatically be treated as UTC or the host computer's local time.
 
+### D014 — Organise Source Files by Responsibility
+
+**Decision:** Keep route files in `src/app/`, feature-named Server Actions in `src/app/actions/`, feature-grouped UI in `src/components/`, and schemas with their TypeScript types in `src/schemas/`. Group schemas for the same workflow together, including its external API response checks. Shared data models have their own schema modules. Keep data access and integration logic in `src/lib/`; SQL table changes remain in `migrations/`.
+
+**Rationale:** Clear ownership makes the search flow and data requirements easier to find. Keeping workflow schemas together provides one place to review its validation rules; names distinguish source formats from application data. Shared application schemas let connectors and persistence use the same rules without depending on each other's implementation. Split components around meaningful responsibilities and add further structure only when the code needs it.
+
 ## 3. Under Evaluation
 
 ### AI Integration

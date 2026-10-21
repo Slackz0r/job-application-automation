@@ -4,11 +4,11 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test, type TestContext } from "node:test";
 import Database from "better-sqlite3";
-import { listOpportunities } from "../lib/opportunities.ts";
-import { searchOpportunities } from "./actions.ts";
+import { listOpportunities } from "../../lib/opportunities.ts";
+import { searchOpportunities } from "./opportunity-actions.ts";
 
-const migration = readFileSync(new URL("../../migrations/001-create-opportunities.sql", import.meta.url), "utf8");
-const locationMigration = readFileSync(new URL("../../migrations/002-add-opportunity-location.sql", import.meta.url), "utf8");
+const migration = readFileSync(new URL("../../../migrations/001-create-opportunities.sql", import.meta.url), "utf8");
+const locationMigration = readFileSync(new URL("../../../migrations/002-add-opportunity-location.sql", import.meta.url), "utf8");
 const advertisement = {
   id: "example-001", headline: "Example Developer", webpage_url: "https://example.test/jobs/001",
   description: { text: "Example advertisement text." },
