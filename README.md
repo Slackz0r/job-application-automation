@@ -27,7 +27,7 @@ Technical decisions are driven by actual requirements and validated assumptions 
 
 **Phase:** MVP Implementation — Opportunity Discovery
 
-The local application now searches Platsbanken, saves valid advertisements in SQLite, and shows their locations alongside the text and original-source links. Search by free text and optionally choose one or more locations. The homepage shows recently saved opportunities after refresh or restart. The private professional profile remains on the server, with only its loading status and contribution count shown in the interface.
+The local application now searches Platsbanken, saves valid advertisements in SQLite, and shows their locations alongside the text and original-source links. Search by free text and optionally choose one or more locations. The homepage shows recently saved opportunities after refresh or restart. The private professional profile remains on the server, with only its loading status and professional-experience and education counts shown in the interface.
 
 The initial stack consists of Next.js, React, Node.js, TypeScript, SQLite, and a structured JSON professional knowledge base.
 
@@ -63,7 +63,7 @@ npm.cmd run build
 npm.cmd start
 ```
 
-The server loader is in `src/lib/professional-profile.ts`; the status page is in `src/app/page.tsx`. The loader validates the current single-experience format and preserves additional details, including `verificationNeeded`. This is an initial format, not the final schema for a complete career profile. Missing, invalid, or unreadable profiles produce a setup message, and the private file is read at request time rather than included in prerendered output.
+The server loader is in `src/lib/professional-profile.ts`; the status page is in `src/app/page.tsx`. The working profile format has four sections: `skillsAndCompetencies`, `experiences` (with `professional` and `education` arrays), `personalityAndInterests`, and `careerPreferences`. The loader validates this structure and core experience fields while preserving rich descriptions and `verificationNeeded` notes. Dates, professional contribution lists, and education project lists are optional; the other sections may be empty objects, and experience arrays may be empty. Missing details remain unknown, without default dates, preferences, or proficiency levels. The previous single-experience format must be moved into this structure; the sanitized example shows the layout. Missing, invalid, or unreadable profiles produce a setup message, and the private file is read at request time rather than included in prerendered output.
 
 The server-only `src/lib/db.ts` module exports `openDatabase()`, which creates `data/` if needed and opens `data/app.sqlite` through `better-sqlite3`. The caller closes the connection with `db.close()` after use, including on failure. The whole `data/` folder is ignored by Git.
 

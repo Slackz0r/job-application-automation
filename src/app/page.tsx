@@ -10,8 +10,10 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 const setupMessages = {
-  missing: "Add professional-profile.json to the project root. You can use professional-profile.example.json as a starting point.",
-  invalid: "Check that professional-profile.json contains valid JSON and follows the format in professional-profile.example.json.",
+  missing:
+    "Add professional-profile.json to the project root. You can use professional-profile.example.json as a starting point.",
+  invalid:
+    "Check that professional-profile.json contains valid JSON and follows the format in professional-profile.example.json.",
   unavailable: "The profile file could not be read. Check its file permissions and try again.",
 };
 
@@ -38,10 +40,16 @@ export default async function Home() {
       <header>
         <p className="eyebrow">Local workspace</p>
         <h1>Job Opportunity Automation</h1>
-        <p className="intro">Discover opportunities. Prepare thoughtful applications. Keep track of progress.</p>
+        <p className="intro">
+          Discover opportunities. Prepare thoughtful applications. Keep track of progress.
+        </p>
       </header>
 
-      <OpportunityDiscovery municipalities={municipalities} savedOpportunities={savedOpportunities} savedError={savedError} />
+      <OpportunityDiscovery
+        municipalities={municipalities}
+        savedOpportunities={savedOpportunities}
+        savedError={savedError}
+      />
 
       <section aria-labelledby="profile-heading" className="card">
         <p className="eyebrow">Project foundation</p>
@@ -50,7 +58,8 @@ export default async function Home() {
           <>
             <p className="status">Profile loaded</p>
             <p>
-              Your current experience contains {result.profile.contributions.length} documented contributions.
+              Professional experiences: {result.profile.experiences.professional.length}.
+              {" "}Education entries: {result.profile.experiences.education.length}.
             </p>
             <p className="muted">The full profile is available to server-side application logic.</p>
           </>
@@ -61,7 +70,6 @@ export default async function Home() {
           </>
         )}
       </section>
-
     </main>
   );
 }

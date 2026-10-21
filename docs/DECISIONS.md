@@ -2,7 +2,7 @@
 
 **Version:** 0.1  
 **Status:** Living document  
-**Last updated:** 2026-10-21
+**Last updated:** 2026-10-22
 
 ## 1. Purpose
 
@@ -133,6 +133,14 @@ Applied migration files remain unchanged; subsequent changes use new files. Migr
 **Decision:** Keep route files in `src/app/`, feature-named Server Actions in `src/app/actions/`, feature-grouped UI in `src/components/`, and schemas with their TypeScript types in `src/schemas/`. Group schemas for the same workflow together, including its external API response checks. Shared data models have their own schema modules. Keep data access and integration logic in `src/lib/`; SQL table changes remain in `migrations/`.
 
 **Rationale:** Clear ownership makes the search flow and data requirements easier to find. Keeping workflow schemas together provides one place to review its validation rules; names distinguish source formats from application data. Shared application schemas let connectors and persistence use the same rules without depending on each other's implementation. Split components around meaningful responsibilities and add further structure only when the code needs it.
+
+### D015 — Working Multi-Experience Profile Format
+
+**Decision:** Organize the private JSON profile into `skillsAndCompetencies`, `experiences` with `professional` and `education` arrays, `personalityAndInterests`, and `careerPreferences`. Validate the structure and core experience fields while retaining richer descriptions and uncertainty notes. Dates, contribution lists, and education project lists remain optional; unfinished sections may be empty.
+
+**Rationale:** Opportunity evaluation needs evidence from multiple experiences and education without requiring a complete career history before use. Missing information remains unknown rather than evidence of missing ability. The format does not assign skill proficiency or infer preferences. This replaces the initial single-experience input format without adding new folders or changing profile storage.
+
+**Revisit if:** Evaluation reveals a concrete need for more detailed validation or a different representation of supporting evidence.
 
 ## 3. Under Evaluation
 

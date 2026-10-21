@@ -1,14 +1,58 @@
 {
-  "id": "example-internship",
-  "company": "Example Company",
-  "role": "Software Development Intern",
-  "type": "internship",
-  "summary": "Contributed to an internal application during an internship.",
-  "contributions": [
-    {
-      "name": "Form validation",
-      "summary": "Added validation messages to an existing form.",
-      "verificationNeeded": ["Confirm the release date before including it in an application."]
-    }
-  ]
+  "skillsAndCompetencies": {
+    "languages": ["JavaScript"],
+    "frontend": ["React"]
+  },
+  "experiences": {
+    "professional": [
+      {
+        "id": "example-internship",
+        "company": "Example Company",
+        "role": "Software Development Intern",
+        "type": "internship",
+        "summary": "Contributed to an internal application during an internship.",
+        "contributions": [
+          {
+            "name": "Form validation",
+            "summary": "Added validation messages to an existing form.",
+            "verificationNeeded": ["Confirm the release date before including it in an application."]
+          }
+        ]
+      },
+      {
+        "id": "example-freelance",
+        "company": "Example Association",
+        "role": "Web Developer",
+        "type": "freelance",
+        "summary": "Built and maintain a small information website.",
+        "dates": { "startDate": "2025-09", "ongoing": true },
+        "contributions": [
+          {
+            "name": "Website delivery",
+            "summary": "Turned client feedback into a responsive website."
+          }
+        ]
+      }
+    ],
+    "education": [
+      {
+        "id": "example-education",
+        "institution": "Example School",
+        "programme": "Web Development",
+        "type": "education",
+        "summary": "Studied web development through practical exercises and projects.",
+        "projects": [
+          {
+            "name": "Course project",
+            "summary": "Built a small application using an external API.",
+            "contributions": ["Implemented the search interface."]
+          }
+        ]
+      }
+    ]
+  },
+  "personalityAndInterests": {
+    "aboutMe": "Enjoy learning and solving practical problems."
+  },
+  "careerPreferences": {}
 }

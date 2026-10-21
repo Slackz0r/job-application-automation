@@ -2,7 +2,7 @@
 
 **Version:** 0.2  
 **Status:** Initial Architecture  
-**Last updated:** 2026-10-21
+**Last updated:** 2026-10-22
 
 ## 1. Overview
 
@@ -150,7 +150,7 @@ The system separates professional knowledge from operational application data.
 
 A structured JSON file serves as the primary source of truth for professional information.
 
-The local file is `professional-profile.json` in the repository root and is excluded from Git. A sanitized `professional-profile.example.json` documents the initial single-experience format. The server-only loader validates its core fields while preserving additional information. The interface reads it at request time and displays only loading status and a contribution count.
+The local file is `professional-profile.json` in the repository root and is excluded from Git. A sanitized `professional-profile.example.json` documents the working four-section format: skills and competencies, experiences grouped into professional and education arrays, personality and interests, and career preferences. The server-only loader validates the section structure and core experience fields while preserving additional information, including uncertainty notes. Dates, contribution lists, and education project lists are optional; unfinished sections and empty experience arrays are allowed. Validation does not supply missing facts or assess proficiency. The interface reads the profile at request time and displays only loading status and professional-experience and education counts.
 
 It contains verified skills, experiences, contributions, interests, and career preferences.
 
