@@ -13,17 +13,17 @@ export async function searchOpportunities(
   formData: FormData,
 ): Promise<SearchState> {
   const query = formData.get("query");
-  const municipality = formData.get("municipality");
+  const municipalities = formData.getAll("municipality");
   if (typeof query !== "string" || !query.trim()) {
     return { status: "error", message: "Enter a search term, such as developer or support." };
   }
-  if (municipality !== null && typeof municipality !== "string") {
-    return { status: "error", message: "Choose a municipality or search all of Sweden." };
+  if (!municipalities.every((value) => typeof value === "string")) {
+    return { status: "error", message: "Choose locations or search all of Sweden." };
   }
 
   let result;
   try {
-    result = await searchJobs({ query, municipality: municipality?.trim() || undefined });
+    result = await searchJobs({ query, municipalities: municipalities.map((value) => value.trim()).filter(Boolean) });
   } catch {
     return { status: "error", message: "Could not search Platsbanken. Please try again." };
   }

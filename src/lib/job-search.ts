@@ -5,7 +5,8 @@ import { opportunityInputSchema, type OpportunityInput } from "./opportunities.t
 
 const searchInputSchema = z.object({
   query: z.string().trim().min(1),
-  municipality: z.string().trim().min(1).optional(),
+  municipalities: z.array(z.string().trim().min(1)).default([])
+    .transform((values) => [...new Set(values)]),
   limit: z.number().int().min(1).max(100).default(20),
 });
 
@@ -13,6 +14,13 @@ const searchResponseSchema = z.object({
   total: z.object({ value: z.number().int().nonnegative() }),
   hits: z.array(z.unknown()),
 });
+
+const workplaceAddressSchema = z.object({
+  municipality: z.string().nullish(),
+  city: z.string().nullish(),
+  region: z.string().nullish(),
+  country: z.string().nullish(),
+}).nullish().catch(null);
 
 // Read only the fields we use; source advertisements can contain other data.
 const advertisementSchema = z.object({
@@ -23,6 +31,8 @@ const advertisementSchema = z.object({
   description: z.object({ text: z.string().nullish() }).nullish(),
   application_deadline: z.string().nullish(),
   publication_date: z.string().nullish(),
+  workplace_address: workplaceAddressSchema,
+  workplace_addresses: z.array(workplaceAddressSchema).nullish().catch(null),
 });
 
 export type JobSearchInput = z.input<typeof searchInputSchema>;
@@ -60,7 +70,9 @@ export async function searchJobs(
   const url = new URL("https://jobsearch.api.jobtechdev.se/search");
   url.searchParams.set("q", search.query);
   url.searchParams.set("limit", String(search.limit));
-  if (search.municipality) url.searchParams.set("municipality", search.municipality);
+  for (const municipality of search.municipalities) {
+    url.searchParams.append("municipality", municipality);
+  }
 
   let response: Response;
   try {
@@ -96,11 +108,16 @@ export async function searchJobs(
       continue;
     }
     const ad = advertisement.data;
+    const locationNames = [...(ad.workplace_addresses ?? []), ad.workplace_address]
+      .map((address) => address?.municipality?.trim() || address?.city?.trim()
+        || address?.region?.trim() || address?.country?.trim())
+      .filter(Boolean);
     const opportunity = opportunityInputSchema.safeParse({
       source: "platsbanken",
       sourceId: ad.id,
       title: ad.headline,
       company: ad.employer?.name,
+      location: [...new Set(locationNames)].join(", ") || null,
       description: ad.description?.text,
       url: ad.webpage_url,
       applicationDeadline: ad.application_deadline,

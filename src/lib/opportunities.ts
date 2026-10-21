@@ -15,6 +15,7 @@ export const opportunityInputSchema = z.object({
   sourceId: requiredText,
   title: requiredText,
   company: optionalText,
+  location: optionalText,
   description: optionalText,
   url: requiredText.pipe(z.httpUrl()),
   applicationDeadline: optionalDate,
@@ -28,7 +29,7 @@ export type Opportunity = z.output<typeof opportunityInputSchema> & {
 };
 
 const opportunityColumns = `
-  id, source, source_id AS sourceId, title, company, description, url,
+  id, source, source_id AS sourceId, title, company, location, description, url,
   application_deadline AS applicationDeadline,
   discovered_at AS discoveredAt, published_at AS publishedAt
 `;
@@ -40,13 +41,14 @@ export function saveOpportunity(db: Database.Database, input: unknown): Opportun
   const save = db.transaction(() => {
     db.prepare(`
       INSERT INTO opportunities (
-        source, source_id, title, company, description, url,
+        source, source_id, title, company, location, description, url,
         application_deadline, discovered_at, published_at
       ) VALUES (
-        @source, @sourceId, @title, @company, @description, @url,
+        @source, @sourceId, @title, @company, @location, @description, @url,
         @applicationDeadline, @discoveredAt, @publishedAt
       )
-      ON CONFLICT (source, source_id) DO NOTHING
+      ON CONFLICT (source, source_id) DO UPDATE SET location = excluded.location
+      WHERE opportunities.location IS NULL AND excluded.location IS NOT NULL
     `).run({ ...opportunity, discoveredAt: new Date().toISOString() });
 
     const saved = db.prepare<[string, string], Opportunity>(`

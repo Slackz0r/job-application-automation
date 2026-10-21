@@ -12,6 +12,9 @@ const initialMigration = await readFile(
   new URL("../migrations/001-create-opportunities.sql", import.meta.url),
   "utf8"
 );
+const locationMigration = await readFile(
+  new URL("../migrations/002-add-opportunity-location.sql", import.meta.url), "utf8"
+);
 
 async function createFixture(t: TestContext, migrations: Record<string, string>) {
   const directory = await mkdtemp(join(tmpdir(), "job-migrations-"));
@@ -110,4 +113,40 @@ test("rolls back a failed migration, keeps earlier work, and stops before later 
   } finally {
     db.close();
   }
+});
+
+test("adds location to an existing database without changing saved advertisements and runs only once", async (t) => {
+  const directory = await createFixture(t, { "001-create-opportunities.sql": initialMigration });
+  assert.equal(runMigrations(directory).status, 0);
+  const path = join(directory, "data", "app.sqlite");
+  const db = new Database(path);
+  let original: unknown;
+  try {
+    db.prepare(`INSERT INTO opportunities (source, source_id, title, url, discovered_at)
+      VALUES (?, ?, ?, ?, ?)`).run(
+      "example-source", "example-001", "Saved Developer", "https://example.test/jobs/001", "2026-10-21T12:00:00.000Z"
+    );
+    original = db.prepare("SELECT * FROM opportunities").get();
+  } finally { db.close(); }
+
+  await writeFile(join(directory, "migrations", "002-add-opportunity-location.sql"), locationMigration);
+  const upgrade = runMigrations(directory);
+  assert.equal(upgrade.status, 0, upgrade.stderr);
+  assert.match(upgrade.stdout, /Applied: 002-add-opportunity-location\.sql/);
+  const upgraded = new Database(path);
+  try {
+    assert.deepEqual(upgraded.prepare("SELECT * FROM opportunities").get(), { ...(original as object), location: null });
+    upgraded.prepare("UPDATE opportunities SET location = ?").run("Stockholm");
+  } finally { upgraded.close(); }
+
+  const repeated = runMigrations(directory);
+  assert.equal(repeated.status, 0, repeated.stderr);
+  assert.match(repeated.stdout, /Already run: 002-add-opportunity-location\.sql/);
+  const reopened = new Database(path, { readonly: true, fileMustExist: true });
+  try {
+    assert.deepEqual(reopened.prepare("SELECT * FROM opportunities").all(), [{ ...(original as object), location: "Stockholm" }]);
+    assert.deepEqual(reopened.prepare("SELECT name FROM schema_migrations ORDER BY name").all(), [
+      { name: "001-create-opportunities.sql" }, { name: "002-add-opportunity-location.sql" },
+    ]);
+  } finally { reopened.close(); }
 });

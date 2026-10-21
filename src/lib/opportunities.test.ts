@@ -11,6 +11,7 @@ const initialMigration = readFileSync(
   new URL("../../migrations/001-create-opportunities.sql", import.meta.url),
   "utf8",
 );
+const locationMigration = readFileSync(new URL("../../migrations/002-add-opportunity-location.sql", import.meta.url), "utf8");
 
 const example = {
   source: "example-source",
@@ -29,6 +30,7 @@ function createFixture(t: TestContext) {
     rmSync(directory, { recursive: true, force: true });
   });
   db.exec(initialMigration);
+  db.exec(locationMigration);
   return { db, path };
 }
 
@@ -49,6 +51,7 @@ test("saves useful minimum data, generates discovery time, and survives reopenin
     id: saved.id,
     discoveredAt: saved.discoveredAt,
     company: null,
+    location: null,
     description: null,
     applicationDeadline: null,
     publishedAt: null,
@@ -70,6 +73,7 @@ test("preserves advertisement text and optional dates, and treats blank optional
     ...example,
     title: "Developer's role; DROP TABLE opportunities; --",
     company: "  Example Company  ",
+    location: "  Stockholm  ",
     description: "  First paragraph.\n\nSecond paragraph.  ",
     applicationDeadline: "2026-11-30",
     publishedAt: "2026-10-21T10:30:00+02:00",
@@ -78,6 +82,7 @@ test("preserves advertisement text and optional dates, and treats blank optional
   assert.deepEqual(getOpportunity(db, saved.id), {
     ...details,
     company: "Example Company",
+    location: "Stockholm",
     description: "First paragraph.\n\nSecond paragraph.",
     id: saved.id,
     discoveredAt: saved.discoveredAt,
@@ -86,27 +91,44 @@ test("preserves advertisement text and optional dates, and treats blank optional
     ...example,
     sourceId: "job-002",
     company: " \t\n ",
+    location: " \t ",
     description: null,
     applicationDeadline: null,
     publishedAt: null,
   });
   assert.equal(minimal.company, null);
+  assert.equal(minimal.location, null);
   assert.equal(minimal.description, null);
 });
 
 test("returns the original opportunity for duplicates without overwriting any fields", (t) => {
   const { db } = createFixture(t);
-  const first = saveOpportunity(db, example);
+  const first = saveOpportunity(db, { ...example, location: "Stockholm" });
   const duplicate = saveOpportunity(db, {
     ...example,
     title: "Changed title",
     url: "https://example.test/changed",
     description: "Changed description",
+    location: "Solna",
   });
   assert.deepEqual(duplicate, first);
   const otherSource = saveOpportunity(db, { ...example, source: "another-source" });
   assert.notEqual(otherSource.id, first.id);
   assert.deepEqual(db.prepare("SELECT COUNT(*) AS count FROM opportunities").get(), { count: 2 });
+});
+
+test("fills a missing location on rediscovery while preserving all other saved fields", (t) => {
+  const { db, path } = createFixture(t);
+  const first = saveOpportunity(db, example);
+  const filled = saveOpportunity(db, {
+    ...example, title: "Changed title", description: "Changed text", location: "Stockholm",
+  });
+  assert.deepEqual(filled, { ...first, location: "Stockholm" });
+  assert.deepEqual(saveOpportunity(db, { ...example, location: "Solna" }), filled);
+  assert.deepEqual(saveOpportunity(db, example), filled);
+  db.close();
+  const reopened = new Database(path, { readonly: true, fileMustExist: true });
+  try { assert.deepEqual(getOpportunity(reopened, first.id), filled); } finally { reopened.close(); }
 });
 
 test("preserves source timestamps without adding or converting a timezone", (t) => {

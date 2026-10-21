@@ -82,6 +82,90 @@ p {
   min-width: 0;
 }
 
+.location-field {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.location-field legend {
+  margin-bottom: 8px;
+  padding: 0;
+  font-weight: 700;
+}
+
+.location-picker {
+  border: 1px solid #b9c8bf;
+  border-radius: 8px;
+}
+
+.location-picker > summary {
+  padding: 12px;
+  font-weight: 400;
+}
+
+.location-picker-content {
+  display: grid;
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.location-options {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.location-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 6px 2px;
+  cursor: pointer;
+  font-weight: 400;
+}
+
+.location-option input {
+  flex: 0 0 18px;
+  width: 18px;
+  min-height: 18px;
+  height: 18px;
+  padding: 0;
+  accent-color: #234d3d;
+}
+
+.selected-locations {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.location-chip, .location-clear {
+  width: auto;
+  min-height: 36px;
+  padding: 6px 10px;
+  color: #234d3d;
+  background: #edf3ee;
+  border-color: #b9c8bf;
+  font-size: 0.875rem;
+}
+
+.location-clear {
+  background: transparent;
+  border-color: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.location-chip:hover:not(:disabled), .location-clear:hover:not(:disabled) {
+  background: #dce9df;
+}
+
+#location-help {
+  margin: 0;
+}
+
 label, summary {
   font-weight: 700;
 }
@@ -159,7 +243,7 @@ button:disabled {
   line-height: 1.45;
 }
 
-.company {
+.company, .location {
   margin: 6px 0;
 }
 

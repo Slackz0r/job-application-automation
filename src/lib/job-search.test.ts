@@ -11,26 +11,30 @@ const advertisement = {
   description: { text: "First paragraph.\n\nSecond paragraph.", text_formatted: "<p>Not used</p>" },
   publication_date: "2026-10-21T10:30:00",
   application_deadline: "2026-11-30T23:59:59",
+  workplace_address: { municipality: "Stockholm", city: "Solna" },
 };
 
 function respond(payload: unknown): typeof fetch {
   return async () => Response.json(payload);
 }
 
-test("sends an encoded search and municipality filter, and returns our opportunity format", async () => {
+test("sends multiple areas in one encoded search, removes duplicate areas, and returns our opportunity format", async () => {
   let requestedUrl: URL | undefined;
+  let requests = 0;
   const fetcher: typeof fetch = async (input, options) => {
+    requests++;
     requestedUrl = new URL(String(input));
     assert.equal(options?.cache, "no-store");
     assert.deepEqual(options?.headers, { Accept: "application/json" });
     assert.ok(options?.signal instanceof AbortSignal);
     return Response.json({ total: { value: 42 }, hits: [advertisement] });
   };
-  const result = await searchJobs({ query: "  C++ & utvecklare  ", municipality: "0180" }, fetcher);
+  const result = await searchJobs({ query: "  C++ & utvecklare  ", municipalities: [" 0180 ", "0184", "0180"] }, fetcher);
   assert.equal(requestedUrl?.origin, "https://jobsearch.api.jobtechdev.se");
   assert.equal(requestedUrl?.pathname, "/search");
   assert.equal(requestedUrl?.searchParams.get("q"), "C++ & utvecklare");
-  assert.equal(requestedUrl?.searchParams.get("municipality"), "0180");
+  assert.deepEqual(requestedUrl?.searchParams.getAll("municipality"), ["0180", "0184"]);
+  assert.equal(requests, 1);
   assert.equal(requestedUrl?.searchParams.get("limit"), "20");
   assert.deepEqual(result, {
     total: 42,
@@ -40,6 +44,7 @@ test("sends an encoded search and municipality filter, and returns our opportuni
       sourceId: "example-001",
       title: "Example Developer",
       company: "Example Company",
+      location: "Stockholm",
       description: "First paragraph.\n\nSecond paragraph.",
       url: "https://example.test/jobs/001",
       applicationDeadline: "2026-11-30T23:59:59",
@@ -57,12 +62,40 @@ test("allows national searches and unknown optional advertisement fields", async
       id: "example-002", headline: "Developer", webpage_url: "https://example.test/jobs/002",
     }] });
   };
-  const result = await searchJobs({ query: "developer", limit: 5 }, fetcher);
+  const result = await searchJobs({ query: "developer", municipalities: [], limit: 5 }, fetcher);
   assert.equal(result.skippedCount, 0);
   assert.equal(result.opportunities[0]?.company, null);
+  assert.equal(result.opportunities[0]?.location, null);
   assert.equal(result.opportunities[0]?.description, null);
   assert.equal(result.opportunities[0]?.publishedAt, null);
   assert.equal(result.opportunities[0]?.applicationDeadline, null);
+});
+
+test("uses supplied workplace locations, combines distinct places, and tolerates missing location data", async () => {
+  for (const [fields, expected] of [
+    [{ workplace_address: { city: "  Solna  " } }, "Solna"],
+    [{ workplace_address: { region: "Stockholms län" } }, "Stockholms län"],
+    [{ workplace_address: { country: "Norge" } }, "Norge"],
+    [{ workplace_address: null }, null],
+    [{ workplace_address: { municipality: 123 } }, null],
+    [{ workplace_address: { municipality: " \t " } }, null],
+    [{ workplace_address: null, workplace_addresses: [
+      { municipality: "Stockholm" }, { municipality: "Solna" }, { municipality: "Stockholm" },
+    ] }, "Stockholm, Solna"],
+  ] as const) {
+    const result = await searchJobs({ query: "developer", municipalities: ["unrelated-search-location"] }, respond({
+      total: { value: 1 }, hits: [{ ...advertisement, ...fields }],
+    }));
+    assert.equal(result.opportunities.length, 1);
+    assert.equal(result.opportunities[0]?.location, expected);
+  }
+});
+
+test("supports a single selected area", async () => {
+  await searchJobs({ query: "developer", municipalities: ["0180"] }, async (input) => {
+    assert.deepEqual(new URL(String(input)).searchParams.getAll("municipality"), ["0180"]);
+    return Response.json({ total: { value: 0 }, hits: [] });
+  });
 });
 
 test("skips unusable advertisements, reports the count, and keeps valid results", async () => {
@@ -97,7 +130,7 @@ test("rejects invalid searches before contacting the API", async () => {
     return Response.json({});
   };
   for (const input of [
-    { query: " \t " }, { query: "developer", municipality: " " },
+    { query: " \t " }, { query: "developer", municipalities: ["0180", " "] },
     { query: "developer", limit: 0 }, { query: "developer", limit: 101 },
     { query: "developer", limit: 1.5 },
   ]) {

@@ -59,7 +59,7 @@ Scope:
 
 **Goal:** Retrieve and browse real job opportunities.
 
-**Current progress:** Implemented. The homepage supports free-text search and an optional official municipality picker, saves valid results in SQLite, and displays advertisement text and original-source links. Recent records remain visible after refresh or application restart. Tests cover duplicate handling, source dates, form validation, API failures, and rollback of failed save batches. Browser checks verified live searches, retained search criteria, saved records after refresh, empty results, and readable advertisement details. The first interface searches and lists up to 20 records at a time; pagination is not implemented. Hands-on usage review is the next checkpoint before AI evaluation work.
+**Current progress:** Implemented. The homepage supports free-text search and an optional **Location** picker with multiple selections, saves valid results in SQLite, and displays each advertisement's location, text, and original-source link. Search locations use official municipality identifiers and are combined in one request. A new migration adds optional location text to saved opportunities, and rediscovery fills missing locations without replacing existing facts. Recent records remain visible after refresh or application restart. Tests cover duplicate handling, source dates, form validation, API failures, and rollback of failed save batches. Browser checks verified live searches, retained search criteria, saved records after refresh, empty results, and readable advertisement details. The first interface searches and lists up to 20 records at a time; pagination is not implemented. Hands-on usage review is the next checkpoint before AI evaluation work.
 
 Scope:
 

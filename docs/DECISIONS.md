@@ -100,7 +100,7 @@ Future autonomous submissions should depend on verified reliability, clear execu
 
 **Rationale:** Identifiers and timestamps support traceability and processing, but a saved opportunity must also support useful browsing and verification. Incomplete source data alone is not a reason to create unusable records.
 
-**Initial scope:** Company, description, publication date, and application deadline may be unknown. Evaluation and generation require sufficient advertisement text before proceeding. The schema enforces required and nonblank fields; the save workflow validates HTTP/HTTPS URLs and ISO dates or timestamps, and generates the discovery timestamp. Source timezone handling is defined in D013.
+**Initial scope:** Company, location, description, publication date, and application deadline may be unknown. Location is optional display text based on supplied workplace addresses; distinct place names are combined when an advertisement lists multiple workplaces. It is never inferred from the search filters. Evaluation and generation require sufficient advertisement text before proceeding. The schema enforces required and nonblank fields; the save workflow validates HTTP/HTTPS URLs and ISO dates or timestamps, and generates the discovery timestamp. Source timezone handling is defined in D013.
 
 **Revisit if:** Real source data or workflow requirements reveal a concrete need to change the minimum requirements or add fields.
 
@@ -114,9 +114,9 @@ Applied migration files remain unchanged; subsequent changes use new files. Migr
 
 ### D012 — Preserve Opportunities on Duplicate Discovery
 
-**Decision:** Saving an opportunity with an existing `(source, source_id)` returns the original record without overwriting its contents or first discovery time.
+**Decision:** Saving an opportunity with an existing `(source, source_id)` preserves its contents and first discovery time. The single exception is filling a missing (`null`) location from newly supplied advertisement data; a known location is never overwritten.
 
-**Rationale:** Repeated discovery should avoid duplicates and preserve the saved advertisement. Updating advertisements needs an explicit policy rather than silently replacing existing data.
+**Rationale:** Repeated discovery should avoid duplicates and preserve the saved advertisement. Filling missing locations lets records saved before the location migration gain useful display information without replacing existing facts. Broader advertisement updates still need an explicit policy.
 
 **Revisit if:** Real discovery reveals a need to refresh changed or expired advertisements.
 

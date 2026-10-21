@@ -8,10 +8,12 @@ import { listOpportunities } from "../lib/opportunities.ts";
 import { searchOpportunities } from "./actions.ts";
 
 const migration = readFileSync(new URL("../../migrations/001-create-opportunities.sql", import.meta.url), "utf8");
+const locationMigration = readFileSync(new URL("../../migrations/002-add-opportunity-location.sql", import.meta.url), "utf8");
 const advertisement = {
   id: "example-001", headline: "Example Developer", webpage_url: "https://example.test/jobs/001",
   description: { text: "Example advertisement text." },
   publication_date: "2026-10-21T10:30:00", application_deadline: "2026-11-30T23:59:59",
+  workplace_address: { municipality: "Stockholm" },
 };
 
 function createFixture(t: TestContext) {
@@ -26,29 +28,29 @@ function createFixture(t: TestContext) {
   mkdirSync(join(directory, "data"));
   const path = join(directory, "data", "app.sqlite");
   const db = new Database(path);
-  try { db.exec(migration); } finally { db.close(); }
+  try { db.exec(migration); db.exec(locationMigration); } finally { db.close(); }
   process.chdir(directory);
   return path;
 }
 
-function searchForm(query = "developer", municipality = "") {
+function searchForm(query = "developer", municipalities: string[] = []) {
   const form = new FormData();
   form.set("query", query);
-  form.set("municipality", municipality);
+  for (const municipality of municipalities) form.append("municipality", municipality);
   return form;
 }
 
-test("searches from form data, saves results, closes the connection, and preserves duplicates", async (t) => {
+test("searches all selected areas from form data, saves results, and preserves duplicates", async (t) => {
   const path = createFixture(t);
   t.mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
     const url = new URL(String(input));
     assert.equal(url.searchParams.get("q"), "developer");
-    assert.equal(url.searchParams.get("municipality"), "example-municipality");
+    assert.deepEqual(url.searchParams.getAll("municipality"), ["example-area-001", "example-area-002"]);
     return Response.json({ total: { value: 1 }, hits: [advertisement] });
   });
-  const first = await searchOpportunities(null, searchForm("developer", "example-municipality"));
+  const first = await searchOpportunities(null, searchForm("developer", ["example-area-001", "example-area-002"]));
   assert.equal(first.status, "success");
-  const repeated = await searchOpportunities(first, searchForm("developer", "example-municipality"));
+  const repeated = await searchOpportunities(first, searchForm("developer", ["example-area-001", "example-area-002"]));
   assert.deepEqual(repeated, first);
   const db = new Database(path, { readonly: true, fileMustExist: true });
   try {
@@ -56,6 +58,7 @@ test("searches from form data, saves results, closes the connection, and preserv
     assert.equal(saved.length, 1);
     assert.equal(saved[0]?.publishedAt, advertisement.publication_date);
     assert.equal(saved[0]?.applicationDeadline, advertisement.application_deadline);
+    assert.equal(saved[0]?.location, "Stockholm");
     if (first.status === "success") assert.deepEqual(first.opportunities, saved);
   } finally { db.close(); }
 });
@@ -68,10 +71,30 @@ test("rejects blank or non-text form fields before searching", async (t) => {
   const file = searchForm();
   file.set("query", new Blob(["developer"]), "query.txt");
   assert.equal((await searchOpportunities(null, file)).status, "error");
-  const invalidLocation = searchForm();
-  invalidLocation.set("municipality", new Blob(["location"]), "location.txt");
+  const invalidLocation = searchForm("developer", ["example-valid-area"]);
+  invalidLocation.append("municipality", new Blob(["location"]), "location.txt");
   assert.equal((await searchOpportunities(null, invalidLocation)).status, "error");
   assert.equal(fetchMock.mock.callCount(), 0);
+});
+
+test("rediscovery fills an older record's missing location without replacing its saved advertisement", async (t) => {
+  const path = createFixture(t);
+  const db = new Database(path);
+  try {
+    db.prepare(`INSERT INTO opportunities (source, source_id, title, url, discovered_at)
+      VALUES (?, ?, ?, ?, ?)`).run(
+      "platsbanken", advertisement.id, "Original title", "https://example.test/saved", "2026-10-01T12:00:00.000Z"
+    );
+  } finally { db.close(); }
+  t.mock.method(globalThis, "fetch", async () => Response.json({ total: { value: 1 }, hits: [advertisement] }));
+  const result = await searchOpportunities(null, searchForm());
+  assert.equal(result.status, "success");
+  if (result.status === "success") {
+    assert.equal(result.opportunities[0]?.location, "Stockholm");
+    assert.equal(result.opportunities[0]?.title, "Original title");
+    assert.equal(result.opportunities[0]?.url, "https://example.test/saved");
+    assert.equal(result.opportunities[0]?.discoveredAt, "2026-10-01T12:00:00.000Z");
+  }
 });
 
 test("returns a helpful search error and accepts a valid empty search", async (t) => {
@@ -80,7 +103,10 @@ test("returns a helpful search error and accepts a valid empty search", async (t
   assert.deepEqual(await searchOpportunities(null, searchForm()), {
     status: "error", message: "Could not search Platsbanken. Please try again.",
   });
-  fetchMock.mock.mockImplementation(async () => Response.json({ total: { value: 0 }, hits: [] }));
+  fetchMock.mock.mockImplementation(async (input: string | URL | Request) => {
+    assert.equal(new URL(String(input)).searchParams.has("municipality"), false);
+    return Response.json({ total: { value: 0 }, hits: [] });
+  });
   assert.deepEqual(await searchOpportunities(null, searchForm()), {
     status: "success", total: 0, skippedCount: 0, opportunities: [],
   });

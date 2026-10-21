@@ -14,7 +14,10 @@ type OpportunitySearchProps = {
 export function OpportunitySearch({ municipalities, savedOpportunities, savedError }: OpportunitySearchProps) {
   const [state, formAction, pending] = useActionState(searchOpportunities, null);
   const [query, setQuery] = useState("");
-  const [municipality, setMunicipality] = useState("");
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const [locationFilter, setLocationFilter] = useState("");
+  const matchingLocations = municipalities.filter((location) => location.name.toLocaleLowerCase("sv")
+    .includes(locationFilter.trim().toLocaleLowerCase("sv")));
   const opportunities = state?.status === "success" ? state.opportunities : savedOpportunities;
 
   return (
@@ -29,19 +32,48 @@ export function OpportunitySearch({ municipalities, savedOpportunities, savedErr
             <input id="query" name="query" type="search" placeholder="For example, developer or support"
               value={query} onChange={(event) => setQuery(event.target.value)} required />
           </div>
-          <div className="field">
-            <label htmlFor="municipality">Municipality (optional)</label>
-            <select id="municipality" name="municipality" value={municipality}
-              onChange={(event) => setMunicipality(event.target.value)} aria-describedby="location-help">
-              <option value="">All of Sweden</option>
-              {municipalities.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}
-            </select>
-          </div>
+          <fieldset className="field location-field" aria-describedby="location-help">
+            <legend>Location (optional)</legend>
+            {/* Submit every selected location, including those hidden by the filter. */}
+            {selectedLocations.map((id) => <input key={id} type="hidden" name="municipality" value={id} />)}
+            <details className="location-picker">
+              <summary>{selectedLocations.length > 0
+                ? `${selectedLocations.length} ${selectedLocations.length === 1 ? "location" : "locations"} selected`
+                : "All of Sweden"}</summary>
+              <div className="location-picker-content">
+                <label htmlFor="location-filter">Find a location</label>
+                <input id="location-filter" type="search" placeholder="Search locations"
+                  value={locationFilter} onChange={(event) => setLocationFilter(event.target.value)}
+                  onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault(); }} />
+                <div className="location-options">
+                  {matchingLocations.map((location) => (
+                    <label key={location.id} className="location-option">
+                      <input type="checkbox" checked={selectedLocations.includes(location.id)}
+                        onChange={(event) => setSelectedLocations((current) => event.target.checked
+                          ? [...current, location.id] : current.filter((id) => id !== location.id))} />
+                      {location.name}
+                    </label>
+                  ))}
+                  {matchingLocations.length === 0 && <p className="muted">No locations found.</p>}
+                </div>
+              </div>
+            </details>
+            {selectedLocations.length > 0 && <div className="selected-locations" aria-label="Selected locations">
+              {municipalities.filter((location) => selectedLocations.includes(location.id)).map((location) => (
+                <button key={location.id} type="button" className="location-chip" aria-label={`Remove ${location.name}`}
+                  onClick={() => setSelectedLocations((current) => current.filter((id) => id !== location.id))}>
+                  {location.name} <span aria-hidden="true">×</span>
+                </button>
+              ))}
+              <button type="button" className="location-clear" onClick={() => setSelectedLocations([])}>Clear locations</button>
+            </div>}
+            <p id="location-help" className="muted">Choose one or more locations. Leave empty to search all of Sweden.</p>
+          </fieldset>
           <button type="submit">{pending ? "Searching…" : "Search Platsbanken"}</button>
         </fieldset>
-        <p id="location-help" className="muted">
+        <p className="muted">
           {municipalities.length === 0
-            ? "The municipality list is unavailable. You can still search all of Sweden. Refresh to try loading locations again."
+            ? "The location list is unavailable. You can still search all of Sweden. Refresh to try loading locations again."
             : "Searches show up to 20 advertisements. Results are saved on this computer."}
         </p>
       </form>
@@ -62,7 +94,7 @@ export function OpportunitySearch({ municipalities, savedOpportunities, savedErr
         {state?.status !== "success" && savedError && <p className="error-message">{savedError}</p>}
         {opportunities.length === 0 ? (
           <p className="muted">{state?.status === "success"
-            ? state.total === 0 ? "No matching advertisements. Try another search term or municipality."
+            ? state.total === 0 ? "No matching advertisements. Try another search term or location."
               : "None of the returned advertisements contained usable data. Try another search."
             : "No saved opportunities yet. Run a search to get started."}</p>
         ) : (
@@ -71,6 +103,7 @@ export function OpportunitySearch({ municipalities, savedOpportunities, savedErr
               <li key={opportunity.id} className="opportunity">
                 <h4>{opportunity.title}</h4>
                 <p className="company">{opportunity.company || "Company not provided"}</p>
+                <p className="location muted">Location: {opportunity.location || "Not provided"}</p>
                 {opportunity.applicationDeadline && <p className="muted">
                   Apply by <time dateTime={opportunity.applicationDeadline}>{opportunity.applicationDeadline.replace("T", " ")}</time>
                 </p>}
