@@ -1,7 +1,7 @@
 # Job Opportunity Automation
 
 **Version:** 0.4  
-**Status:** MVP Implementation — Discovery and Simulated Evaluation
+**Status:** MVP Implementation — Discovery and Initial Live Evaluation
 **Last updated:** 2026-10-22
 
 ## 1. Vision
@@ -159,9 +159,9 @@ These hypotheses have not yet been fully validated.
 
 ## 10. Current Focus & Next Steps
 
-**Current phase:** MVP implementation — opportunity discovery and simulated evaluation.
+**Current phase:** MVP implementation — opportunity discovery and initial live evaluation.
 
-The local application supports Platsbanken searches, an optional location picker with multiple selections, SQLite persistence, and browsing saved advertisement locations, text, and original-source links. The initial foundation and opportunity-discovery milestones are implemented. A simulated evaluation flow supports saving and revisiting clearly labelled sample results without external AI calls or charges. A separate ChatGPT sign-in card checks subscription permission, which has been verified during manual use; credentials stay in memory and a new sign-in is required after restart. Manual testing has also verified model discovery and a completed fixed-message subscription response. OpenAI with GPT-6.1 Sol is selected for later live trials, subject to account availability; actual matching quality remains unverified.
+The local application supports Platsbanken searches, an optional location picker with multiple selections, SQLite persistence, and browsing saved advertisement locations, text, and original-source links. The initial foundation and opportunity-discovery milestones are implemented. After ChatGPT sign-in, one saved advertisement can be evaluated explicitly against the approved professional profile sections using GPT-6.1 Sol and the subscription. Valid completed results are stored locally with the model and date; older samples remain labelled until replaced successfully. Credentials stay in memory and a new sign-in is required after restart. Manual testing has verified sign-in, model discovery, and the fixed-message subscription response. The first real opportunity evaluation and review of its reasoning remain pending. Smaller-model comparison is deferred until evaluation trials.
 
 The MVP will support job discovery, opportunity evaluation, AI-assisted application generation, manual application submission, and tracking.
 

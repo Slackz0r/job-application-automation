@@ -17,15 +17,18 @@ export function OpportunityEvaluation({ opportunityId, hasDescription, savedEval
 
   return (
     <section className="evaluation" aria-label="Opportunity evaluation" aria-busy={pending}>
-      <p className="eyebrow">Simulated evaluation</p>
-      <p className="muted">Sample results only. No OpenAI calls or API charges.</p>
+      <p className="eyebrow">Opportunity evaluation</p>
+      <p className="muted">Evaluate this advertisement with GPT-6.1 Sol using your ChatGPT subscription. Sends skills and competencies, professional experience, education, and career preferences. Personality and interests are excluded.</p>
+      <p className="muted">One request per attempt. No automatic retries or paid API fallback. Review the result before deciding whether to apply.</p>
       {loadError && <p className="error-message" role="alert">{loadError}</p>}
       <div aria-live="polite">
-        {pending && <p className="status">Running simulation and saving the result…</p>}
+        {pending && <p className="status">Evaluating with ChatGPT and saving the result…</p>}
         {state?.status === "error" && <p className="error-message" role="alert">{state.message}</p>}
         {evaluation && (
           <>
-            <h5>{recommendationLabels[evaluation.result.recommendation]} <span className="muted">(sample)</span></h5>
+            {evaluation.mode === "simulated" && <p className="status">Saved sample — no suitability assessment was made.</p>}
+            {evaluation.mode === "live" && <p className="status">AI evaluation · {evaluation.model}</p>}
+            <h5>{recommendationLabels[evaluation.result.recommendation]} {evaluation.mode === "simulated" && <span className="muted">(sample)</span>}</h5>
             <p>{evaluation.result.summary}</p>
             <p className="status">Supporting evidence</p>
             {evaluation.result.supportingEvidence.length > 0
@@ -42,7 +45,7 @@ export function OpportunityEvaluation({ opportunityId, hasDescription, savedEval
       <form action={formAction}>
         {evaluation && <input type="hidden" name="reevaluate" value="true" />}
         <button type="submit" disabled={pending || !hasDescription || Boolean(loadError)}>
-          {pending ? "Running simulation…" : evaluation ? "Run simulation again" : "Evaluate (simulated)"}
+          {pending ? "Evaluating…" : evaluation?.mode === "live" ? "Evaluate again with ChatGPT" : "Evaluate with ChatGPT"}
         </button>
       </form>
       {!hasDescription && <p className="muted">Advertisement text is required for evaluation.</p>}

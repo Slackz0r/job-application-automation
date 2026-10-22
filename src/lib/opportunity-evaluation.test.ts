@@ -62,7 +62,7 @@ test("validates results, persists across connections, and replaces only the sele
     assert.equal(dirname(directory), resolve(tmpdir()));
     rmSync(directory, { recursive: true, force: true });
   });
-  for (const name of ["001-create-opportunities.sql", "002-add-opportunity-location.sql", "003-create-opportunity-evaluations.sql"]) {
+  for (const name of ["001-create-opportunities.sql", "002-add-opportunity-location.sql", "003-create-opportunity-evaluations.sql", "004-enable-live-opportunity-evaluations.sql"]) {
     db.exec(readFileSync(new URL(`../../migrations/${name}`, import.meta.url), "utf8"));
   }
   const first = saveOpportunity(db, advertisement);

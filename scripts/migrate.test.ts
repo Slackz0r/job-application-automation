@@ -15,6 +15,8 @@ const initialMigration = await readFile(
 const locationMigration = await readFile(
   new URL("../migrations/002-add-opportunity-location.sql", import.meta.url), "utf8"
 );
+const evaluationMigration = await readFile(new URL("../migrations/003-create-opportunity-evaluations.sql", import.meta.url), "utf8");
+const liveEvaluationMigration = await readFile(new URL("../migrations/004-enable-live-opportunity-evaluations.sql", import.meta.url), "utf8");
 
 async function createFixture(t: TestContext, migrations: Record<string, string>) {
   const directory = await mkdtemp(join(tmpdir(), "job-migrations-"));
@@ -148,5 +150,47 @@ test("adds location to an existing database without changing saved advertisement
     assert.deepEqual(reopened.prepare("SELECT name FROM schema_migrations ORDER BY name").all(), [
       { name: "001-create-opportunities.sql" }, { name: "002-add-opportunity-location.sql" },
     ]);
+  } finally { reopened.close(); }
+});
+
+test("upgrades saved samples without changing them and records models only for live evaluations", async (t) => {
+  const directory = await createFixture(t, {
+    "001-create-opportunities.sql": initialMigration,
+    "002-add-opportunity-location.sql": locationMigration,
+    "003-create-opportunity-evaluations.sql": evaluationMigration,
+  });
+  assert.equal(runMigrations(directory).status, 0);
+  const path = join(directory, "data", "app.sqlite");
+  const db = new Database(path);
+  const result = JSON.stringify({ recommendation: "needs_clarification", summary: "Saved sample.", supportingEvidence: [], gapsAndUnknowns: [] });
+  try {
+    db.prepare(`INSERT INTO opportunities (source, source_id, title, url, discovered_at)
+      VALUES ('example', '001', 'Example Developer', 'https://example.test/job', '2026-10-22T12:00:00.000Z')`).run();
+    db.prepare("INSERT INTO opportunity_evaluations VALUES (1, 'simulated', ?, ?)")
+      .run(result, "2026-10-22T12:00:00.000Z");
+  } finally { db.close(); }
+  await writeFile(join(directory, "migrations", "004-enable-live-opportunity-evaluations.sql"), liveEvaluationMigration);
+  const upgrade = runMigrations(directory);
+  assert.equal(upgrade.status, 0, upgrade.stderr);
+  const upgraded = new Database(path);
+  try {
+    assert.deepEqual(upgraded.prepare("SELECT * FROM opportunity_evaluations").get(), {
+      opportunity_id: 1, mode: "simulated", model: null, result_json: result, evaluated_at: "2026-10-22T12:00:00.000Z",
+    });
+    assert.throws(() => upgraded.exec("UPDATE opportunity_evaluations SET mode = 'live'"), /CHECK/);
+    assert.throws(() => upgraded.exec("UPDATE opportunity_evaluations SET model = 'gpt-6.1-sol'"), /CHECK/);
+    assert.throws(() => upgraded.exec("UPDATE opportunity_evaluations SET mode = 'live', model = ' '"), /CHECK/);
+    upgraded.exec("UPDATE opportunity_evaluations SET mode = 'live', model = 'gpt-6.1-sol'");
+  } finally { upgraded.close(); }
+  const repeat = runMigrations(directory);
+  assert.equal(repeat.status, 0, repeat.stderr);
+  assert.match(repeat.stdout, /Already run: 004-enable-live-opportunity-evaluations/);
+  const reopened = new Database(path);
+  try {
+    assert.deepEqual(reopened.prepare("SELECT mode, model, result_json FROM opportunity_evaluations").get(), {
+      mode: "live", model: "gpt-6.1-sol", result_json: result,
+    });
+    reopened.exec("DELETE FROM opportunities WHERE id = 1");
+    assert.deepEqual(reopened.prepare("SELECT * FROM opportunity_evaluations").all(), []);
   } finally { reopened.close(); }
 });

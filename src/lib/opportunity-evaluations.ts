@@ -10,13 +10,14 @@ import {
 } from "../schemas/opportunity-evaluation.ts";
 
 const opportunityIdSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
-const columns = "opportunity_id AS opportunityId, mode, result_json AS resultJson, evaluated_at AS evaluatedAt";
-type EvaluationRow = { opportunityId: number; mode: string; resultJson: string; evaluatedAt: string };
+const columns = "opportunity_id AS opportunityId, mode, model, result_json AS resultJson, evaluated_at AS evaluatedAt";
+type EvaluationRow = { opportunityId: number; mode: string; model: string | null; resultJson: string; evaluatedAt: string };
 
 function readEvaluation(row: EvaluationRow): SavedEvaluation {
   return savedEvaluationSchema.parse({
     opportunityId: row.opportunityId,
     mode: row.mode,
+    model: row.model,
     result: JSON.parse(row.resultJson),
     evaluatedAt: row.evaluatedAt,
   });
@@ -40,23 +41,30 @@ export function getEvaluations(db: Database.Database, opportunityIds: number[]):
   return Object.fromEntries(rows.map((row) => [row.opportunityId, readEvaluation(row)]));
 }
 
-export function saveEvaluation(db: Database.Database, opportunityId: number, input: unknown): SavedEvaluation {
+export function saveEvaluation(
+  db: Database.Database,
+  opportunityId: number,
+  input: unknown,
+  source: { mode: "simulated" } | { mode: "live"; model: string } = { mode: "simulated" },
+): SavedEvaluation {
   opportunityIdSchema.parse(opportunityId);
   const result = evaluationResultSchema.parse(input);
-  const evaluation: SavedEvaluation = {
+  const evaluation = savedEvaluationSchema.parse({
     opportunityId,
-    mode: "simulated",
+    ...source,
+    model: source.mode === "live" ? source.model : null,
     result,
     evaluatedAt: new Date().toISOString(),
-  };
+  });
   db.prepare(`
-    INSERT INTO opportunity_evaluations (opportunity_id, mode, result_json, evaluated_at)
-    VALUES (@opportunityId, @mode, @resultJson, @evaluatedAt)
+    INSERT INTO opportunity_evaluations (opportunity_id, mode, model, result_json, evaluated_at)
+    VALUES (@opportunityId, @mode, @model, @resultJson, @evaluatedAt)
     ON CONFLICT (opportunity_id) DO UPDATE SET
-      mode = excluded.mode, result_json = excluded.result_json, evaluated_at = excluded.evaluated_at
+      mode = excluded.mode, model = excluded.model, result_json = excluded.result_json, evaluated_at = excluded.evaluated_at
   `).run({
     opportunityId,
     mode: evaluation.mode,
+    model: evaluation.model,
     resultJson: JSON.stringify(result),
     evaluatedAt: evaluation.evaluatedAt,
   });

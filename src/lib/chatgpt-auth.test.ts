@@ -6,6 +6,7 @@ import { dirname, join } from "node:path";
 import { test, type TestContext } from "node:test";
 import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from "jose";
 import { createChatGPTAuth, localAppOrigin } from "./chatgpt-auth.ts";
+import type { EvaluationInput } from "./opportunity-evaluation.ts";
 
 const keys = await generateKeyPair("RS256");
 const publicKey = { ...await exportJWK(keys.publicKey), kid: "test-key", alg: "RS256" };
@@ -34,6 +35,7 @@ function fixture(t: TestContext) {
     failNetwork: false,
     invalidJson: false,
     invalidSignature: false,
+    beforeResponse: async () => {},
   };
   const fetcher: typeof fetch = async (url, options) => {
     if (String(url).startsWith("https://api.openai.com/v1/")) {
@@ -41,8 +43,13 @@ function fixture(t: TestContext) {
       if (String(url).endsWith("/models")) return Response.json({
         models: [{ slug: "gpt-6.1-sol", display_name: "GPT-6.1 Sol", visibility: "list" }],
       });
+      await reply.beforeResponse();
+      const isEvaluation = JSON.parse(String(options?.body)).instructions !== undefined;
+      const text = isEvaluation ? JSON.stringify({
+        recommendation: "needs_clarification", summary: "Synthetic result.", supportingEvidence: [], gapsAndUnknowns: ["Preferences are unknown."],
+      }) : "Subscription connection works.";
       return new Response(`data: ${JSON.stringify({ type: "response.completed", response: {
-        status: "completed", output: [{ type: "message", content: [{ type: "output_text", text: "Subscription connection works." }] }],
+        status: "completed", output: [{ type: "message", content: [{ type: "output_text", text }] }],
       } })}\n\ndata: [DONE]\n\n`, { headers: { "Content-Type": "text/event-stream" } });
     }
     requests.push({ url: String(url), options });
@@ -276,4 +283,67 @@ test("concurrent tests share one request and successful tests are reused without
   assert.doesNotMatch(readFileSync(f.registrationPath, "utf8"), /token|Subscription connection works/);
   f.auth.signOut("browser-one");
   assert.equal((await f.auth.testConnection("browser-one")).status, "error");
+});
+
+
+const evaluationInput: EvaluationInput = {
+  opportunity: { title: "Example Developer", description: "Develop web interfaces.", company: null, location: null },
+  profile: { skillsAndCompetencies: {}, experiences: { professional: [], education: [] }, careerPreferences: {} },
+};
+
+test("live evaluations require active browser-bound subscription permission", async (t) => {
+  const f = fixture(t);
+  assert.equal((await f.auth.evaluateOpportunity("browser-one", 1, evaluationInput)).status, "error");
+  f.reply.scope = "openid email";
+  f.start();
+  assert.equal(await f.auth.complete("browser-one", f.callback()), "permission_missing");
+  assert.equal((await f.auth.evaluateOpportunity("browser-one", 1, evaluationInput)).status, "error");
+  f.reply.scope = "openid email chatgpt.tokens.use.direct";
+  f.start();
+  assert.equal(await f.auth.complete("browser-one", f.callback()), "connected");
+  assert.equal((await f.auth.evaluateOpportunity("other-browser", 1, evaluationInput)).status, "error");
+  f.advance(3600_001);
+  assert.equal((await f.auth.evaluateOpportunity("browser-one", 1, evaluationInput)).status, "error");
+  assert.equal(f.inferenceRequests.length, 0);
+});
+
+test("duplicate evaluation clicks share one request and another job waits for it to finish", async (t) => {
+  const f = fixture(t);
+  f.start();
+  assert.equal(await f.auth.complete("browser-one", f.callback()), "connected");
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => { release = resolve; });
+  f.reply.beforeResponse = () => held;
+  const first = f.auth.evaluateOpportunity("browser-one", 1, evaluationInput);
+  const duplicate = f.auth.evaluateOpportunity("browser-one", 1, evaluationInput);
+  const other = await f.auth.evaluateOpportunity("browser-one", 2, evaluationInput);
+  assert.equal(other.status, "error");
+  if (other.status === "error") assert.match(other.message, /already running/);
+  release();
+  const [result, repeated] = await Promise.all([first, duplicate]);
+  assert.equal(result.status, "success");
+  assert.deepEqual(repeated, result);
+  assert.equal(f.inferenceRequests.filter((url) => url.endsWith("/responses")).length, 1);
+  assert.equal((await f.auth.evaluateOpportunity("browser-one", 2, evaluationInput)).status, "success");
+  assert.equal(f.inferenceRequests.filter((url) => url.endsWith("/responses")).length, 2);
+  assert.doesNotMatch(readFileSync(f.registrationPath, "utf8"), /Synthetic result|Develop web interfaces|synthetic-access-token/);
+  assert.doesNotMatch(JSON.stringify(f.auth.status("browser-one")), /Synthetic result|Develop web interfaces|synthetic-access-token/);
+});
+
+test("signing out during a request prevents its result from being saved through that connection", async (t) => {
+  const f = fixture(t);
+  f.start();
+  assert.equal(await f.auth.complete("browser-one", f.callback()), "connected");
+  let release!: () => void;
+  let began!: () => void;
+  const started = new Promise<void>((resolve) => { began = resolve; });
+  const held = new Promise<void>((resolve) => { release = resolve; });
+  f.reply.beforeResponse = () => { began(); return held; };
+  const pending = f.auth.evaluateOpportunity("browser-one", 1, evaluationInput);
+  await started;
+  f.auth.signOut("browser-one");
+  release();
+  const result = await pending;
+  assert.equal(result.status, "error");
+  if (result.status === "error") assert.match(result.message, /connection ended/i);
 });

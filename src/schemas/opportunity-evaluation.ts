@@ -9,12 +9,29 @@ export const evaluationResultSchema = z.strictObject({
   gapsAndUnknowns: z.array(text),
 });
 
-export const savedEvaluationSchema = z.strictObject({
+const savedFields = {
   opportunityId: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
-  mode: z.literal("simulated"),
   result: evaluationResultSchema,
   evaluatedAt: z.iso.datetime(),
+};
+
+export const savedEvaluationSchema = z.discriminatedUnion("mode", [
+  z.strictObject({ ...savedFields, mode: z.literal("simulated"), model: z.null() }),
+  z.strictObject({ ...savedFields, mode: z.literal("live"), model: text.max(200) }),
+]);
+
+export const evaluationModel = "gpt-6.1-sol";
+
+// Bound the live reply while retaining the agreed four-field result format.
+export const liveEvaluationResultSchema = evaluationResultSchema.extend({
+  summary: text.max(1800),
+  supportingEvidence: z.array(text.max(1200)).max(8),
+  gapsAndUnknowns: z.array(text.max(1200)).max(8),
 });
+
+export type LiveEvaluationState =
+  | { status: "success"; model: string; result: EvaluationResult }
+  | { status: "error"; message: string; requestId?: string };
 
 export const recommendationLabels = {
   worth_considering: "Worth considering",

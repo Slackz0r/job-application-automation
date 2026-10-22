@@ -29,7 +29,7 @@ function ConnectionTest({ savedResult }: { savedResult?: ChatGPTConnectionTestSt
           <p className="status">Subscription response verified</p>
           <p>Reply: {result.reply}</p>
           <p className="muted">Model: {result.model}. Completed <time dateTime={result.testedAt}>{result.testedAt.replace("T", " ").replace(/\.\d+Z$/, " UTC")}</time>.</p>
-          <p className="muted">This confirms a test response worked. Job evaluation still uses simulated results.</p>
+          <p className="muted">This confirms a test response worked. Choose a saved advertisement to run a separate job evaluation.</p>
         </>}
       </div>
       {result && result.models.length > 0 && <details>
@@ -60,7 +60,7 @@ export function ChatGPTConnectionCard({ connection, notice }: { connection: Chat
           : "Not connected"}
       </p>
       {connection.email && <p>Account: {connection.email}</p>}
-      <p>Connect your existing subscription. Job evaluations still use sample results.</p>
+      <p>Connect your existing subscription to evaluate saved job advertisements. Requests run only when you click an evaluation or test button.</p>
       {visibleNotice && <p role="status" className={visibleNotice === "failed" || visibleNotice === "invalid_callback" || visibleNotice === "local_address" ? "error-message" : "muted"}>{chatGPTNotices[visibleNotice]}</p>}
       {connection.status === "permission_granted" && <ConnectionTest savedResult={connection.testResult} />}
       {connection.status !== "permission_granted" && (
