@@ -37,8 +37,6 @@ The **ChatGPT subscription** card offers **Continue with ChatGPT** for a separat
 
 After sign-in, **Test subscription connection** fetches the account's visible model list and, if `gpt-6.1-sol` is listed, sends only `Reply with exactly: Subscription connection works.` using the subscription. It shows model choices and the reply after a completed response. No job or profile data is loaded by this test. There is at most one model request per attempt, no automatic retries or paid API fallback, and a successful test is reused until the connection ends. No test runs on sign-in or page load. If the agreed model is absent, no inference request is made. Manual testing has verified model discovery and the fixed-message response; automated tests use synthetic streams.
 
-After saving a live Sol evaluation, **Compare with GPT-6 Luna** makes one explicit subscription request and shows a temporary result below it. Sol remains the saved result; the Luna result disappears on refresh. Model availability is checked before inference. Keep the profile and instructions unchanged between runs: the comparison uses current inputs, while an older saved Sol result may have used different ones. The panel reports Luna request time, including model discovery, but does not measure subscription allowance savings. Keep temporary results on screen or copy them for manual review.
-
 ## Source Structure
 
 - `src/app/` contains route files and server entry points. Feature-named Server Actions and their tests live in `src/app/actions/`.

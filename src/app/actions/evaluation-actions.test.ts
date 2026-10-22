@@ -4,8 +4,8 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test, type TestContext } from "node:test";
 import Database from "better-sqlite3";
-import { compareSavedOpportunity, evaluateSavedOpportunity, type EvaluationInput } from "../../lib/opportunity-evaluation.ts";
-import { comparisonModel, evaluationModel, type LiveEvaluationState } from "../../schemas/opportunity-evaluation.ts";
+import { evaluateSavedOpportunity, type EvaluationInput } from "../../lib/opportunity-evaluation.ts";
+import { evaluationModel, type LiveEvaluationState } from "../../schemas/opportunity-evaluation.ts";
 import { saveOpportunity } from "../../lib/opportunities.ts";
 import { getEvaluation, saveEvaluation } from "../../lib/opportunity-evaluations.ts";
 
@@ -162,73 +162,4 @@ test("a failed live rerun preserves the previous result and requires another exp
   assert.equal(calls, 1);
   const db = new Database(path);
   try { assert.deepEqual(getEvaluation(db, id), first.evaluation); } finally { db.close(); }
-});
-
-test("a temporary comparison returns Luna display data without changing any saved evaluation", async (t) => {
-  const { path, id, evaluateOpportunity, runEvaluation } = createFixture(t);
-  const saved = await evaluateOpportunity(id, null, new FormData());
-  assert.equal(saved.status, "success");
-  if (saved.status !== "success") return;
-  const db = new Database(path);
-  try {
-    db.exec("CREATE TRIGGER block_update BEFORE UPDATE ON opportunity_evaluations BEGIN SELECT RAISE(ABORT, 'Must not update'); END;");
-    db.exec("CREATE TRIGGER block_insert BEFORE INSERT ON opportunity_evaluations BEGIN SELECT RAISE(ABORT, 'Must not insert'); END;");
-  } finally { db.close(); }
-  const result = await compareSavedOpportunity(id, async (input) => {
-    assert.deepEqual(input, runEvaluation.mock.calls[0].arguments[0]);
-    return { status: "success", model: comparisonModel, result: { ...saved.evaluation.result, summary: "Synthetic Luna comparison." } };
-  });
-  assert.equal(result.status, "success");
-  if (result.status === "success") {
-    assert.equal(result.comparison.model, comparisonModel);
-    assert.equal(result.comparison.baselineEvaluatedAt, saved.evaluation.evaluatedAt);
-    assert.ok(result.comparison.elapsedMs >= 0);
-    assert.ok(Number.isFinite(Date.parse(result.comparison.comparedAt)));
-  }
-  const reopened = new Database(path);
-  try { assert.deepEqual(getEvaluation(reopened, id), saved.evaluation); } finally { reopened.close(); }
-});
-
-test("comparison requires a saved Sol result, advertisement text and a readable profile before requesting", async (t) => {
-  const { path, id, noTextId, profilePath, evaluateOpportunity } = createFixture(t);
-  let requests = 0;
-  const unexpected = async (): Promise<LiveEvaluationState> => {
-    requests++; throw new Error("Must not request");
-  };
-  for (const invalid of [0, -1, Number.NaN, 999, noTextId, id]) {
-    assert.equal((await compareSavedOpportunity(invalid, unexpected)).status, "error");
-  }
-  const db = new Database(path);
-  try {
-    saveEvaluation(db, id, { recommendation: "needs_clarification", summary: "Sample.", supportingEvidence: [], gapsAndUnknowns: [] });
-  } finally { db.close(); }
-  assert.equal((await compareSavedOpportunity(id, unexpected)).status, "error");
-  await evaluateOpportunity(id, null, new FormData());
-  unlinkSync(profilePath);
-  assert.equal((await compareSavedOpportunity(id, unexpected)).status, "error");
-  assert.equal(requests, 0);
-});
-
-test("comparison failures and a changed Sol baseline never replace the saved result", async (t) => {
-  const { path, id, evaluateOpportunity } = createFixture(t);
-  const saved = await evaluateOpportunity(id, null, new FormData());
-  assert.equal(saved.status, "success");
-  if (saved.status !== "success") return;
-  for (const response of [
-    { status: "error", message: "Usage limit reached." } as LiveEvaluationState,
-    { status: "success", model: evaluationModel, result: saved.evaluation.result } as LiveEvaluationState,
-    { status: "success", model: comparisonModel, result: { ...saved.evaluation.result, summary: "" } } as LiveEvaluationState,
-  ]) {
-    assert.equal((await compareSavedOpportunity(id, async () => response)).status, "error");
-    const unchanged = new Database(path);
-    try { assert.deepEqual(getEvaluation(unchanged, id), saved.evaluation); } finally { unchanged.close(); }
-  }
-  const changed = await compareSavedOpportunity(id, async () => {
-    const db = new Database(path);
-    try { db.prepare("UPDATE opportunity_evaluations SET evaluated_at = ? WHERE opportunity_id = ?").run("2026-10-22T23:00:00.000Z", id); }
-    finally { db.close(); }
-    return { status: "success", model: comparisonModel, result: saved.evaluation.result };
-  });
-  assert.equal(changed.status, "error");
-  if (changed.status === "error") assert.match(changed.message, /Sol result changed/);
 });

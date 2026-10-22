@@ -14,7 +14,7 @@ import {
 import { runChatGPTConnectionTest } from "./chatgpt-connection-test.ts";
 import { runChatGPTEvaluation } from "./chatgpt-evaluation.ts";
 import type { EvaluationInput } from "./opportunity-evaluation.ts";
-import { evaluationModel, evaluationModelSchema, type EvaluationModel, type LiveEvaluationState } from "../schemas/opportunity-evaluation.ts";
+import type { LiveEvaluationState } from "../schemas/opportunity-evaluation.ts";
 
 const issuer = "https://auth.openai.com";
 const tokenEndpoint = `${issuer}/api/accounts/oauth/token`;
@@ -43,7 +43,7 @@ type Connection = {
   expiresAt: number;
   testResult?: ChatGPTConnectionTestState;
   testPromise?: Promise<ChatGPTConnectionTestState>;
-  evaluation?: { opportunityId: number; model: EvaluationModel; promise: Promise<LiveEvaluationState> };
+  evaluation?: { opportunityId: number; promise: Promise<LiveEvaluationState> };
 };
 
 export function localAppOrigin(host: string | null) {
@@ -251,26 +251,23 @@ export function createChatGPTAuth(options: {
       return connection.testPromise;
     },
 
-    async evaluateOpportunity(browserId: string, opportunityId: number, input: EvaluationInput, model: EvaluationModel = evaluationModel): Promise<LiveEvaluationState> {
-      if (!evaluationModelSchema.safeParse(model).success) {
-        return { status: "error", message: "Choose an agreed evaluation model. No request was made." };
-      }
+    async evaluateOpportunity(browserId: string, opportunityId: number, input: EvaluationInput): Promise<LiveEvaluationState> {
       clearExpiredAttempts();
       const connection = connections.get(browserId);
       if (!connection || connection.expiresAt <= now() || !connection.sharing || !connection.accessToken) {
         return { status: "error", message: "Sign in and grant subscription permission before evaluating an opportunity." };
       }
       if (connection.evaluation) {
-        return connection.evaluation.opportunityId === opportunityId && connection.evaluation.model === model ? connection.evaluation.promise
+        return connection.evaluation.opportunityId === opportunityId ? connection.evaluation.promise
           : { status: "error", message: "An evaluation is already running. Wait for it to finish before evaluating another opportunity." };
       }
-      const promise = runChatGPTEvaluation(connection.accessToken, input, fetcher, model).then((result): LiveEvaluationState => {
+      const promise = runChatGPTEvaluation(connection.accessToken, input, fetcher).then((result): LiveEvaluationState => {
         if (connections.get(browserId) !== connection || connection.expiresAt <= now()) {
           return { status: "error", message: "The connection ended before the evaluation could be saved. Sign in again before trying another request." };
         }
         return result;
       }).finally(() => { connection.evaluation = undefined; });
-      connection.evaluation = { opportunityId, model, promise };
+      connection.evaluation = { opportunityId, promise };
       return promise;
     },
 

@@ -21,9 +21,6 @@ export const savedEvaluationSchema = z.discriminatedUnion("mode", [
 ]);
 
 export const evaluationModel = "gpt-6.1-sol";
-export const comparisonModel = "gpt-6-luna";
-export const evaluationModelSchema = z.enum([evaluationModel, comparisonModel]);
-export type EvaluationModel = z.infer<typeof evaluationModelSchema>;
 
 // Bound the live reply while retaining the agreed four-field result format.
 export const liveEvaluationResultSchema = evaluationResultSchema.extend({
@@ -34,16 +31,6 @@ export const liveEvaluationResultSchema = evaluationResultSchema.extend({
 
 export type LiveEvaluationState =
   | { status: "success"; model: string; result: EvaluationResult }
-  | { status: "error"; message: string; requestId?: string };
-
-export type ComparisonState =
-  | { status: "success"; comparison: {
-    model: typeof comparisonModel;
-    result: EvaluationResult;
-    baselineEvaluatedAt: string;
-    comparedAt: string;
-    elapsedMs: number;
-  } }
   | { status: "error"; message: string; requestId?: string };
 
 export const recommendationLabels = {

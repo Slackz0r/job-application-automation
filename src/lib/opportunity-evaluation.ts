@@ -3,7 +3,7 @@ import "server-only";
 import { z } from "zod";
 import type { Opportunity } from "../schemas/opportunity.ts";
 import type { ProfessionalProfile } from "../schemas/professional-profile.ts";
-import { comparisonModel, evaluationModel, evaluationResultSchema, liveEvaluationResultSchema, type ComparisonState, type LiveEvaluationState, type SavedEvaluation } from "../schemas/opportunity-evaluation.ts";
+import { evaluationResultSchema, type LiveEvaluationState, type SavedEvaluation } from "../schemas/opportunity-evaluation.ts";
 import { openDatabase } from "./db.ts";
 import { getOpportunity } from "./opportunities.ts";
 import { getEvaluation, saveEvaluation } from "./opportunity-evaluations.ts";
@@ -77,50 +77,6 @@ export async function evaluateSavedOpportunity(
     } finally { db.close(); }
   } catch {
     return { status: "error", message: "The evaluation could not be prepared. Run npm run db:migrate if needed, then try again. Any previous saved result is unchanged." };
-  }
-}
-
-// A comparison returns display data only. It never writes an evaluation to SQLite.
-export async function compareSavedOpportunity(
-  opportunityId: number,
-  runComparison: (input: EvaluationInput) => Promise<LiveEvaluationState>,
-): Promise<ComparisonState> {
-  if (!z.number().int().positive().max(Number.MAX_SAFE_INTEGER).safeParse(opportunityId).success) {
-    return { status: "error", message: "Choose a saved opportunity to compare." };
-  }
-  try {
-    const db = openDatabase();
-    try {
-      const opportunity = getOpportunity(db, opportunityId);
-      if (!opportunity?.description?.trim()) {
-        return { status: "error", message: "A saved advertisement with text is required for comparison." };
-      }
-      const baseline = getEvaluation(db, opportunityId);
-      if (baseline?.mode !== "live" || baseline.model !== evaluationModel) {
-        return { status: "error", message: "Save a GPT-6.1 Sol evaluation before comparing it with Luna." };
-      }
-      const profile = await loadProfessionalProfile();
-      if (profile.status !== "ready") {
-        return { status: "error", message: "The professional profile needs attention before comparison." };
-      }
-      const started = performance.now();
-      const response = await runComparison(createEvaluationInput(opportunity, profile.profile));
-      if (response.status === "error") return response;
-      if (response.model !== comparisonModel) {
-        return { status: "error", message: "The comparison did not use the agreed Luna model. The saved Sol result is unchanged." };
-      }
-      const result = liveEvaluationResultSchema.parse(response.result);
-      const current = getEvaluation(db, opportunityId);
-      if (current?.mode !== "live" || current.model !== evaluationModel || current.evaluatedAt !== baseline.evaluatedAt) {
-        return { status: "error", message: "The saved Sol result changed during this comparison. No result was replaced; refresh before comparing again." };
-      }
-      return { status: "success", comparison: {
-        model: comparisonModel, result, baselineEvaluatedAt: baseline.evaluatedAt,
-        comparedAt: new Date().toISOString(), elapsedMs: Math.round(performance.now() - started),
-      } };
-    } finally { db.close(); }
-  } catch {
-    return { status: "error", message: "The comparison could not be completed. The saved Sol result is unchanged. No automatic retry was made." };
   }
 }
 

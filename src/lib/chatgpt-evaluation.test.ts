@@ -4,7 +4,7 @@ import { test } from "node:test";
 import { runChatGPTEvaluation, evaluationInstructions } from "./chatgpt-evaluation.ts";
 import { createEvaluationInput } from "./opportunity-evaluation.ts";
 import { professionalProfileSchema } from "../schemas/professional-profile.ts";
-import { comparisonModel, evaluationModel, type EvaluationModel } from "../schemas/opportunity-evaluation.ts";
+import { evaluationModel } from "../schemas/opportunity-evaluation.ts";
 
 const example = JSON.parse(readFileSync(new URL("../../professional-profile.example.json", import.meta.url), "utf8"));
 const profile = professionalProfileSchema.parse({ ...example,
@@ -132,38 +132,4 @@ test("usage limits, authentication errors, and timeouts never retry or use anoth
   assert.equal(response.status, "error");
   assert.equal(requests, 2);
   assert.doesNotMatch(JSON.stringify(response), /PRIVATE/);
-});
-
-test("Sol and Luna use identical input, instructions, format and reasoning settings", async () => {
-  const bodies: Record<string, unknown>[] = [];
-  for (const model of [evaluationModel, comparisonModel] as const) {
-    const response = await runChatGPTEvaluation("synthetic-token", input, async (url, options) => {
-      if (String(url).endsWith("/models")) return Response.json({ models: [
-        { slug: evaluationModel, visibility: "list" }, { slug: comparisonModel, visibility: "list" },
-      ] });
-      const body = JSON.parse(String(options?.body));
-      assert.equal(body.model, model);
-      delete body.model;
-      bodies.push(body);
-      return stream([complete(JSON.stringify(result))]);
-    }, model);
-    assert.deepEqual(response, { status: "success", model, result });
-  }
-  assert.deepEqual(bodies[0], bodies[1]);
-});
-
-test("unavailable Luna and unagreed models never send an evaluation or switch models", async () => {
-  let requests = 0;
-  const fetcher: typeof fetch = async (_url, options) => {
-    requests++;
-    assert.equal(options?.body, undefined);
-    return Response.json(catalog);
-  };
-  const unavailable = await runChatGPTEvaluation("synthetic-token", input, fetcher, comparisonModel);
-  assert.equal(unavailable.status, "error");
-  if (unavailable.status === "error") assert.match(unavailable.message, /Luna is not available/);
-  assert.equal(requests, 1);
-  const invalid = await runChatGPTEvaluation("synthetic-token", input, fetcher, "unagreed-model" as EvaluationModel);
-  assert.equal(invalid.status, "error");
-  assert.equal(requests, 1);
 });
