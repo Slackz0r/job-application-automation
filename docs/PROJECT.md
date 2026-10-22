@@ -2,7 +2,7 @@
 
 **Version:** 0.4  
 **Status:** MVP Implementation — Discovery and Initial Live Evaluation
-**Last updated:** 2026-10-22
+**Last updated:** 2026-10-23
 
 ## 1. Vision
 
@@ -161,7 +161,7 @@ These hypotheses have not yet been fully validated.
 
 **Current phase:** MVP implementation — opportunity discovery and initial live evaluation.
 
-The local application supports Platsbanken searches, an optional location picker with multiple selections, SQLite persistence, and browsing saved advertisement locations, text, and original-source links. The initial foundation and opportunity-discovery milestones are implemented. After ChatGPT sign-in, one saved advertisement can be evaluated explicitly against the approved professional profile sections using GPT-6.1 Sol and the subscription. Valid completed results are stored locally with the model and date; older samples remain labelled until replaced successfully. Credentials stay in memory and a new sign-in is required after restart. Manual testing has verified sign-in, model discovery, and the fixed-message subscription response. A first real opportunity evaluation has completed, persisted, and been checked against its source advertisement and approved profile. Its reasoning was supported in this case; broader quality validation remains open. Smaller-model comparison is underway using temporary Luna results beside saved Sol evaluations; the default remains Sol.
+The local application supports Platsbanken searches, an optional location picker with multiple selections, SQLite persistence, and browsing saved advertisement locations, text, and original-source links. The initial foundation and opportunity-discovery milestones are implemented. After ChatGPT sign-in, one saved advertisement can be evaluated explicitly against the approved professional profile sections using GPT-6.1 Sol and the subscription. Valid completed results are stored locally with the model and date; older samples remain labelled until replaced successfully. Credentials stay in memory and a new sign-in is required after restart. Manual testing has verified sign-in, model discovery, and the fixed-message subscription response. A first real opportunity evaluation has completed, persisted, and been checked against its source advertisement and approved profile. Its reasoning was supported in this case; broader quality validation remains open. An initial two-case comparison of temporary Luna results against saved Sol evaluations has been reviewed. Sol remains the default provisionally; broader model quality and usage savings remain unverified.
 
 The MVP will support job discovery, opportunity evaluation, AI-assisted application generation, manual application submission, and tracking.
 

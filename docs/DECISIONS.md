@@ -2,7 +2,7 @@
 
 **Version:** 0.1  
 **Status:** Living document  
-**Last updated:** 2026-10-22
+**Last updated:** 2026-10-23
 
 ## 1. Purpose
 
@@ -202,7 +202,9 @@ Applied migration files remain unchanged; subsequent changes use new files. Migr
 
 **Validation and review:** Synthetic tests verify matching request settings, model availability and allowlisting, concurrency isolation, setup failures, and preservation of saved results. The first manual comparison has verified Luna access; broader output quality remains under review. Review the same two advertisements for recommendation quality, grounded evidence and treatment of unknowns before changing the default model. Temporary results must be kept on screen or copied for review because they are not stored in SQLite.
 
-**First Luna comparison (2026-10-22):** A user-triggered request completed in 13.8 seconds on the reviewed development role. The user copied the temporary output for review, and the saved Sol baseline was verified unchanged. Luna returned **Needs clarification**, while Sol retained **Worth considering**. Both identified relevant delivered work and material infrastructure uncertainties; Luna gave those unknowns more weight in its recommendation. Sol better matched the user's stated willingness to explore this particular role. This one disagreement does not establish overall model quality. Keep the profile, instructions and default model unchanged while comparing the second reviewed role. Exact subscription usage savings and relative latency have not been measured.
+**First Luna comparison (2026-10-22):** A user-triggered request completed in 13.8 seconds on the reviewed development role. The user copied the temporary output for review, and the saved Sol baseline was verified unchanged. Luna returned **Needs clarification**, while Sol retained **Worth considering**. Both identified relevant delivered work and material infrastructure uncertainties; Luna gave those unknowns more weight in its recommendation. Sol better matched the user's stated willingness to explore this particular role. This one disagreement does not establish overall model quality. The second reviewed role is covered below; the profile and instructions were kept unchanged for this trial. Exact subscription usage savings and relative latency have not been measured.
+
+**Second Luna comparison (2026-10-23, local date):** The user supplied the temporary result for the reviewed specialist design role, completed in 12.7 seconds. Both models returned **Needs clarification** for uncertain portfolio and specialist design evidence. Luna added an unsupported design-specific language concern despite documented general language ability and attributed UX/UI study to a course where it is not explicitly recorded; the profile places that study under a different programme. The saved Sol assessment handled those details more accurately. The two-case trial supports keeping Sol as the current default provisionally, with no automatic fallback or extra calls. It is too small to establish general model rankings or quantify usage savings. Source attribution and unsupported requirement interpretation remain quality checks for both models.
 
 ## 3. Under Evaluation
 
