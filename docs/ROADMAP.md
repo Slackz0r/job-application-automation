@@ -1,7 +1,7 @@
 # Development Roadmap
 
 **Version:** 0.1  
-**Status:** Milestones 1–2 implemented — Milestone 3 live evaluation awaiting review
+**Status:** Milestones 1–2 implemented — Milestone 3 initial live trial verified
 **Last updated:** 2026-10-22
 
 ## 1. Purpose
@@ -81,9 +81,9 @@ Scope:
 
 **Goal:** Identify promising opportunities using verified professional information.
 
-**Current progress:** The first live evaluation flow is implemented and awaits manual quality review on a saved advertisement. An explicit **Evaluate with ChatGPT** action sends only the approved profile sections and selected advertisement through the subscription using GPT-6.1 Sol. The app validates a completed structured reply and saves one current result with its model and date. Refresh and rediscovery reuse it; reruns are explicit, and failures preserve the old result. Samples created before the live flow remain clearly labelled until successfully replaced. Missing profile information must remain unknown rather than count as missing experience. Automated tests use synthetic data and responses; the first real output still needs review before batching or model comparison.
+**Current progress:** The first live evaluation flow is implemented and one saved advertisement has been evaluated and reviewed against its source data. An explicit **Evaluate with ChatGPT** action sends only the approved profile sections and selected advertisement through the subscription using GPT-6.1 Sol. The app validates a completed structured reply and saves one current result with its model and date. Refresh and rediscovery reuse it; reruns are explicit, and failures preserve the old result. Samples created before the live flow remain clearly labelled until successfully replaced. Missing profile information must remain unknown rather than count as missing experience. Automated tests use synthetic data and responses; the first real output had grounded supporting evidence and preserved material unknowns. Broader trials and model comparison remain open before batching.
 
-A separate **Continue with ChatGPT** card implements the subscription sign-in and permission check, which has been verified during manual use. Credentials stay in server memory and sign-in is required after restart or expiry. An explicit **Test subscription connection** action now lists available models and sends one fixed, nonpersonal test message if GPT-6.1 Sol is listed. Manual testing has verified model availability and a completed fixed-message response. Automated tests use synthetic identities and response streams; the first real opportunity evaluation and its quality review remain outstanding. No daily call count or scheduled processing is enabled.
+A separate **Continue with ChatGPT** card implements the subscription sign-in and permission check, which has been verified during manual use. Credentials stay in server memory and sign-in is required after restart or expiry. An explicit **Test subscription connection** action now lists available models and sends one fixed, nonpersonal test message if GPT-6.1 Sol is listed. Manual testing has verified model availability and a completed fixed-message response. Automated tests use synthetic identities and response streams; the first real opportunity evaluation has also completed and been reviewed, while broader quality validation remains outstanding. No daily call count or scheduled processing is enabled.
 
 Scope:
 
