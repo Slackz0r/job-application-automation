@@ -142,11 +142,21 @@ Applied migration files remain unchanged; subsequent changes use new files. Migr
 
 **Revisit if:** Evaluation reveals a concrete need for more detailed validation or a different representation of supporting evidence.
 
+### D016 — Evaluation Provider, Input Boundary, and Simulation First
+
+**Decision:** Select OpenAI with GPT-6.1 Sol for initial live trials. First implement and test the flow using simulated responses only. Prepare skills and competencies, professional experience, education, and career preferences; exclude personality and interests and other top-level profile data. Keep richer information and uncertainty notes inside approved sections. No external transmission or automatic switch to a live provider is enabled in this step.
+
+**Rationale:** The workflow, result display, persistence, and errors can be verified without API charges or sending the private profile to an external service. Restricting input by section limits personal information while preserving professional evidence. Missing information remains unknown. Real evaluation quality will need a separate review on actual advertisements.
+
+**Initial output and storage:** A short recommendation, summary, supporting evidence, and gaps or unknowns, without a numerical score. Save one current result per opportunity, explicitly marked as simulated. Reuse saved results unless the user requests a rerun; replace them only after a successful rerun. The simulator produces illustrative content and does not make suitability judgements.
+
+**Revisit if:** Live trials establish concrete needs for a different model, input selection, evidence structure, or evaluation history. Live evaluation is a separate implementation step.
+
 ## 3. Under Evaluation
 
 ### AI Integration
 
-- LLM provider and model selection.
+- Quality, cost, and latency of the selected OpenAI model on real evaluations.
 - Whether simple LLM calls are sufficient for opportunity evaluation and application generation.
 - Appropriate output structures, evidence checks, and validation mechanisms.
 

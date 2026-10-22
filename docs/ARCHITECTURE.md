@@ -29,9 +29,9 @@ The system will initially be developed as a **modular monolith**, using a single
 | Runtime                     | Node.js         | Supports API integration, orchestration, and future automation        |
 | Database                    | SQLite          | Lightweight relational persistence without a separate database server |
 | Professional knowledge base | JSON            | Structured, maintainable source of verified professional information  |
-| AI                          | LLM API         | Contextual opportunity evaluation and application generation          |
+| AI                          | OpenAI API (planned) | GPT-6.1 Sol selected for initial trials; the current flow is simulation-only |
 
-Specific libraries, database tooling, and the LLM provider will be selected during implementation when their requirements become clearer.
+The OpenAI SDK is installed, but no live evaluation connection is enabled. Additional tooling will be selected when its requirements become clearer.
 
 Python and separate backend services are excluded from the initial architecture because they introduce complexity without a demonstrated advantage for the MVP.
 
@@ -59,7 +59,7 @@ Provides the means to:
 
 The interface should remain separate from the underlying business logic.
 
-Route files remain in `src/app/`; Server Actions are grouped by feature in `src/app/actions/`. UI components are grouped by feature under `src/components/`. The opportunity interface uses `OpportunityDiscovery` to coordinate the search, `LocationPicker` to manage location selection, and `OpportunityList` to display advertisements. Server-side data access and integration code remain in `src/lib/`.
+Route files remain in `src/app/`; Server Actions are grouped by feature in `src/app/actions/`. UI components are grouped by feature under `src/components/`. The opportunity interface uses `OpportunityDiscovery` to coordinate the search, `LocationPicker` to manage location selection, `OpportunityList` to display advertisements, and `OpportunityEvaluation` to run and display simulations. Server-side data access and integration code remain in `src/lib/`.
 
 Validation rules and their related TypeScript types live together in `src/schemas/opportunity.ts`, `src/schemas/professional-profile.ts`, and `src/schemas/job-search.ts`. Schemas for the same workflow are grouped together: job search includes search criteria, JobSearch responses, source advertisements and workplace addresses, and the Taxonomy municipality response. Shared data models, such as an opportunity used by discovery and persistence, have their own schema modules. Names and comments distinguish external response formats from application data. These modules contain data definitions without file, database, or network access. SQL migrations separately define the database structure.
 
@@ -97,7 +97,11 @@ Matching should not rely exclusively on rigid keyword comparisons or years-of-ex
 
 The system should consider credible stretch opportunities while identifying genuine eligibility barriers and clearly unsuitable positions.
 
-The exact evaluation strategy and prioritization criteria remain open to experimentation.
+The current implementation is a simulated flow, not a suitability assessment. `OpportunityEvaluation` in the existing opportunity component folder calls a Server Action in `src/app/actions/evaluation-actions.ts`. The server loads the saved advertisement and private profile. `src/lib/opportunity-evaluation.ts` prepares skills and competencies, professional experience, education, and career preferences; it excludes the personality-and-interests section and other top-level fields. Rich details within included sections remain intact. The simulator returns explicitly illustrative text without importing the OpenAI SDK or making network calls. Adding an API key cannot enable real evaluation.
+
+`src/schemas/opportunity-evaluation.ts` defines the recommendation, summary, supporting evidence, and gaps or unknowns. Recommendations are **Worth considering**, **Needs clarification**, or **Unlikely fit**, with no numerical score. Simulations always use **Needs clarification** and visibly explain that no fit assessment was made. `src/lib/opportunity-evaluations.ts` validates results and reads or saves one current result per opportunity in SQLite. Migration `003-create-opportunity-evaluations.sql` adds the table, with a required simulation marker and UTC save time. The full input and profile are not stored there or returned to the client. Refreshing or repeating discovery reads saved results; a repeat evaluation request reuses the result unless the user explicitly requests a rerun. A failed rerun retains the previous result. Missing evaluation setup does not prevent job discovery.
+
+OpenAI with GPT-6.1 Sol is selected for future live trials, subject to availability on the connected account. Actual matching quality and inference behavior remain untested; the matching strategy remains open to experimentation.
 
 ### 4.4 Application Generation
 

@@ -2,7 +2,9 @@ import { loadProfessionalProfile } from "@/lib/professional-profile";
 import { openDatabase } from "@/lib/db";
 import { getMunicipalities } from "@/lib/job-search";
 import { listOpportunities } from "@/lib/opportunities";
+import { getEvaluations } from "@/lib/opportunity-evaluations";
 import type { Opportunity } from "@/schemas/opportunity";
+import type { EvaluationMap } from "@/schemas/opportunity-evaluation";
 import { OpportunityDiscovery } from "@/components/opportunities/opportunity-discovery";
 
 // Read the private profile at request time, keeping it out of prerendered pages.
@@ -24,10 +26,17 @@ export default async function Home() {
   ]);
   let savedOpportunities: Opportunity[] = [];
   let savedError: string | null = null;
+  let savedEvaluations: EvaluationMap = {};
+  let evaluationError: string | null = null;
   try {
     const db = openDatabase();
     try {
       savedOpportunities = listOpportunities(db);
+      try {
+        savedEvaluations = getEvaluations(db, savedOpportunities.map((opportunity) => opportunity.id));
+      } catch {
+        evaluationError = "Saved evaluations could not be loaded. Run npm run db:migrate if needed, then refresh.";
+      }
     } finally {
       db.close();
     }
@@ -49,6 +58,8 @@ export default async function Home() {
         municipalities={municipalities}
         savedOpportunities={savedOpportunities}
         savedError={savedError}
+        savedEvaluations={savedEvaluations}
+        evaluationError={evaluationError}
       />
 
       <section aria-labelledby="profile-heading" className="card">

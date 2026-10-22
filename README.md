@@ -25,16 +25,18 @@ Technical decisions are driven by actual requirements and validated assumptions 
 
 ## Current Status
 
-**Phase:** MVP Implementation — Opportunity Discovery
+**Phase:** MVP Implementation — Discovery and Simulated Evaluation
 
 The local application now searches Platsbanken, saves valid advertisements in SQLite, and shows their locations alongside the text and original-source links. Search by free text and optionally choose one or more locations. The homepage shows recently saved opportunities after refresh or restart. The private professional profile remains on the server, with only its loading status and professional-experience and education counts shown in the interface.
 
 The initial stack consists of Next.js, React, Node.js, TypeScript, SQLite, and a structured JSON professional knowledge base.
 
+Each saved advertisement now offers **Evaluate (simulated)**. The result is clearly labelled sample text, not an assessment of suitability. It is saved locally and remains available after refresh or rediscovery. **Run simulation again** explicitly replaces the previous sample. The OpenAI SDK is installed, but evaluation makes no network calls, needs no API key, and incurs no API charges. Real AI evaluation and its quality review are still pending.
+
 ## Source Structure
 
 - `src/app/` contains route files and server entry points. Feature-named Server Actions and their tests live in `src/app/actions/`.
-- `src/components/opportunities/` contains `OpportunityDiscovery` for the search flow, `LocationPicker` for location selection, and `OpportunityList` for advertisement display.
+- `src/components/opportunities/` contains `OpportunityDiscovery` for the search flow, `LocationPicker` for location selection, `OpportunityList` for advertisement display, and `OpportunityEvaluation` for the simulated evaluation flow.
 - `src/schemas/` contains validation rules and related TypeScript types, grouped by workflow or shared data model. The job-search module includes search criteria and JobTech API response checks; opportunity and professional-profile schemas have their own modules.
 - `src/lib/` contains database access, the Platsbanken connector, and profile loading. SQL table changes live in `migrations/`.
 
@@ -77,6 +79,8 @@ The first migration creates `opportunities`; setup adds no sample job records. T
 
 The homepage connects `src/components/opportunities/opportunity-discovery.tsx` to the Server Action in `src/app/actions/opportunity-actions.ts`. Submitting a search fetches advertisements, saves the valid batch in one transaction, and returns the saved records for display. Database failures roll back the batch and produce a setup/error message. Repeated searches fill missing locations while preserving existing advertisement facts. Each list item shows its location or **Not provided**; older records gain locations when rediscovered. Refreshing the page reads the latest 20 saved opportunities without starting a new search. Search results and recently saved lists are currently limited to 20 records; pagination is not implemented. Automated tests use sanitized responses and temporary databases, while browser checks verify live searches, persistence after refresh, form validation, empty results, and the original-source links.
 
+Run `npm.cmd run db:migrate` to apply `003-create-opportunity-evaluations.sql` before trying evaluation. It adds one current result per opportunity, including an explicit `simulated` marker and a UTC save time. The evaluation action loads the saved advertisement and private profile on the server, prepares only skills, professional experience, education, and career preferences, validates a simulated response, and saves it. The personality-and-interests section and other top-level data are excluded; rich details within the approved sections remain intact. The input and full profile are not stored in the evaluation table or returned to the browser. Missing advertisement text or an unreadable profile produces a message without exposing private contents. A repeat request returns an existing result unless a rerun was explicitly requested; failed reruns retain the previous result. Missing evaluation migrations do not block discovery. The initial response contains a recommendation, a short explanation, supporting evidence, and gaps or unknowns, without a numerical score.
+
 Tooling limitation: ESLint 9 is retained for compatibility with the plugins in Next.js's lint configuration, although ESLint marks that release as unsupported. The development dependency audit reports five high-severity entries from one unpatched [braces advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) in the lint dependency chain. The production dependency audit reports no vulnerabilities. Revisit this when compatible upstream releases become available.
 
 ## Git Workflow
@@ -86,6 +90,7 @@ Tooling limitation: ESLint 9 is retained for compatibility with the plugins in N
 - When using a task branch, start from the default branch and continue unfinished work on that branch. After merging the completed task, return to the default branch; use a fresh branch for a later task if one is useful.
 - Use short, descriptive task branch names with the `codex/` prefix and hyphens between words, such as `codex/job-search-api`.
 - Keep related code, tests, and documentation together in small, clear commits. Review changes and run appropriate checks before committing or merging, whichever workflow is used.
+- Commit each completed, tested feature or fix before moving to a distinct part of the work; a larger milestone can span several commits.
 
 ## Documentation
 

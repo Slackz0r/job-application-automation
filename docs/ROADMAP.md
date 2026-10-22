@@ -1,8 +1,8 @@
 # Development Roadmap
 
 **Version:** 0.1  
-**Status:** Milestones 1–2 implemented — ready for hands-on review
-**Last updated:** 2026-10-21
+**Status:** Milestones 1–2 implemented — Milestone 3 simulation in progress
+**Last updated:** 2026-10-22
 
 ## 1. Purpose
 
@@ -80,6 +80,8 @@ Scope:
 ### Milestone 3 — AI Opportunity Evaluation
 
 **Goal:** Identify promising opportunities using verified professional information.
+
+**Current progress:** The simulated flow is implemented: evaluate one saved advertisement, validate an illustrative response, save one current result in SQLite, revisit it after refresh or rediscovery, and explicitly rerun it. Simulation labels distinguish sample text from an actual fit assessment. Only approved professional profile sections are prepared, and no evaluation network calls or API charges occur. OpenAI with GPT-6.1 Sol is selected for the later live trial; real AI integration and evaluation quality checks remain outstanding. Missing profile information must remain unknown rather than count as missing experience.
 
 Scope:
 

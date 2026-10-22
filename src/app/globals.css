@@ -264,6 +264,24 @@ summary {
   white-space: pre-wrap;
 }
 
+.evaluation {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #d7dfd9;
+  border-radius: 8px;
+  background: #f5f8f5;
+}
+
+.evaluation h5 {
+  margin: 16px 0 8px;
+  font-size: 1rem;
+}
+
+.evaluation li {
+  margin: 8px 0;
+  line-height: 1.65;
+}
+
 @media (max-width: 480px) {
   main {
     padding: 40px 20px;

@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import type { Municipality } from "@/schemas/job-search";
 import type { Opportunity } from "@/schemas/opportunity";
+import type { EvaluationMap } from "@/schemas/opportunity-evaluation";
 import { searchOpportunities } from "@/app/actions/opportunity-actions";
 import { LocationPicker } from "./location-picker";
 import { OpportunityList } from "./opportunity-list";
@@ -11,12 +12,16 @@ type OpportunityDiscoveryProps = {
   municipalities: Municipality[];
   savedOpportunities: Opportunity[];
   savedError: string | null;
+  savedEvaluations: EvaluationMap;
+  evaluationError: string | null;
 };
 
-export function OpportunityDiscovery({ municipalities, savedOpportunities, savedError }: OpportunityDiscoveryProps) {
+export function OpportunityDiscovery({ municipalities, savedOpportunities, savedError, savedEvaluations, evaluationError }: OpportunityDiscoveryProps) {
   const [state, formAction, pending] = useActionState(searchOpportunities, null);
   const [query, setQuery] = useState("");
   const opportunities = state?.status === "success" ? state.opportunities : savedOpportunities;
+  const evaluations = state?.status === "success" ? state.evaluations ?? {} : savedEvaluations;
+  const evaluationsError = state?.status === "success" ? state.evaluationError : evaluationError;
 
   return (
     <section aria-labelledby="search-heading" className="card">
@@ -54,7 +59,7 @@ export function OpportunityDiscovery({ municipalities, savedOpportunities, saved
       <div className="search-results" aria-busy={pending}>
         <h3>{state?.status === "success" ? "Search results" : "Recently saved"}</h3>
         {state?.status !== "success" && savedError && <p className="error-message">{savedError}</p>}
-        <OpportunityList opportunities={opportunities} emptyMessage={state?.status === "success"
+        <OpportunityList opportunities={opportunities} evaluations={evaluations} evaluationError={evaluationsError} emptyMessage={state?.status === "success"
           ? state.total === 0 ? "No matching advertisements. Try another search term or location."
             : "None of the returned advertisements contained usable data. Try another search."
           : "No saved opportunities yet. Run a search to get started."} />

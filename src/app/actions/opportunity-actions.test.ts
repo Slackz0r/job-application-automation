@@ -5,10 +5,12 @@ import { dirname, join, resolve } from "node:path";
 import { test, type TestContext } from "node:test";
 import Database from "better-sqlite3";
 import { listOpportunities } from "../../lib/opportunities.ts";
+import { saveEvaluation } from "../../lib/opportunity-evaluations.ts";
 import { searchOpportunities } from "./opportunity-actions.ts";
 
 const migration = readFileSync(new URL("../../../migrations/001-create-opportunities.sql", import.meta.url), "utf8");
 const locationMigration = readFileSync(new URL("../../../migrations/002-add-opportunity-location.sql", import.meta.url), "utf8");
+const evaluationMigration = readFileSync(new URL("../../../migrations/003-create-opportunity-evaluations.sql", import.meta.url), "utf8");
 const advertisement = {
   id: "example-001", headline: "Example Developer", webpage_url: "https://example.test/jobs/001",
   description: { text: "Example advertisement text." },
@@ -28,7 +30,7 @@ function createFixture(t: TestContext) {
   mkdirSync(join(directory, "data"));
   const path = join(directory, "data", "app.sqlite");
   const db = new Database(path);
-  try { db.exec(migration); db.exec(locationMigration); } finally { db.close(); }
+  try { db.exec(migration); db.exec(locationMigration); db.exec(evaluationMigration); } finally { db.close(); }
   process.chdir(directory);
   return path;
 }
@@ -128,4 +130,37 @@ test("rolls back the whole search when saving one advertisement fails", async (t
   if (result.status === "error") assert.match(result.message, /could not be saved/);
   const reopened = new Database(path, { readonly: true, fileMustExist: true });
   try { assert.deepEqual(listOpportunities(reopened), []); } finally { reopened.close(); }
+});
+
+test("returns saved evaluations when an opportunity is found again", async (t) => {
+  const path = createFixture(t);
+  t.mock.method(globalThis, "fetch", async () => Response.json({ total: { value: 1 }, hits: [advertisement] }));
+  const first = await searchOpportunities(null, searchForm());
+  assert.equal(first.status, "success");
+  if (first.status !== "success") return;
+  const db = new Database(path);
+  let saved;
+  try {
+    saved = saveEvaluation(db, first.opportunities[0].id, {
+      recommendation: "needs_clarification", summary: "Simulated result.", supportingEvidence: [], gapsAndUnknowns: ["Sample only."],
+    });
+  } finally { db.close(); }
+  const repeated = await searchOpportunities(null, searchForm());
+  assert.equal(repeated.status, "success");
+  if (repeated.status === "success") assert.deepEqual(repeated.evaluations, { [saved.opportunityId]: saved });
+});
+
+test("evaluation setup failure leaves discovery and saved advertisements usable", async (t) => {
+  const path = createFixture(t);
+  const db = new Database(path);
+  try { db.exec("DROP TABLE opportunity_evaluations"); } finally { db.close(); }
+  t.mock.method(globalThis, "fetch", async () => Response.json({ total: { value: 1 }, hits: [advertisement] }));
+  const result = await searchOpportunities(null, searchForm());
+  assert.equal(result.status, "success");
+  if (result.status === "success") {
+    assert.equal(result.opportunities.length, 1);
+    assert.match(result.evaluationError ?? "", /db:migrate/);
+  }
+  const reopened = new Database(path);
+  try { assert.equal(listOpportunities(reopened).length, 1); } finally { reopened.close(); }
 });

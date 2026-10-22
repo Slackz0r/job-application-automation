@@ -3,10 +3,12 @@
 import { openDatabase } from "../../lib/db.ts";
 import { searchJobs } from "../../lib/job-search.ts";
 import { saveOpportunity } from "../../lib/opportunities.ts";
+import { getEvaluations } from "../../lib/opportunity-evaluations.ts";
 import type { Opportunity } from "../../schemas/opportunity.ts";
+import type { EvaluationMap } from "../../schemas/opportunity-evaluation.ts";
 
 export type SearchState =
-  | { status: "success"; total: number; skippedCount: number; opportunities: Opportunity[] }
+  | { status: "success"; total: number; skippedCount: number; opportunities: Opportunity[]; evaluations?: EvaluationMap; evaluationError?: string }
   | { status: "error"; message: string };
 
 export async function searchOpportunities(
@@ -38,7 +40,15 @@ export async function searchOpportunities(
       // Save this search together: a database failure leaves no partial batch.
       const saveResults = db.transaction(() => result.opportunities.map((opportunity) => saveOpportunity(db, opportunity)));
       const opportunities = saveResults.immediate();
-      return { status: "success", ...result, opportunities };
+      try {
+        return { status: "success", ...result, opportunities, evaluations: getEvaluations(db, opportunities.map((opportunity) => opportunity.id)) };
+      } catch {
+        // Evaluation setup must not prevent discovery or undo a saved search.
+        return {
+          status: "success", ...result, opportunities,
+          evaluationError: "Saved evaluations could not be loaded. Run npm run db:migrate if needed, then refresh.",
+        };
+      }
     } finally {
       db.close();
     }

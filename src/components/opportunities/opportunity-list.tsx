@@ -1,11 +1,15 @@
 import type { Opportunity } from "@/schemas/opportunity";
+import type { EvaluationMap } from "@/schemas/opportunity-evaluation";
+import { OpportunityEvaluation } from "./opportunity-evaluation";
 
 type OpportunityListProps = {
   opportunities: Opportunity[];
   emptyMessage: string;
+  evaluations: EvaluationMap;
+  evaluationError?: string | null;
 };
 
-export function OpportunityList({ opportunities, emptyMessage }: OpportunityListProps) {
+export function OpportunityList({ opportunities, emptyMessage, evaluations, evaluationError }: OpportunityListProps) {
   if (opportunities.length === 0) {
     return <p className="muted">{emptyMessage}</p>;
   }
@@ -27,6 +31,12 @@ export function OpportunityList({ opportunities, emptyMessage }: OpportunityList
             </details>
           ) : <p className="muted">Advertisement text is available at the original source.</p>}
           <a href={opportunity.url} target="_blank" rel="noopener noreferrer">Open original advertisement <span aria-hidden="true">↗</span></a>
+          <OpportunityEvaluation
+            opportunityId={opportunity.id}
+            hasDescription={Boolean(opportunity.description?.trim())}
+            savedEvaluation={evaluations[opportunity.id]}
+            loadError={evaluationError}
+          />
         </li>
       ))}
     </ul>
