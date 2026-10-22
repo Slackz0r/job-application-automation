@@ -33,10 +33,15 @@ The initial stack consists of Next.js, React, Node.js, TypeScript, SQLite, and a
 
 Each saved advertisement now offers **Evaluate (simulated)**. The result is clearly labelled sample text, not an assessment of suitability. It is saved locally and remains available after refresh or rediscovery. **Run simulation again** explicitly replaces the previous sample. The OpenAI SDK is installed, but evaluation makes no network calls, needs no API key, and incurs no API charges. Real AI evaluation and its quality review are still pending.
 
+The **ChatGPT subscription** card offers **Continue with ChatGPT** for a separate permission check. Open the local app using `http://127.0.0.1:3000` (or the displayed port). Clicking the button opens OpenAI's sign-in and consent page; the callback verifies identity and whether subscription usage permission was granted. Sign-in does not make a model request or send job/profile data. Credentials stay in server memory, so restart or expiry requires sign-in again. Only registration identifiers are kept in the ignored `data/chatgpt-registration.json`; local sign-out clears credentials without revoking the app's permission in ChatGPT settings. One registered account/workspace is supported in this first local version. Manual sign-in and subscription permission have been verified; automated tests use synthetic tokens and mocked token responses.
+
+After sign-in, **Test subscription connection** fetches the account's visible model list and, if `gpt-6.1-sol` is listed, sends only `Reply with exactly: Subscription connection works.` using the subscription. It shows model choices and the reply after a completed response. No job or profile data is loaded by this test. There is at most one model request per attempt, no automatic retries or paid API fallback, and a successful test is reused until the connection ends. No test runs on sign-in or page load. If the agreed model is absent, no inference request is made. Live inference remains unverified until this test is run; automated tests use synthetic streams.
+
 ## Source Structure
 
 - `src/app/` contains route files and server entry points. Feature-named Server Actions and their tests live in `src/app/actions/`.
 - `src/components/opportunities/` contains `OpportunityDiscovery` for the search flow, `LocationPicker` for location selection, `OpportunityList` for advertisement display, and `OpportunityEvaluation` for the simulated evaluation flow.
+- `src/components/chatgpt/` contains the subscription connection card. `src/app/auth/callback/` receives OpenAI's sign-in reply; the related Server Actions, integration logic, and validation use the existing action, library, and schema folders.
 - `src/schemas/` contains validation rules and related TypeScript types, grouped by workflow or shared data model. The job-search module includes search criteria and JobTech API response checks; opportunity and professional-profile schemas have their own modules.
 - `src/lib/` contains database access, the Platsbanken connector, and profile loading. SQL table changes live in `migrations/`.
 

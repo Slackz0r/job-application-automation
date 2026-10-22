@@ -6,6 +6,10 @@ import { getEvaluations } from "@/lib/opportunity-evaluations";
 import type { Opportunity } from "@/schemas/opportunity";
 import type { EvaluationMap } from "@/schemas/opportunity-evaluation";
 import { OpportunityDiscovery } from "@/components/opportunities/opportunity-discovery";
+import { cookies } from "next/headers";
+import { getChatGPTAuth } from "@/lib/chatgpt-auth";
+import { ChatGPTConnectionCard } from "@/components/chatgpt/connection";
+import { chatGPTNotices, type ChatGPTNotice } from "@/schemas/chatgpt-auth";
 
 // Read the private profile at request time, keeping it out of prerendered pages.
 export const dynamic = "force-dynamic";
@@ -19,7 +23,12 @@ const setupMessages = {
   unavailable: "The profile file could not be read. Check its file permissions and try again.",
 };
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<{ chatgpt?: string | string[] }> }) {
+  const noticeValue = (await searchParams).chatgpt;
+  const notice = typeof noticeValue === "string" && Object.hasOwn(chatGPTNotices, noticeValue)
+    ? noticeValue as ChatGPTNotice : undefined;
+  const browserId = (await cookies()).get("chatgpt_session")?.value ?? "";
+  const connection = getChatGPTAuth().status(browserId);
   const [result, municipalities] = await Promise.all([
     loadProfessionalProfile(),
     getMunicipalities().catch(() => []),
@@ -53,6 +62,8 @@ export default async function Home() {
           Discover opportunities. Prepare thoughtful applications. Keep track of progress.
         </p>
       </header>
+
+      <ChatGPTConnectionCard connection={connection} notice={notice} />
 
       <OpportunityDiscovery
         municipalities={municipalities}

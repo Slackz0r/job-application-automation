@@ -150,7 +150,29 @@ Applied migration files remain unchanged; subsequent changes use new files. Migr
 
 **Initial output and storage:** A short recommendation, summary, supporting evidence, and gaps or unknowns, without a numerical score. Save one current result per opportunity, explicitly marked as simulated. Reuse saved results unless the user requests a rerun; replace them only after a successful rerun. The simulator produces illustrative content and does not make suitability judgements.
 
-**Revisit if:** Live trials establish concrete needs for a different model, input selection, evidence structure, or evaluation history. Live evaluation is a separate implementation step.
+**Revisit if:** Live trials establish concrete needs for a different model, input selection, evidence structure, or evaluation history. Live evaluation is a separate implementation step; D017 defines the initial subscription connection.
+
+### D017 — ChatGPT Subscription Connection Before Live Evaluation
+
+**Decision:** Use Sign in with ChatGPT for the initial connection, rather than separate paid API billing. Add a **Continue with ChatGPT** button and connection status to the local app. The first step validates identity and the granted subscription permission only; it does not discover models, make inference requests, or send professional profiles or advertisements. Sign-in alone must not be reported as subscription permission.
+
+**Rationale:** The user's existing Plus subscription may support local personal-project usage without additional API spending. A permission check establishes authorization before investing in live evaluation. Actual account acceptance, model availability, and successful inference remain unverified until their respective live checks.
+
+**Connection lifetime:** Keep credentials and pending sign-in attempts in server memory, bound to an HTTP-only browser-session cookie. Restarting the server requires signing in again; expired credentials also require sign-in for this first version. Retain only a stable installation identifier, the issued client registration ID, and its verified subject in `data/chatgpt-registration.json`, which is already ignored by Git. Reuse the registration for this single-account local installation. Local sign-out clears in-memory credentials and pending attempts; it does not revoke permission in ChatGPT settings.
+
+**Implementation boundary:** Use the published local public-client flow, a `127.0.0.1` callback, PKCE, state and nonce checks, and `jose` to verify signed identity tokens. Never log callback codes or credentials. The component lives in `src/components/chatgpt/`, the callback in `src/app/auth/callback/`, Server Actions in their existing folder, and integration logic and schemas in their existing folders. No API key or automatic paid fallback is enabled.
+
+**Revisit if:** Live checks fail, connection renewal or multiple accounts become useful, or the user chooses persistent protected credential storage or separate API billing. Daily evaluation counts remain undecided and no scheduling is enabled.
+
+### D018 — A Small Subscription Response Test Before Job Evaluation
+
+**Decision:** Extend the existing connection card with an explicit **Test subscription connection** action. Fetch the signed-in account's visible model catalog, then send `Reply with exactly: Subscription connection works.` only if the agreed `gpt-6.1-sol` model is listed. Show the available models and completed reply. If the model is absent, stop and review choices rather than silently choosing another model.
+
+**Rationale:** Successful sign-in and subscription permission were confirmed through the user's manual sign-in on 2026-10-22. They establish authorization, but a completed response is needed to verify inference before sending any professional information. This fixed test contains no profile or advertisement data and does not change simulated job evaluation.
+
+**Request boundary:** The existing OpenAI SDK uses the in-memory OAuth access token with the public Responses endpoint, `store: false`, `stream: true`, and no automatic retries. A successful result requires `response.completed` and a nonempty short reply. Failed, incomplete, or interrupted streams remain failures. There is no paid API fallback, account-credit purchase, or automatic test on sign-in or page load. Concurrent submissions share one attempt; successful tests are reused for that connection. A new attempt after a failed result requires another explicit click.
+
+**Storage and validation:** Results and model choices stay in server memory, with only safe display data returned to the browser. Request IDs, HTTP status, and error codes support diagnosis without exposing credentials or raw provider messages. Integration code stays in `src/lib/chatgpt-connection-test.ts`; related schemas, actions, and UI extend their existing workflow files. Automated tests use synthetic streams and never call a live model. Live inference remains unverified until the user runs the new test.
 
 ## 3. Under Evaluation
 

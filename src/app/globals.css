@@ -63,6 +63,47 @@ p {
   font-weight: 700;
 }
 
+#chatgpt form + form {
+  margin-top: 12px;
+}
+
+.connection-test {
+  margin: 24px 0;
+  padding: 20px;
+  border: 1px solid #d7dfd9;
+  border-radius: 8px;
+  background: #f5f8f5;
+}
+
+.connection-test h3 {
+  margin: 0;
+}
+
+.connection-test details {
+  margin-bottom: 16px;
+}
+
+.connection-test li {
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+
+#chatgpt a {
+  color: #234d3d;
+  text-underline-offset: 3px;
+}
+
+button.chatgpt-sign-in {
+  color: #fff;
+  background: #000;
+  border-color: #000;
+  border-radius: 999px;
+}
+
+button.chatgpt-sign-in:hover:not(:disabled) {
+  background: #292929;
+}
+
 .muted {
   color: #53675f;
   font-size: 0.9375rem;
