@@ -186,6 +186,8 @@ Applied migration files remain unchanged; subsequent changes use new files. Migr
 
 **Initial manual review (2026-10-22):** A subscription evaluation of one saved advertisement completed and persisted with its model and date. Comparing its claims with the advertisement and approved profile found supporting evidence grounded in the supplied experience, relevant transferable connections, and material unknowns kept distinct from confirmed mismatches. This is a successful first trial, not evidence of reliable quality across different roles. Broader trials and a Luna/Sol comparison remain open.
 
+**Recommendation refinement (2026-10-22):** A second reviewed result had grounded evidence but an overly generous positive recommendation based on adjacent skills. The user agreed to distinguish a credible stretch in the job's main work from overlap in tools or secondary responsibilities. Instructions now prioritize the role's main purpose: **Worth considering** requires supporting evidence for the core work and credible remaining gaps; **Needs clarification** applies when a central responsibility or essential specialist capability remains materially unknown; **Unlikely fit** still requires a documented substantial mismatch. Unknown experience is never a confirmed deficiency, and technical history must not imply career preferences. The change retains the existing output format and awaits a real rerun; synthetic tests verify integration, not model judgment. Saved results are not automatically regenerated.
+
 ## 3. Under Evaluation
 
 ### AI Integration
