@@ -1,10 +1,8 @@
 import "server-only";
 
-import OpenAI from "openai";
+import { ChatGPTRequestError, requestChatGPTResponse } from "./chatgpt-response.ts";
 import {
-  chatGPTCompletedResponseSchema,
   chatGPTModelCatalogSchema,
-  chatGPTTextEventSchema,
   chatGPTTestModel,
   chatGPTTestPrompt,
   type ChatGPTConnectionTestState,
@@ -65,67 +63,22 @@ export async function runChatGPTConnectionTest(
       };
     }
 
-    const client = new OpenAI({
-      apiKey: accessToken,
-      baseURL,
-      organization: null,
-      project: null,
-      logLevel: "off",
-      maxRetries: 0,
-      timeout: 30_000,
-      fetch: fetcher,
-      fetchOptions: { redirect: "error", cache: "no-store" },
-    });
-    const { data: stream, response } = await client.responses.create({
+    const { text: reply } = await requestChatGPTResponse(accessToken, {
       model: chatGPTTestModel,
       input: [{ role: "user", content: chatGPTTestPrompt }],
-      store: false,
-      stream: true,
-    }, { signal: AbortSignal.timeout(30_000) }).withResponse();
-    requestId = response.headers.get("x-request-id");
-    const textParts = new Map<string, { outputIndex: number; contentIndex: number; text: string }>();
-    for await (const event of stream) {
-      if (event.type === "response.output_text.delta" || event.type === "response.output_text.done") {
-        const part = chatGPTTextEventSchema.parse(event);
-        const key = `${part.output_index}:${part.content_index}`;
-        textParts.set(key, {
-          outputIndex: part.output_index,
-          contentIndex: part.content_index,
-          // A finalized part replaces its accumulated deltas instead of duplicating them.
-          text: part.type === "response.output_text.done" ? part.text : (textParts.get(key)?.text ?? "") + part.delta,
-        });
-      }
-      if (event.type === "response.failed") {
-        return failure(models, event.response.error?.code, undefined, requestId);
-      }
-      if (event.type === "error") return failure(models, event.code, undefined, requestId);
-      if (event.type === "response.incomplete") {
-        return { status: "error", models, message: "The test response was incomplete. No automatic retry was made." };
-      }
-      if (event.type === "response.completed") {
-        const completed = chatGPTCompletedResponseSchema.parse(event.response);
-        const finalText = completed.output.filter((item) => item.type === "message")
-          .flatMap((item) => item.content ?? [])
-          .filter((item) => item.type === "output_text")
-          .map((item) => item.text ?? "").join("").trim();
-        // Completion can omit the text already delivered through streaming events.
-        // Keep that text private until this validated successful terminal event.
-        const reply = finalText || [...textParts.values()]
-          .sort((left, right) => left.outputIndex - right.outputIndex || left.contentIndex - right.contentIndex)
-          .map((part) => part.text).join("").trim();
-        if (!reply) {
-          return { status: "error", models, message: "OpenAI completed the request, but no reply text was received. No retry was made.", ...(requestId ? { requestId } : {}) };
-        }
-        if (reply.length > 500) {
-          return { status: "error", models, message: "OpenAI completed the request, but the test reply was unexpectedly long. No retry was made.", ...(requestId ? { requestId } : {}) };
-        }
-        return { status: "success", models, model: chatGPTTestModel, reply, testedAt: new Date().toISOString() };
-      }
-    }
-    return { status: "error", models, message: "The connection ended without a completed response. No automatic retry was made." };
+    }, { fetcher });
+    return { status: "success", models, model: chatGPTTestModel, reply, testedAt: new Date().toISOString() };
   } catch (error) {
-    if (error instanceof OpenAI.APIError) {
-      return failure(models, error.code, error.status, error.requestID ?? requestId);
+    if (error instanceof ChatGPTRequestError) {
+      if (error.code === "empty_response" || error.code === "response_too_long" || error.code === "incomplete_response") {
+        const message = error.code === "empty_response"
+          ? "OpenAI completed the request, but no reply text was received. No retry was made."
+          : error.code === "response_too_long"
+            ? "The test reply was unexpectedly long. No retry was made."
+            : "The test response was incomplete. No automatic retry was made.";
+        return { status: "error", models, message, ...(error.requestId ? { requestId: error.requestId } : {}) };
+      }
+      return failure(models, error.code, error.httpStatus, error.requestId ?? requestId);
     }
     return failure(models, undefined, undefined, requestId);
   }
