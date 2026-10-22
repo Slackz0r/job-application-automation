@@ -38,8 +38,23 @@ export const chatGPTCompletedResponseSchema = z.object({
   output: z.array(z.object({
     type: z.string(),
     content: z.array(z.object({ type: z.string(), text: z.string().optional() })).optional(),
-  })),
+  })).default([]),
 });
+
+export const chatGPTTextEventSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("response.output_text.delta"),
+    output_index: z.number().int().nonnegative(),
+    content_index: z.number().int().nonnegative(),
+    delta: z.string(),
+  }),
+  z.object({
+    type: z.literal("response.output_text.done"),
+    output_index: z.number().int().nonnegative(),
+    content_index: z.number().int().nonnegative(),
+    text: z.string(),
+  }),
+]);
 
 export type ChatGPTModel = { slug: string; displayName: string };
 export type ChatGPTConnectionTestState =

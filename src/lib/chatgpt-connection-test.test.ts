@@ -24,6 +24,49 @@ function completed(text = "Subscription connection works.") {
   };
 }
 
+function textDelta(delta: string, outputIndex = 0, contentIndex = 0) {
+  return { type: "response.output_text.delta", output_index: outputIndex, content_index: contentIndex, delta };
+}
+
+function textDone(text: string, outputIndex = 0, contentIndex = 0) {
+  return { type: "response.output_text.done", output_index: outputIndex, content_index: contentIndex, text };
+}
+
+test("keeps streamed text when the completed event contains an empty output array", async () => {
+  const result = await runChatGPTConnectionTest("synthetic-token", async (input) => {
+    if (String(input).endsWith("/models")) return Response.json(catalog);
+    return stream([
+      textDelta("Subscription "), textDelta("connection works."),
+      { type: "response.completed", response: { status: "completed", output: [] } },
+    ]);
+  });
+  assert.equal(result.status, "success");
+  if (result.status === "success") assert.equal(result.reply, "Subscription connection works.");
+});
+
+test("accepts finalized text followed by completion without a repeated output snapshot", async () => {
+  const result = await runChatGPTConnectionTest("synthetic-token", async (input) => {
+    if (String(input).endsWith("/models")) return Response.json(catalog);
+    return stream([textDone("Subscription connection works."), { type: "response.completed", response: { status: "completed" } }]);
+  });
+  assert.equal(result.status, "success");
+  if (result.status === "success") assert.equal(result.reply, "Subscription connection works.");
+});
+
+test("finalized text replaces its deltas and multiple parts retain output order without duplication", async () => {
+  const result = await runChatGPTConnectionTest("synthetic-token", async (input) => {
+    if (String(input).endsWith("/models")) return Response.json(catalog);
+    return stream([
+      textDelta("works.", 1),
+      textDelta("Subscription "), textDone("Subscription "),
+      textDelta("connection ", 0, 1), textDone("connection ", 0, 1), textDone("works.", 1),
+      { type: "response.completed", response: { status: "completed", output: [] } },
+    ]);
+  });
+  assert.equal(result.status, "success");
+  if (result.status === "success") assert.equal(result.reply, "Subscription connection works.");
+});
+
 test("lists visible models and sends only the agreed fixed message with subscription credentials", async () => {
   const requests: { url: string; options?: RequestInit }[] = [];
   const result = await runChatGPTConnectionTest("synthetic-oauth-token", async (input, options) => {
@@ -41,7 +84,7 @@ test("lists visible models and sends only the agreed fixed message with subscrip
     assert.deepEqual(JSON.parse(String(options?.body)), {
       model: chatGPTTestModel, input: [{ role: "user", content: chatGPTTestPrompt }], store: false, stream: true,
     });
-    return stream([{ type: "response.output_text.delta", delta: "partial text must not establish success" }, completed()]);
+    return stream([textDelta("partial text must not establish success"), completed()]);
   });
   assert.equal(result.status, "success");
   if (result.status !== "success") return;
@@ -88,12 +131,16 @@ test("stops before inference on catalog errors or malformed model data", async (
 
 test("does not accept partial, interrupted, failed, incomplete, empty, or malformed streams as success", async () => {
   for (const events of [
-    [{ type: "response.output_text.delta", delta: "looks successful" }],
-    [{ type: "response.output_text.delta", delta: "looks successful" }, { type: "response.failed", response: { error: { code: "subscription_sharing_usage_limit_exceeded" } } }],
-    [{ type: "response.incomplete", response: { status: "incomplete" } }],
+    [textDelta("looks successful")],
+    [textDone("looks successful")],
+    [textDelta("looks successful"), { type: "response.failed", response: { error: { code: "subscription_sharing_usage_limit_exceeded" } } }],
+    [textDone("looks successful"), { type: "response.incomplete", response: { status: "incomplete" } }],
     [{ type: "error", code: "subscription_sharing_usage_unavailable", message: "private provider detail" }],
     [completed("")], [completed("x".repeat(501))],
-    [{ type: "response.completed", response: { status: "incomplete", output: [] } }],
+    [textDelta("x".repeat(501)), { type: "response.completed", response: { status: "completed", output: [] } }],
+    [textDelta("looks successful"), { type: "response.completed", response: { status: "incomplete", output: [] } }],
+    [{ type: "response.output_text.delta", output_index: 0, content_index: 0, delta: 123 }, completed()],
+    [{ type: "response.output_text.done", output_index: -1, content_index: 0, text: "looks successful" }, completed()],
   ]) {
     let requests = 0;
     const result = await runChatGPTConnectionTest("synthetic-token", async (input) => {
@@ -103,6 +150,19 @@ test("does not accept partial, interrupted, failed, incomplete, empty, or malfor
     assert.equal(result.status, "error");
     assert.equal(requests, 2);
     assert.doesNotMatch(JSON.stringify(result), /looks successful|private provider detail/);
+  }
+});
+
+test("distinguishes a genuinely empty completed reply from an unexpectedly long one", async () => {
+  for (const [text, expectedMessage] of [["", /no reply text/], ["x".repeat(501), /unexpectedly long/]] as const) {
+    const result = await runChatGPTConnectionTest("synthetic-token", async (input) => {
+      return String(input).endsWith("/models") ? Response.json(catalog) : stream([completed(text)]);
+    });
+    assert.equal(result.status, "error");
+    if (result.status === "error") {
+      assert.match(result.message, expectedMessage);
+      assert.equal(result.requestId, "synthetic-response-request");
+    }
   }
 });
 

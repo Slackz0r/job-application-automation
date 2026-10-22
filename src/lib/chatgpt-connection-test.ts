@@ -4,6 +4,7 @@ import OpenAI from "openai";
 import {
   chatGPTCompletedResponseSchema,
   chatGPTModelCatalogSchema,
+  chatGPTTextEventSchema,
   chatGPTTestModel,
   chatGPTTestPrompt,
   type ChatGPTConnectionTestState,
@@ -82,7 +83,18 @@ export async function runChatGPTConnectionTest(
       stream: true,
     }, { signal: AbortSignal.timeout(30_000) }).withResponse();
     requestId = response.headers.get("x-request-id");
+    const textParts = new Map<string, { outputIndex: number; contentIndex: number; text: string }>();
     for await (const event of stream) {
+      if (event.type === "response.output_text.delta" || event.type === "response.output_text.done") {
+        const part = chatGPTTextEventSchema.parse(event);
+        const key = `${part.output_index}:${part.content_index}`;
+        textParts.set(key, {
+          outputIndex: part.output_index,
+          contentIndex: part.content_index,
+          // A finalized part replaces its accumulated deltas instead of duplicating them.
+          text: part.type === "response.output_text.done" ? part.text : (textParts.get(key)?.text ?? "") + part.delta,
+        });
+      }
       if (event.type === "response.failed") {
         return failure(models, event.response.error?.code, undefined, requestId);
       }
@@ -92,12 +104,20 @@ export async function runChatGPTConnectionTest(
       }
       if (event.type === "response.completed") {
         const completed = chatGPTCompletedResponseSchema.parse(event.response);
-        const reply = completed.output.filter((item) => item.type === "message")
+        const finalText = completed.output.filter((item) => item.type === "message")
           .flatMap((item) => item.content ?? [])
           .filter((item) => item.type === "output_text")
           .map((item) => item.text ?? "").join("").trim();
-        if (!reply || reply.length > 500) {
-          return { status: "error", models, message: "OpenAI completed the request, but the reply was empty or unexpectedly long. No retry was made." };
+        // Completion can omit the text already delivered through streaming events.
+        // Keep that text private until this validated successful terminal event.
+        const reply = finalText || [...textParts.values()]
+          .sort((left, right) => left.outputIndex - right.outputIndex || left.contentIndex - right.contentIndex)
+          .map((part) => part.text).join("").trim();
+        if (!reply) {
+          return { status: "error", models, message: "OpenAI completed the request, but no reply text was received. No retry was made.", ...(requestId ? { requestId } : {}) };
+        }
+        if (reply.length > 500) {
+          return { status: "error", models, message: "OpenAI completed the request, but the test reply was unexpectedly long. No retry was made.", ...(requestId ? { requestId } : {}) };
         }
         return { status: "success", models, model: chatGPTTestModel, reply, testedAt: new Date().toISOString() };
       }
