@@ -7,6 +7,7 @@ import { test, type TestContext } from "node:test";
 import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from "jose";
 import { createChatGPTAuth, localAppOrigin } from "./chatgpt-auth.ts";
 import type { EvaluationInput } from "./opportunity-evaluation.ts";
+import { comparisonModel, evaluationModel, type EvaluationModel } from "../schemas/opportunity-evaluation.ts";
 
 const keys = await generateKeyPair("RS256");
 const publicKey = { ...await exportJWK(keys.publicKey), kid: "test-key", alg: "RS256" };
@@ -36,12 +37,13 @@ function fixture(t: TestContext) {
     invalidJson: false,
     invalidSignature: false,
     beforeResponse: async () => {},
+    models: [evaluationModel] as string[],
   };
   const fetcher: typeof fetch = async (url, options) => {
     if (String(url).startsWith("https://api.openai.com/v1/")) {
       inferenceRequests.push(String(url));
       if (String(url).endsWith("/models")) return Response.json({
-        models: [{ slug: "gpt-6.1-sol", display_name: "GPT-6.1 Sol", visibility: "list" }],
+        models: reply.models.map((slug) => ({ slug, display_name: slug, visibility: "list" })),
       });
       await reply.beforeResponse();
       const isEvaluation = JSON.parse(String(options?.body)).instructions !== undefined;
@@ -346,4 +348,28 @@ test("signing out during a request prevents its result from being saved through 
   const result = await pending;
   assert.equal(result.status, "error");
   if (result.status === "error") assert.match(result.message, /connection ended/i);
+});
+
+test("Luna duplicates share a request while Sol requests cannot reuse a pending Luna response", async (t) => {
+  const f = fixture(t);
+  f.reply.models = [evaluationModel, comparisonModel];
+  f.start();
+  assert.equal(await f.auth.complete("browser-one", f.callback()), "connected");
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => { release = resolve; });
+  f.reply.beforeResponse = () => held;
+  const first = f.auth.evaluateOpportunity("browser-one", 1, evaluationInput, comparisonModel);
+  const duplicate = f.auth.evaluateOpportunity("browser-one", 1, evaluationInput, comparisonModel);
+  const sol = await f.auth.evaluateOpportunity("browser-one", 1, evaluationInput, evaluationModel);
+  assert.equal(sol.status, "error");
+  if (sol.status === "error") assert.match(sol.message, /already running/);
+  release();
+  const [result, repeated] = await Promise.all([first, duplicate]);
+  assert.equal(result.status, "success");
+  if (result.status === "success") assert.equal(result.model, comparisonModel);
+  assert.deepEqual(repeated, result);
+  assert.equal(f.inferenceRequests.filter((url) => url.endsWith("/responses")).length, 1);
+  const invalid = await f.auth.evaluateOpportunity("browser-one", 1, evaluationInput, "unagreed-model" as EvaluationModel);
+  assert.equal(invalid.status, "error");
+  assert.equal(f.inferenceRequests.filter((url) => url.endsWith("/responses")).length, 1);
 });

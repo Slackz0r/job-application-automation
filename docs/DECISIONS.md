@@ -192,6 +192,16 @@ Applied migration files remain unchanged; subsequent changes use new files. Migr
 
 **Balance check (2026-10-22):** The user reran the previously reviewed development role with the revised guidance. It retained **Worth considering**, grounding the recommendation in relevant full-stack delivery and collaboration while identifying infrastructure, testing and work-arrangement uncertainties. Together, the two reruns support the intended distinction in these reviewed cases. One wording caveat remains: the summary called an undocumented technology a learning gap, although the detailed section correctly treated experience as unknown. Do not infer a confirmed deficiency from absent evidence. Broader cases and model comparison remain open.
 
+### D020 - Temporary Luna Comparison Against Saved Sol Results
+
+**Decision:** Add an explicit **Compare with GPT-6 Luna** action below a saved live GPT-6.1 Sol evaluation. Keep Sol as the standard saved evaluation and leave its database row intact. Display the Luna result below it in page state only; refreshing discards that comparison. The user selected this smaller trial instead of adding persistent comparison storage. No new source folders, database tables or migrations are needed.
+
+**Controlled settings:** The provider accepts only the two agreed model IDs. Luna uses the same current advertisement, approved profile sections, evaluation instructions, low reasoning effort, output limit and structured result format as Sol. Availability is checked against the connected account's visible catalog before inference, with no substitute model. Existing Sol rows do not retain input or instruction fingerprints, so the interface explicitly warns that an older baseline may use different inputs. Keep inputs unchanged during this manual trial and refresh the Sol baseline explicitly if they change.
+
+**Requests and display:** One explicit click makes at most one Luna inference request through the subscription, without retries or paid API fallback. Concurrent duplicates share a request only when both opportunity and model match; competing requests wait. A comparison requires a saved Sol result, valid advertisement text and a readable profile. If the saved Sol baseline changes during the request, discard the comparison instead of showing a mismatched pair. A later Sol rerun also hides a comparison tied to an older save time. The displayed elapsed time covers the Luna request path, including model discovery; historical Sol results have no comparable timing, and subscription allowance savings are not measured by this trial.
+
+**Validation and review:** Synthetic tests verify matching request settings, model availability and allowlisting, concurrency isolation, setup failures, and preservation of saved results. Real Luna access and output quality remain unverified until the user explicitly runs comparisons. Review the same two advertisements for recommendation quality, grounded evidence and treatment of unknowns before changing the default model. Temporary results must be kept on screen or copied for review because they are not stored in SQLite.
+
 ## 3. Under Evaluation
 
 ### AI Integration

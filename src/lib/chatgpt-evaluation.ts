@@ -2,7 +2,7 @@ import "server-only";
 
 import { zodTextFormat } from "openai/helpers/zod";
 import { chatGPTModelCatalogSchema } from "../schemas/chatgpt-auth.ts";
-import { evaluationModel, liveEvaluationResultSchema, type LiveEvaluationState } from "../schemas/opportunity-evaluation.ts";
+import { evaluationModel, evaluationModelSchema, liveEvaluationResultSchema, type EvaluationModel, type LiveEvaluationState } from "../schemas/opportunity-evaluation.ts";
 import type { EvaluationInput } from "./opportunity-evaluation.ts";
 import { ChatGPTRequestError, requestChatGPTResponse } from "./chatgpt-response.ts";
 
@@ -17,7 +17,11 @@ export async function runChatGPTEvaluation(
   accessToken: string,
   input: EvaluationInput,
   fetcher: typeof fetch = fetch,
+  model: EvaluationModel = evaluationModel,
 ): Promise<LiveEvaluationState> {
+  if (!evaluationModelSchema.safeParse(model).success) {
+    return { status: "error", message: "Choose an agreed evaluation model. No request was made." };
+  }
   let requestId: string | undefined;
   try {
     const catalogResponse = await fetcher("https://api.openai.com/v1/models", {
@@ -31,11 +35,12 @@ export async function runChatGPTEvaluation(
       throw new ChatGPTRequestError(code, catalogResponse.status, requestId);
     }
     const catalog = chatGPTModelCatalogSchema.parse(await catalogResponse.json());
-    if (!catalog.models.some((model) => model.slug === evaluationModel && model.visibility === "list")) {
-      return { status: "error", message: "GPT-6.1 Sol is not available for this connection. No evaluation request was made. We can review the available models before choosing another." };
+    if (!catalog.models.some((item) => item.slug === model && item.visibility === "list")) {
+      const name = model === evaluationModel ? "GPT-6.1 Sol" : "GPT-6 Luna";
+      return { status: "error", message: `${name} is not available for this connection. No evaluation request was made. We can review the available models before choosing another.` };
     }
     const response = await requestChatGPTResponse(accessToken, {
-      model: evaluationModel,
+      model,
       instructions: evaluationInstructions,
       input: [{ role: "user", content: JSON.stringify(input) }],
       reasoning: { effort: "low" },
@@ -44,7 +49,7 @@ export async function runChatGPTEvaluation(
     }, { fetcher, timeout: 90_000, maxTextLength: 24_000 });
     requestId = response.requestId;
     const result = liveEvaluationResultSchema.parse(JSON.parse(response.text));
-    return { status: "success", model: evaluationModel, result };
+    return { status: "success", model, result };
   } catch (error) {
     let message = "The evaluation did not return a complete, valid result. No automatic retry was made.";
     if (error instanceof ChatGPTRequestError) {
