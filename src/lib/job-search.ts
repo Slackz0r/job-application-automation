@@ -3,6 +3,7 @@ import "server-only";
 import { opportunityInputSchema, type OpportunityInput } from "../schemas/opportunity.ts";
 import {
   searchInputSchema,
+  maxSearchOffset,
   jobSearchResponseSchema,
   jobSearchAdvertisementSchema,
   municipalitiesResponseSchema,
@@ -34,6 +35,7 @@ export async function searchJobs(
   const url = new URL("https://jobsearch.api.jobtechdev.se/search");
   url.searchParams.set("q", search.query);
   url.searchParams.set("limit", String(search.limit));
+  url.searchParams.set("offset", String(search.offset));
   for (const municipality of search.municipalities) {
     url.searchParams.append("municipality", municipality);
   }
@@ -94,5 +96,12 @@ export async function searchJobs(
     }
   }
 
-  return { total: result.data.total.value, opportunities, skippedCount };
+  // Advance by source hits, including invalid ads, rather than displayed results.
+  const next = search.offset + result.data.hits.length;
+  const more = result.data.hits.length > 0 && next < result.data.total.value;
+  return {
+    total: result.data.total.value, opportunities, skippedCount,
+    nextOffset: more && next <= maxSearchOffset ? next : null,
+    limitReached: more && next > maxSearchOffset,
+  };
 }

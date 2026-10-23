@@ -1,12 +1,16 @@
 import { z } from "zod";
 import type { OpportunityInput } from "./opportunity.ts";
 
+export const searchPageSize = 20;
+export const maxSearchOffset = 2000;
+
 // Search criteria accepted by our application.
 export const searchInputSchema = z.object({
   query: z.string().trim().min(1),
   municipalities: z.array(z.string().trim().min(1)).default([])
     .transform((values) => [...new Set(values)]),
-  limit: z.number().int().min(1).max(100).default(20),
+  limit: z.number().int().min(1).max(100).default(searchPageSize),
+  offset: z.number().int().min(0).max(maxSearchOffset).default(0),
 });
 
 // JobTech API responses, before conversion to our application format.
@@ -45,6 +49,8 @@ export type JobSearchResult = {
   total: number;
   opportunities: OpportunityInput[];
   skippedCount: number;
+  nextOffset: number | null;
+  limitReached: boolean;
 };
 
 export type Municipality = { id: string; name: string };

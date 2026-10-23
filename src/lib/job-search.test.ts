@@ -36,9 +36,12 @@ test("sends multiple areas in one encoded search, removes duplicate areas, and r
   assert.deepEqual(requestedUrl?.searchParams.getAll("municipality"), ["0180", "0184"]);
   assert.equal(requests, 1);
   assert.equal(requestedUrl?.searchParams.get("limit"), "20");
+  assert.equal(requestedUrl?.searchParams.get("offset"), "0");
   assert.deepEqual(result, {
     total: 42,
     skippedCount: 0,
+    nextOffset: 1,
+    limitReached: false,
     opportunities: [{
       source: "platsbanken",
       sourceId: "example-001",
@@ -119,7 +122,7 @@ test("skips unusable advertisements, reports the count, and keeps valid results"
 test("returns an empty search as a successful result", async () => {
   assert.deepEqual(
     await searchJobs({ query: "developer" }, respond({ total: { value: 0 }, hits: [] })),
-    { total: 0, opportunities: [], skippedCount: 0 },
+    { total: 0, opportunities: [], skippedCount: 0, nextOffset: null, limitReached: false },
   );
 });
 
@@ -133,10 +136,42 @@ test("rejects invalid searches before contacting the API", async () => {
     { query: " \t " }, { query: "developer", municipalities: ["0180", " "] },
     { query: "developer", limit: 0 }, { query: "developer", limit: 101 },
     { query: "developer", limit: 1.5 },
+    { query: "developer", offset: -1 }, { query: "developer", offset: 2001 },
+    { query: "developer", offset: 1.5 },
   ]) {
     await assert.rejects(searchJobs(input, fetcher), ZodError);
   }
   assert.equal(requests, 0);
+});
+
+test("advances pagination past invalid advertisements and retains the same search criteria", async () => {
+  const result = await searchJobs({ query: "developer", municipalities: ["0180", "0184"], offset: 20 }, async (input) => {
+    const url = new URL(String(input));
+    assert.equal(url.searchParams.get("offset"), "20");
+    assert.equal(url.searchParams.get("limit"), "20");
+    assert.equal(url.searchParams.get("q"), "developer");
+    assert.deepEqual(url.searchParams.getAll("municipality"), ["0180", "0184"]);
+    return Response.json({ total: { value: 50 }, hits: [advertisement, null, { ...advertisement, id: " " }] });
+  });
+  assert.equal(result.opportunities.length, 1);
+  assert.equal(result.skippedCount, 2);
+  assert.equal(result.nextOffset, 23);
+  assert.equal(result.limitReached, false);
+});
+
+test("ends pagination at the last or empty page and exposes the source offset limit", async () => {
+  for (const [offset, total, hits, nextOffset, limitReached] of [
+    [20, 21, [advertisement], null, false],
+    [20, 50, [], null, false],
+    [1980, 3000, Array(20).fill(advertisement), 2000, false],
+    [2000, 3000, Array(20).fill(advertisement), null, true],
+    [2000, 2001, [advertisement], null, false],
+    [0, 50, [null], 1, false],
+  ] as const) {
+    const result = await searchJobs({ query: "developer", offset }, respond({ total: { value: total }, hits }));
+    assert.equal(result.nextOffset, nextOffset);
+    assert.equal(result.limitReached, limitReached);
+  }
 });
 
 test("reports HTTP, network, and timeout failures without returning partial results", async () => {

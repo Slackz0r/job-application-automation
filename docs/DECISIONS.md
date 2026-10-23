@@ -204,6 +204,16 @@ Applied migration files remain unchanged; subsequent changes use new files. Migr
 
 **Limits:** These two cases support the current choice, not a general model ranking. Subscription usage savings were not measured, and historical Sol results have no comparable timing. Grounded source attribution, interpretation of requirements and treatment of missing information remain review checks for Sol as well. Broader trials remain necessary before batching.
 
+### D021 - Browse Search Results in Explicit Batches
+
+**Decision (2026-10-23):** Add **Load more** to the existing discovery workflow. Fetch 20 advertisements per explicit request, append unseen records in source order, and preserve the submitted search text and locations independently of draft form edits. A successful new search replaces the list. Keep source, action, schemas and UI in their existing files; no database migration or additional folders are needed.
+
+**Reliability:** Advance the offset by raw source hits, including invalid advertisements. Stop at an empty page or the reported end. [JobTech's published specification](https://jobsearch.api.jobtechdev.se/swagger.json) permits offsets from 0 to 2,000; stop and explain how to narrow the search when another offset would exceed that range. Failed requests preserve the displayed results and page position for an explicit retry. Each returned batch is saved atomically under the existing duplicate-preservation policy, and existing evaluation cards remain mounted when more ads are appended. Live search contents can change between requests; deduplication handles repeated ads but cannot guarantee a snapshot without omissions.
+
+**Boundary:** Browsing does not make AI requests. Accumulated search results and pagination stay in page state; refresh still loads the most recent 20 saved advertisements. Persistent saved-list browsing is a separate future improvement. Automated tests cover offset validation, page endings, skipped ads, retry and preservation of saved records and evaluations.
+
+**Manual verification:** Browser checks loaded 20, 40 and 60 real advertisements, preserved earlier cards in order, continued the original search despite draft edits, retained the list on an interrupted request, and successfully retried that page. A new search replaced the accumulated list.
+
 ## 3. Under Evaluation
 
 ### AI Integration

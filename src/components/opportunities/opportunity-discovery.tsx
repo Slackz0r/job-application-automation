@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import type { Municipality } from "@/schemas/job-search";
 import type { Opportunity } from "@/schemas/opportunity";
 import type { EvaluationMap } from "@/schemas/opportunity-evaluation";
-import { searchOpportunities } from "@/app/actions/opportunity-actions";
+import { searchOpportunities, type SearchState } from "@/app/actions/opportunity-actions";
 import { LocationPicker } from "./location-picker";
 import { OpportunityList } from "./opportunity-list";
 
@@ -16,12 +16,41 @@ type OpportunityDiscoveryProps = {
   evaluationError: string | null;
 };
 
+type DiscoveryState = { result: Extract<SearchState, { status: "success" }> | null; error: string | null };
+const initialState: DiscoveryState = { result: null, error: null };
+
 export function OpportunityDiscovery({ municipalities, savedOpportunities, savedError, savedEvaluations, evaluationError }: OpportunityDiscoveryProps) {
-  const [state, formAction, pending] = useActionState(searchOpportunities, null);
+  const [state, formAction, pending] = useActionState(async (previous: DiscoveryState, formData: FormData): Promise<DiscoveryState> => {
+    let result: SearchState;
+    try {
+      result = await searchOpportunities(null, formData);
+    } catch {
+      return { ...previous, error: "Could not load advertisements. Your displayed results are unchanged. Please try again." };
+    }
+    if (result.status === "error") return { ...previous, error: result.message };
+    const earlier = previous.result;
+    if (result.offset === 0 || !earlier || JSON.stringify(result.criteria) !== JSON.stringify(earlier.criteria)) {
+      return { result, error: null };
+    }
+    // Keep existing cards mounted, including any evaluation just run in the browser.
+    const seen = new Set(earlier.opportunities.map((opportunity) => opportunity.id));
+    const additions = result.opportunities.filter((opportunity) => {
+      if (seen.has(opportunity.id)) return false;
+      seen.add(opportunity.id);
+      return true;
+    });
+    return { error: null, result: {
+      ...result, opportunities: [...earlier.opportunities, ...additions],
+      skippedCount: earlier.skippedCount + result.skippedCount,
+      evaluations: { ...earlier.evaluations, ...result.evaluations },
+      evaluationError: result.evaluationError ?? earlier.evaluationError,
+    } };
+  }, initialState);
   const [query, setQuery] = useState("");
-  const opportunities = state?.status === "success" ? state.opportunities : savedOpportunities;
-  const evaluations = state?.status === "success" ? state.evaluations ?? {} : savedEvaluations;
-  const evaluationsError = state?.status === "success" ? state.evaluationError : evaluationError;
+  const result = state.result;
+  const opportunities = result ? result.opportunities : savedOpportunities;
+  const evaluations = result ? result.evaluations ?? {} : savedEvaluations;
+  const evaluationsError = result ? result.evaluationError : evaluationError;
 
   return (
     <section aria-labelledby="search-heading" className="card">
@@ -36,33 +65,42 @@ export function OpportunityDiscovery({ municipalities, savedOpportunities, saved
               value={query} onChange={(event) => setQuery(event.target.value)} required />
           </div>
           <LocationPicker municipalities={municipalities} />
-          <button type="submit">{pending ? "Searching…" : "Search Platsbanken"}</button>
+          <button type="submit">Search Platsbanken</button>
         </fieldset>
         <p className="muted">
           {municipalities.length === 0
             ? "The location list is unavailable. You can still search all of Sweden. Refresh to try loading locations again."
-            : "Searches show up to 20 advertisements. Results are saved on this computer."}
+            : "Load 20 advertisements at a time. Results are saved on this computer."}
         </p>
       </form>
 
       <div aria-live="polite" aria-atomic="true">
-        {pending && <p className="status">Searching Platsbanken and saving results…</p>}
-        {state?.status === "error" && <p className="error-message" role="alert">{state.message}</p>}
-        {state?.status === "success" && !pending && (
+        {pending && <p className="status">Loading advertisements and saving results…</p>}
+        {state.error && <p className="error-message" role="alert">{state.error}</p>}
+        {result && !pending && (
           <p className="status">
-            Showing {state.opportunities.length} saved results from {state.total} matches.
-            {state.skippedCount > 0 && ` Skipped ${state.skippedCount} advertisements with invalid data.`}
+            Showing {result.opportunities.length} saved results from {result.total} matches for “{result.criteria.query}”.
+            {result.skippedCount > 0 && ` Skipped ${result.skippedCount} advertisements with invalid data.`}
           </p>
         )}
       </div>
 
       <div className="search-results" aria-busy={pending}>
-        <h3>{state?.status === "success" ? "Search results" : "Recently saved"}</h3>
-        {state?.status !== "success" && savedError && <p className="error-message">{savedError}</p>}
-        <OpportunityList opportunities={opportunities} evaluations={evaluations} evaluationError={evaluationsError} emptyMessage={state?.status === "success"
-          ? state.total === 0 ? "No matching advertisements. Try another search term or location."
-            : "None of the returned advertisements contained usable data. Try another search."
+        <h3>{result ? "Search results" : "Recently saved"}</h3>
+        {!result && savedError && <p className="error-message">{savedError}</p>}
+        <OpportunityList opportunities={opportunities} evaluations={evaluations} evaluationError={evaluationsError} emptyMessage={result
+          ? result.total === 0 ? "No matching advertisements. Try another search term or location."
+            : "No usable advertisements loaded so far. Load more or try another search."
           : "No saved opportunities yet. Run a search to get started."} />
+        {result && result.nextOffset !== null && <form action={formAction}>
+          <input type="hidden" name="query" value={result.criteria.query} />
+          {result.criteria.municipalities.map((id) => <input key={id} type="hidden" name="municipality" value={id} />)}
+          <input type="hidden" name="offset" value={result.nextOffset} />
+          <button type="submit" disabled={pending}>{pending ? "Loading…" : "Load more"}</button>
+        </form>}
+        {result?.limitReached && <p className="muted">Platsbanken’s browsing limit for this search has been reached. Use a more specific search term or location to explore more matches.</p>}
+        {result && result.nextOffset === null && !result.limitReached && result.opportunities.length > 0
+          && <p className="muted">No more advertisements available for this search.</p>}
       </div>
     </section>
   );
