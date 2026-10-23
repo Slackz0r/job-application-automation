@@ -61,6 +61,8 @@ The interface should remain separate from the underlying business logic.
 
 Route files remain in `src/app/`; Server Actions are grouped by feature in `src/app/actions/`. UI components are grouped by feature under `src/components/`. The opportunity interface uses `OpportunityDiscovery` to coordinate the search, `LocationPicker` to manage location selection, `OpportunityList` to display advertisements, and `OpportunityEvaluation` to run and review evaluations. Server-side data access and integration code remain in `src/lib/`.
 
+Automated tests live separately under `tests/`, grouped into `discovery`, `evaluation`, `chatgpt`, `profile`, and `database`. Each group has an npm command, and `npm test` discovers all test files. Tests import the existing application modules directly and continue to use sanitized examples, temporary databases, and mocked provider responses. See the README for commands and AGENTS.md for proportionate verification guidance; D022 records the organization decision.
+
 Validation rules and their related TypeScript types live together in `src/schemas/opportunity.ts`, `src/schemas/professional-profile.ts`, and `src/schemas/job-search.ts`. Schemas for the same workflow are grouped together: job search includes search criteria, JobSearch responses, source advertisements and workplace addresses, and the Taxonomy municipality response. Shared data models, such as an opportunity used by discovery and persistence, have their own schema modules. Names and comments distinguish external response formats from application data. These modules contain data definitions without file, database, or network access. SQL migrations separately define the database structure.
 
 ### 4.2 Opportunity Discovery

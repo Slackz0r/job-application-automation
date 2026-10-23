@@ -214,6 +214,14 @@ Applied migration files remain unchanged; subsequent changes use new files. Migr
 
 **Manual verification:** Browser checks loaded 20, 40 and 60 real advertisements, preserved earlier cards in order, continued the original search despite draft edits, retained the list on an interrupted request, and successfully retried that page. A new search replaced the accumulated list.
 
+### D022 - Group Tests and Select Checks by Change
+
+**Decision (2026-10-23):** Move automated tests out of application and script folders into `tests/discovery/`, `tests/evaluation/`, `tests/chatgpt/`, `tests/profile/`, and `tests/database/`. Preserve the existing cases, fixtures, and application behavior; update relative imports and sample/migration paths. Keep Node.js's built-in test runner, use file patterns for discovery, and provide an npm command per group alongside the full suite.
+
+**Rationale:** Grouping tests separately makes application folders easier to browse while keeping verification organized around recognizable workflows. Group commands support checking the affected behavior without repeatedly running unrelated tests or processing verbose output. No new testing dependency or shared-fixture abstraction is needed for this move.
+
+**Verification policy:** Discussion and documentation-only changes need no automated tests. Focused code changes use affected files or relevant groups, including related behavior where needed. Full-suite runs are reserved for broad changes and meaningful checkpoints. Other checks are selected according to the change, and passing checks are repeated only when new changes or unresolved concerns justify it. The initial relocation warrants one full-suite run because every test file's path changes.
+
 ## 3. Under Evaluation
 
 ### AI Integration

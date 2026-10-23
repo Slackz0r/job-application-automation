@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { runChatGPTConnectionTest } from "./chatgpt-connection-test.ts";
-import { chatGPTTestModel, chatGPTTestPrompt } from "../schemas/chatgpt-auth.ts";
+import { runChatGPTConnectionTest } from "../../src/lib/chatgpt-connection-test.ts";
+import { chatGPTTestModel, chatGPTTestPrompt } from "../../src/schemas/chatgpt-auth.ts";
 
 const catalog = { models: [
   { slug: "internal-example", display_name: "Internal", visibility: "hide" },

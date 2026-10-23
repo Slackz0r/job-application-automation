@@ -5,7 +5,7 @@ import { dirname, join, resolve } from "node:path";
 import { test, type TestContext } from "node:test";
 import Database from "better-sqlite3";
 import { ZodError } from "zod";
-import { getOpportunity, listOpportunities, saveOpportunity } from "./opportunities.ts";
+import { getOpportunity, listOpportunities, saveOpportunity } from "../../src/lib/opportunities.ts";
 
 const initialMigration = readFileSync(
   new URL("../../migrations/001-create-opportunities.sql", import.meta.url),

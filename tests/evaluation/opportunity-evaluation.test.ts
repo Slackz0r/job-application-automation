@@ -4,11 +4,11 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
 import Database from "better-sqlite3";
-import { createEvaluationInput, simulateOpportunityEvaluation } from "./opportunity-evaluation.ts";
-import { getEvaluation, getEvaluations, saveEvaluation } from "./opportunity-evaluations.ts";
-import { saveOpportunity } from "./opportunities.ts";
-import { professionalProfileSchema } from "../schemas/professional-profile.ts";
-import type { Opportunity } from "../schemas/opportunity.ts";
+import { createEvaluationInput, simulateOpportunityEvaluation } from "../../src/lib/opportunity-evaluation.ts";
+import { getEvaluation, getEvaluations, saveEvaluation } from "../../src/lib/opportunity-evaluations.ts";
+import { saveOpportunity } from "../../src/lib/opportunities.ts";
+import { professionalProfileSchema } from "../../src/schemas/professional-profile.ts";
+import type { Opportunity } from "../../src/schemas/opportunity.ts";
 
 const profileExample = JSON.parse(readFileSync(new URL("../../professional-profile.example.json", import.meta.url), "utf8"));
 const advertisement = {

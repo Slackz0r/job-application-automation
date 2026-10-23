@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { ZodError } from "zod";
-import { getMunicipalities, searchJobs } from "./job-search.ts";
+import { getMunicipalities, searchJobs } from "../../src/lib/job-search.ts";
 
 const advertisement = {
   id: "example-001",

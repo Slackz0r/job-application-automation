@@ -5,8 +5,8 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test, type TestContext } from "node:test";
 import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from "jose";
-import { createChatGPTAuth, localAppOrigin } from "./chatgpt-auth.ts";
-import type { EvaluationInput } from "./opportunity-evaluation.ts";
+import { createChatGPTAuth, localAppOrigin } from "../../src/lib/chatgpt-auth.ts";
+import type { EvaluationInput } from "../../src/lib/opportunity-evaluation.ts";
 
 const keys = await generateKeyPair("RS256");
 const publicKey = { ...await exportJWK(keys.publicKey), kid: "test-key", alg: "RS256" };

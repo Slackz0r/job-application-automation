@@ -9,7 +9,12 @@
     "start": "next start --hostname 127.0.0.1",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "node --conditions=react-server --test src/lib/professional-profile.test.ts src/lib/opportunities.test.ts src/lib/job-search.test.ts src/lib/opportunity-evaluation.test.ts src/lib/chatgpt-auth.test.ts src/lib/chatgpt-connection-test.test.ts src/lib/chatgpt-evaluation.test.ts src/app/actions/opportunity-actions.test.ts src/app/actions/evaluation-actions.test.ts scripts/migrate.test.ts",
+    "test": "node --conditions=react-server --test \"tests/**/*.test.ts\"",
+    "test:discovery": "node --conditions=react-server --test \"tests/discovery/*.test.ts\"",
+    "test:evaluation": "node --conditions=react-server --test \"tests/evaluation/*.test.ts\"",
+    "test:chatgpt": "node --conditions=react-server --test \"tests/chatgpt/*.test.ts\"",
+    "test:profile": "node --conditions=react-server --test \"tests/profile/*.test.ts\"",
+    "test:database": "node --conditions=react-server --test \"tests/database/*.test.ts\"",
     "db:migrate": "node --conditions=react-server scripts/migrate.ts"
   },
   "engines": {

@@ -39,11 +39,12 @@ After sign-in, **Test subscription connection** fetches the account's visible mo
 
 ## Source Structure
 
-- `src/app/` contains route files and server entry points. Feature-named Server Actions and their tests live in `src/app/actions/`.
+- `src/app/` contains route files and server entry points. Feature-named Server Actions live in `src/app/actions/`.
 - `src/components/opportunities/` contains `OpportunityDiscovery` for the search flow, `LocationPicker` for location selection, `OpportunityList` for advertisement display, and `OpportunityEvaluation` for reviewing and explicitly running evaluations.
 - `src/components/chatgpt/` contains the subscription connection card. `src/app/auth/callback/` receives OpenAI's sign-in reply; the related Server Actions, integration logic, and validation use the existing action, library, and schema folders.
 - `src/schemas/` contains validation rules and related TypeScript types, grouped by workflow or shared data model. The job-search module includes search criteria and JobTech API response checks; opportunity and professional-profile schemas have their own modules.
 - `src/lib/` contains database access, the Platsbanken connector, and profile loading. SQL table changes live in `migrations/`.
+- `tests/` contains automated tests grouped by workflow: `discovery`, `evaluation`, `chatgpt`, `profile`, and `database`.
 
 ## Local Development
 
@@ -62,6 +63,8 @@ Copy the sanitized example only if you do not already have a private `profession
 
 Open [http://127.0.0.1:3000](http://127.0.0.1:3000). Both development and production start commands bind to the local computer. Profile and database setup require no environment variables or external services. The JobSearch connector needs internet access but no API key.
 
+The following commands are available as needed, rather than a checklist after every change:
+
 ```powershell
 npm.cmd run lint
 npm.cmd run typecheck
@@ -69,6 +72,19 @@ npm.cmd test
 npm.cmd run build
 npm.cmd start
 ```
+
+Choose verification according to the change. Discussion and documentation-only edits need no automated tests. For focused code changes, run the affected tests or relevant group; include related groups when shared behavior is affected. Reserve the full suite for broad changes and meaningful milestone checkpoints. Use lint, type checking, builds, and browser checks where relevant, and repeat successful checks only after changes or unresolved concerns justify it.
+
+| Command | Coverage |
+| --- | --- |
+| `npm.cmd run test:discovery` | Job search, saved advertisements, and discovery actions |
+| `npm.cmd run test:evaluation` | Evaluation input, provider replies, saved results, and evaluation flow |
+| `npm.cmd run test:chatgpt` | Subscription sign-in and the connection test |
+| `npm.cmd run test:profile` | Professional profile loading and validation |
+| `npm.cmd run test:database` | SQL migrations |
+| `npm.cmd test` | All groups |
+
+To run one file, for example: `node --conditions=react-server --test tests/discovery/job-search.test.ts`. Node.js discovers test files from the quoted patterns in `package.json`, so new files in these groups require no command changes. Tests use sanitized fixtures, temporary databases, and mocked AI replies; they do not make live model calls.
 
 The server loader is in `src/lib/professional-profile.ts`; the status page is in `src/app/page.tsx`. The working profile format has four sections: `skillsAndCompetencies`, `experiences` (with `professional` and `education` arrays), `personalityAndInterests`, and `careerPreferences`. The loader validates this structure and core experience fields while preserving rich descriptions and `verificationNeeded` notes. Dates, professional contribution lists, and education project lists are optional; the other sections may be empty objects, and experience arrays may be empty. Missing details remain unknown, without default dates, preferences, or proficiency levels. The previous single-experience format must be moved into this structure; the sanitized example shows the layout. Missing, invalid, or unreadable profiles produce a setup message, and the private file is read at request time rather than included in prerendered output.
 

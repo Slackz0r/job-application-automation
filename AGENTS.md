@@ -55,6 +55,15 @@ Do not reread the entire document for every small, well-understood implementatio
 
 For small, clearly defined tasks, execute efficiently without introducing unnecessary planning or discussion.
 
+## Verification
+
+- Keep automated tests under `tests/`, grouped by workflow: `discovery`, `evaluation`, `chatgpt`, `profile`, and `database`.
+- Choose checks according to the change. Discussion and documentation-only changes do not require automated tests.
+- For focused code changes, run the affected test files or relevant `test:<group>` command. Include related groups when shared behavior is affected.
+- Run the full suite for changes with broad impact or at meaningful milestone checkpoints, rather than automatically after every prompt or commit.
+- Use lint, type checking, builds, and browser checks when relevant; they are not a mandatory checklist for every change.
+- After checks pass, repeat them only when subsequent changes, failures, or unresolved concerns justify it. Keep routine output to a short summary; inspect failure details when needed.
+
 ## Documentation
 
 - Update documentation when meaningful architectural, product, or implementation decisions change.

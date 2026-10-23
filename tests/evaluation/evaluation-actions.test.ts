@@ -4,14 +4,14 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test, type TestContext } from "node:test";
 import Database from "better-sqlite3";
-import { evaluateSavedOpportunity, type EvaluationInput } from "../../lib/opportunity-evaluation.ts";
-import { evaluationModel, type LiveEvaluationState } from "../../schemas/opportunity-evaluation.ts";
-import { saveOpportunity } from "../../lib/opportunities.ts";
-import { getEvaluation, saveEvaluation } from "../../lib/opportunity-evaluations.ts";
+import { evaluateSavedOpportunity, type EvaluationInput } from "../../src/lib/opportunity-evaluation.ts";
+import { evaluationModel, type LiveEvaluationState } from "../../src/schemas/opportunity-evaluation.ts";
+import { saveOpportunity } from "../../src/lib/opportunities.ts";
+import { getEvaluation, saveEvaluation } from "../../src/lib/opportunity-evaluations.ts";
 
-const example = readFileSync(new URL("../../../professional-profile.example.json", import.meta.url), "utf8");
+const example = readFileSync(new URL("../../professional-profile.example.json", import.meta.url), "utf8");
 const migrations = ["001-create-opportunities.sql", "002-add-opportunity-location.sql", "003-create-opportunity-evaluations.sql", "004-enable-live-opportunity-evaluations.sql"]
-  .map((name) => readFileSync(new URL(`../../../migrations/${name}`, import.meta.url), "utf8"));
+  .map((name) => readFileSync(new URL(`../../migrations/${name}`, import.meta.url), "utf8"));
 
 function createFixture(t: TestContext) {
   const originalDirectory = process.cwd();

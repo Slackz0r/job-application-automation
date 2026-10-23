@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { runChatGPTEvaluation, evaluationInstructions } from "./chatgpt-evaluation.ts";
-import { createEvaluationInput } from "./opportunity-evaluation.ts";
-import { professionalProfileSchema } from "../schemas/professional-profile.ts";
-import { evaluationModel } from "../schemas/opportunity-evaluation.ts";
+import { runChatGPTEvaluation, evaluationInstructions } from "../../src/lib/chatgpt-evaluation.ts";
+import { createEvaluationInput } from "../../src/lib/opportunity-evaluation.ts";
+import { professionalProfileSchema } from "../../src/schemas/professional-profile.ts";
+import { evaluationModel } from "../../src/schemas/opportunity-evaluation.ts";
 
 const example = JSON.parse(readFileSync(new URL("../../professional-profile.example.json", import.meta.url), "utf8"));
 const profile = professionalProfileSchema.parse({ ...example,

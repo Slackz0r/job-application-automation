@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm, rmdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { loadProfessionalProfile } from "./professional-profile.ts";
+import { loadProfessionalProfile } from "../../src/lib/professional-profile.ts";
 
 test("loads multiple experiences and education, preserving evidence and uncertainty", async (t) => {
   const directory = await mkdtemp(join(tmpdir(), "professional-profile-"));

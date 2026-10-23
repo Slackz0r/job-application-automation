@@ -7,16 +7,16 @@ import { test, type TestContext } from "node:test";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
 
-const runnerPath = fileURLToPath(new URL("./migrate.ts", import.meta.url));
+const runnerPath = fileURLToPath(new URL("../../scripts/migrate.ts", import.meta.url));
 const initialMigration = await readFile(
-  new URL("../migrations/001-create-opportunities.sql", import.meta.url),
+  new URL("../../migrations/001-create-opportunities.sql", import.meta.url),
   "utf8"
 );
 const locationMigration = await readFile(
-  new URL("../migrations/002-add-opportunity-location.sql", import.meta.url), "utf8"
+  new URL("../../migrations/002-add-opportunity-location.sql", import.meta.url), "utf8"
 );
-const evaluationMigration = await readFile(new URL("../migrations/003-create-opportunity-evaluations.sql", import.meta.url), "utf8");
-const liveEvaluationMigration = await readFile(new URL("../migrations/004-enable-live-opportunity-evaluations.sql", import.meta.url), "utf8");
+const evaluationMigration = await readFile(new URL("../../migrations/003-create-opportunity-evaluations.sql", import.meta.url), "utf8");
+const liveEvaluationMigration = await readFile(new URL("../../migrations/004-enable-live-opportunity-evaluations.sql", import.meta.url), "utf8");
 
 async function createFixture(t: TestContext, migrations: Record<string, string>) {
   const directory = await mkdtemp(join(tmpdir(), "job-migrations-"));
