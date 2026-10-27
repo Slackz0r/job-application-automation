@@ -2,7 +2,7 @@
 
 **Version:** 0.1  
 **Status:** Living document  
-**Last updated:** 2026-10-23
+**Last updated:** 2026-10-27
 
 ## 1. Purpose
 
@@ -221,6 +221,16 @@ Applied migration files remain unchanged; subsequent changes use new files. Migr
 **Rationale:** Grouping tests separately makes application folders easier to browse while keeping verification organized around recognizable workflows. Group commands support checking the affected behavior without repeatedly running unrelated tests or processing verbose output. No new testing dependency or shared-fixture abstraction is needed for this move.
 
 **Verification policy:** Discussion and documentation-only changes need no automated tests. Focused code changes use affected files or relevant groups, including related behavior where needed. Full-suite runs are reserved for broad changes and meaningful checkpoints. Other checks are selected according to the change, and passing checks are repeated only when new changes or unresolved concerns justify it. The initial relocation warrants one full-suite run because every test file's path changes.
+
+### D023 - One Editable Swedish Motivation per Opportunity
+
+**Decision (2026-10-27):** Start Milestone 4 with a Swedish motivation draft for one selected advertisement and an application question entered manually. The inspected Deploja form requires a motivation and CV, with a separate optional personal letter. The initial flow covers editable motivation text; CVs, contact details, availability, salary, requirement checkboxes and submission remain manual. The user approved one saved draft per advertisement, explicit saving and protection for existing edits.
+
+**Data and request boundary:** Opening the editor only reads the current saved draft. An explicit generation click sends the advertisement, question and the same approved professional-profile sections used in evaluation to GPT-6.1 Sol through the subscription. Exclude personality/interests and other top-level profile fields; preserve uncertainty notes. Do not use an earlier evaluation as evidence or send previous draft text. Treat all input as untrusted and forbid invented qualifications, motivations, preferences or experience. Use the existing streaming transport, strict structured output, low effort, 4,000 output tokens and a 90-second timeout. One evaluation or generation may run per connection, with identical pending generation requests deduplicated. No tools, automatic retry, model fallback or API billing is added. See the [official structured-output guide](https://developers.openai.com/api/docs/guides/structured-outputs) for the reused response format.
+
+**Save behavior:** Generation returns text to the editor and never overwrites the saved draft. Saving explicitly keeps one current question, text, originating model when applicable, revision and UTC save time in SQLite. Migration 005 adds this table without altering existing records. Revision checks reject stale saves, including competing first saves. Confirmation is required before replacing editor text through generation or reopening. Failed requests and saves retain the editor; unsaved or busy drafts block new searches, and refresh warns about unsaved work. Existing cards remain mounted when more search results append. Drafts can be written, saved and copied without sign-in; generation requires active subscription permission. This is current-draft storage, not version history.
+
+**Organization and validation:** New source files stay in the existing component, action, library and schema folders. The user approved the only new folder, `tests/application/`, with its own group command. Focused synthetic tests cover approved inputs, request boundaries, permissions, failure recovery, draft persistence and save conflicts. Browser checks use a temporary record to verify editing, copying, saving, reopening and stale-save protection without live AI calls. The first actual generated motivation remains a manual acceptance check.
 
 ## 3. Under Evaluation
 

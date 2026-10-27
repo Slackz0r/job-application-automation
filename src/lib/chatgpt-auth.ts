@@ -15,6 +15,9 @@ import { runChatGPTConnectionTest } from "./chatgpt-connection-test.ts";
 import { runChatGPTEvaluation } from "./chatgpt-evaluation.ts";
 import type { EvaluationInput } from "./opportunity-evaluation.ts";
 import type { LiveEvaluationState } from "../schemas/opportunity-evaluation.ts";
+import { runChatGPTApplication } from "./chatgpt-application.ts";
+import type { ApplicationInput } from "./application-generation.ts";
+import type { GeneratedDraftState } from "../schemas/application-draft.ts";
 
 const issuer = "https://auth.openai.com";
 const tokenEndpoint = `${issuer}/api/accounts/oauth/token`;
@@ -44,6 +47,7 @@ type Connection = {
   testResult?: ChatGPTConnectionTestState;
   testPromise?: Promise<ChatGPTConnectionTestState>;
   evaluation?: { opportunityId: number; promise: Promise<LiveEvaluationState> };
+  generation?: { opportunityId: number; question: string; promise: Promise<GeneratedDraftState> };
 };
 
 export function localAppOrigin(host: string | null) {
@@ -257,6 +261,7 @@ export function createChatGPTAuth(options: {
       if (!connection || connection.expiresAt <= now() || !connection.sharing || !connection.accessToken) {
         return { status: "error", message: "Sign in and grant subscription permission before evaluating an opportunity." };
       }
+      if (connection.generation) return { status: "error", message: "A draft is being generated. Wait for it to finish before evaluating an opportunity." };
       if (connection.evaluation) {
         return connection.evaluation.opportunityId === opportunityId ? connection.evaluation.promise
           : { status: "error", message: "An evaluation is already running. Wait for it to finish before evaluating another opportunity." };
@@ -268,6 +273,28 @@ export function createChatGPTAuth(options: {
         return result;
       }).finally(() => { connection.evaluation = undefined; });
       connection.evaluation = { opportunityId, promise };
+      return promise;
+    },
+
+    async generateApplication(browserId: string, opportunityId: number, input: ApplicationInput): Promise<GeneratedDraftState> {
+      clearExpiredAttempts();
+      const connection = connections.get(browserId);
+      if (!connection || connection.expiresAt <= now() || !connection.sharing || !connection.accessToken) {
+        return { status: "error", message: "Sign in and grant subscription permission before generating a draft." };
+      }
+      if (connection.evaluation) return { status: "error", message: "An evaluation is running. Wait for it to finish before generating a draft." };
+      if (connection.generation) {
+        return connection.generation.opportunityId === opportunityId && connection.generation.question === input.question
+          ? connection.generation.promise
+          : { status: "error", message: "A draft is already being generated. Wait for it to finish before starting another." };
+      }
+      const promise = runChatGPTApplication(connection.accessToken, input, fetcher).then((result): GeneratedDraftState => {
+        if (connections.get(browserId) !== connection || connection.expiresAt <= now()) {
+          return { status: "error", message: "The connection ended before the draft could be returned. Sign in again before trying another request." };
+        }
+        return result;
+      }).finally(() => { connection.generation = undefined; });
+      connection.generation = { opportunityId, question: input.question, promise };
       return promise;
     },
 

@@ -15,6 +15,7 @@
     "test:chatgpt": "node --conditions=react-server --test \"tests/chatgpt/*.test.ts\"",
     "test:profile": "node --conditions=react-server --test \"tests/profile/*.test.ts\"",
     "test:database": "node --conditions=react-server --test \"tests/database/*.test.ts\"",
+    "test:application": "node --conditions=react-server --test \"tests/application/*.test.ts\"",
     "db:migrate": "node --conditions=react-server scripts/migrate.ts"
   },
   "engines": {

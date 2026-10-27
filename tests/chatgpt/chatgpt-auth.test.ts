@@ -44,8 +44,9 @@ function fixture(t: TestContext) {
         models: [{ slug: "gpt-6.1-sol", display_name: "GPT-6.1 Sol", visibility: "list" }],
       });
       await reply.beforeResponse();
-      const isEvaluation = JSON.parse(String(options?.body)).instructions !== undefined;
-      const text = isEvaluation ? JSON.stringify({
+      const body = JSON.parse(String(options?.body));
+      const isEvaluation = body.instructions !== undefined;
+      const text = body.text?.format?.name === "application_draft" ? JSON.stringify({ text: "Ett syntetiskt utkast." }) : isEvaluation ? JSON.stringify({
         recommendation: "needs_clarification", summary: "Synthetic result.", supportingEvidence: [], gapsAndUnknowns: ["Preferences are unknown."],
       }) : "Subscription connection works.";
       return new Response(`data: ${JSON.stringify({ type: "response.completed", response: {
@@ -346,4 +347,64 @@ test("signing out during a request prevents its result from being saved through 
   const result = await pending;
   assert.equal(result.status, "error");
   if (result.status === "error") assert.match(result.message, /connection ended/i);
+});
+
+test("draft generation requires active browser-bound subscription permission", async (t) => {
+  const f = fixture(t);
+  const input = { ...evaluationInput, question: "Motivera relevant erfarenhet." };
+  assert.equal((await f.auth.generateApplication("browser-one", 1, input)).status, "error");
+  f.reply.scope = "openid email";
+  f.start();
+  assert.equal(await f.auth.complete("browser-one", f.callback()), "permission_missing");
+  assert.equal((await f.auth.generateApplication("browser-one", 1, input)).status, "error");
+  f.reply.scope = "openid email chatgpt.tokens.use.direct";
+  f.start();
+  assert.equal(await f.auth.complete("browser-one", f.callback()), "connected");
+  assert.equal((await f.auth.generateApplication("other-browser", 1, input)).status, "error");
+  f.advance(3600_001);
+  assert.equal((await f.auth.generateApplication("browser-one", 1, input)).status, "error");
+  assert.equal(f.inferenceRequests.length, 0);
+});
+
+test("duplicate draft requests share inference and cannot overlap evaluation or a different question", async (t) => {
+  const f = fixture(t);
+  f.start(); await f.auth.complete("browser-one", f.callback());
+  const input = { ...evaluationInput, question: "Motivera relevant erfarenhet." };
+  let release!: () => void;
+  f.reply.beforeResponse = () => new Promise<void>((resolve) => { release = resolve; });
+  const pending = f.auth.generateApplication("browser-one", 1, input);
+  const duplicate = f.auth.generateApplication("browser-one", 1, input);
+  assert.equal((await f.auth.generateApplication("browser-one", 1, { ...input, question: "Another question." })).status, "error");
+  assert.equal((await f.auth.evaluateOpportunity("browser-one", 1, evaluationInput)).status, "error");
+  // Model discovery finishes before the mocked response is held.
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  release();
+  const [first, repeated] = await Promise.all([pending, duplicate]);
+  assert.equal(first.status, "success");
+  assert.deepEqual(repeated, first);
+  assert.equal(f.inferenceRequests.filter((url) => url.endsWith("/responses")).length, 1);
+  assert.doesNotMatch(JSON.stringify(f.auth.status("browser-one")), /syntetiskt|synthetic-access-token/);
+  assert.doesNotMatch(readFileSync(f.registrationPath, "utf8"), /syntetiskt|synthetic-access-token/);
+  const evaluation = f.auth.evaluateOpportunity("browser-one", 1, evaluationInput);
+  assert.equal((await f.auth.generateApplication("browser-one", 1, input)).status, "error");
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  f.auth.signOut("browser-one");
+  release();
+  assert.equal((await evaluation).status, "error");
+});
+
+test("sign-out or expiry during generation discards the completed draft", async (t) => {
+  for (const end of ["signout", "expiry"]) {
+    const f = fixture(t);
+    f.start(); await f.auth.complete("browser-one", f.callback());
+    let release!: () => void;
+    let began!: () => void;
+    const started = new Promise<void>((resolve) => { began = resolve; });
+    f.reply.beforeResponse = () => { began(); return new Promise<void>((resolve) => { release = resolve; }); };
+    const pending = f.auth.generateApplication("browser-one", 1, { ...evaluationInput, question: "Motivering." });
+    await started;
+    if (end === "signout") f.auth.signOut("browser-one"); else f.advance(3600_001);
+    release();
+    assert.equal((await pending).status, "error");
+  }
 });

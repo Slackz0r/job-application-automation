@@ -57,7 +57,7 @@ For small, clearly defined tasks, execute efficiently without introducing unnece
 
 ## Verification
 
-- Keep automated tests under `tests/`, grouped by workflow: `discovery`, `evaluation`, `chatgpt`, `profile`, and `database`.
+- Keep automated tests under `tests/`, grouped by workflow: `discovery`, `evaluation`, `chatgpt`, `profile`, `database`, and `application`.
 - Choose checks according to the change. Discussion and documentation-only changes do not require automated tests.
 - For focused code changes, run the affected test files or relevant `test:<group>` command. Include related groups when shared behavior is affected.
 - Run the full suite for changes with broad impact or at meaningful milestone checkpoints, rather than automatically after every prompt or commit.
