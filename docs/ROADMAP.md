@@ -1,8 +1,8 @@
 # Development Roadmap
 
 **Version:** 0.1  
-**Status:** Milestones 1–2 implemented — Milestone 3 initial live trial verified
-**Last updated:** 2026-10-23
+**Status:** Milestones 1–2 implemented — Milestone 3 live evaluations reviewed — Milestone 4 first drafting flow implemented
+**Last updated:** 2026-10-27
 
 ## 1. Purpose
 
@@ -81,7 +81,7 @@ Scope:
 
 **Goal:** Identify promising opportunities using verified professional information.
 
-**Current progress:** The first live evaluation flow is implemented and two saved advertisements have been evaluated and reviewed against their source data. An explicit **Evaluate with ChatGPT** action sends only the approved profile sections and selected advertisement through the subscription using GPT-6.1 Sol. The app validates a completed structured reply and saves one current result with its model and date. Refresh and rediscovery reuse it; reruns are explicit, and failures preserve the old result. Samples created before the live flow remain clearly labelled until successfully replaced. Missing profile information must remain unknown rather than count as missing experience. The second review led to guidance that prioritizes the job's main responsibilities over shared tools, preserving credible stretch opportunities while requesting clarification for material unknowns about core work. Automated tests use synthetic data and responses. The two real reruns with revised guidance and updated profile produced the intended distinction: clarification for uncertain central specialist work and a positive recommendation for a credible development stretch. Wording about undocumented skills still needs scrutiny. The two-case model comparison is complete, and the user selected Sol for continued evaluation. The temporary Luna comparison feature has been removed; findings are retained in D020. Broader quality and actual usage savings remain unverified. Broader trials remain open before batching.
+**Current progress:** The first live evaluation flow is implemented and four saved advertisements have been evaluated and reviewed against their source data, including two further frontend-oriented roles judged credible stretches. An explicit **Evaluate with ChatGPT** action sends only the approved profile sections and selected advertisement through the subscription using GPT-6.1 Sol. The app validates a completed structured reply and saves one current result with its model and date. Refresh and rediscovery reuse it; reruns are explicit, and failures preserve the old result. Samples created before the live flow remain clearly labelled until successfully replaced. Missing profile information must remain unknown rather than count as missing experience. The second review led to guidance that prioritizes the job's main responsibilities over shared tools, preserving credible stretch opportunities while requesting clarification for material unknowns about core work. Automated tests use synthetic data and responses. The two real reruns with revised guidance and updated profile produced the intended distinction: clarification for uncertain central specialist work and a positive recommendation for a credible development stretch. Wording about undocumented skills still needs scrutiny. The two-case model comparison is complete, and the user selected Sol for continued evaluation. The temporary Luna comparison feature has been removed; findings are retained in D020. Broader quality and actual usage savings remain unverified. Broader trials remain open before batching.
 
 A separate **Continue with ChatGPT** card implements the subscription sign-in and permission check, which has been verified during manual use. Credentials stay in server memory and sign-in is required after restart or expiry. An explicit **Test subscription connection** action now lists available models and sends one fixed, nonpersonal test message if GPT-6.1 Sol is listed. Manual testing has verified model availability and a completed fixed-message response. Automated tests use synthetic identities and response streams; the first real opportunity evaluation has also completed and been reviewed, while broader quality validation remains outstanding. No daily call count or scheduled processing is enabled.
 
@@ -107,6 +107,8 @@ The initial evaluation approach should favor simplicity. More advanced ranking a
 ### Milestone 4 — Application Generation
 
 **Goal:** Produce useful application material for selected opportunities.
+
+**Current progress:** The first slice supports one editable Swedish motivation per advertisement and a manually supplied application question. Opening, editing, saving and copying require no model request. Explicit generation uses the existing Sol subscription connection and approved profile boundary; the generated candidate is not saved automatically. Revision checks and confirmation protect saved and unsaved edits. Migration 005 adds local draft storage. Focused tests cover requests, failures, persistence and concurrency; browser checks cover the editor and save flow without live generation. The first real generated draft still needs manual review. Broader application formats and tracking remain future work.
 
 Scope:
 

@@ -60,7 +60,7 @@ export function ChatGPTConnectionCard({ connection, notice }: { connection: Chat
           : "Not connected"}
       </p>
       {connection.email && <p>Account: {connection.email}</p>}
-      <p>Connect your existing subscription to evaluate saved job advertisements. Requests run only when you click an evaluation or test button.</p>
+      <p>Connect your existing subscription to evaluate advertisements and draft application text. Requests run only when you click an evaluation, generation or test button.</p>
       {visibleNotice && <p role="status" className={visibleNotice === "failed" || visibleNotice === "invalid_callback" || visibleNotice === "local_address" ? "error-message" : "muted"}>{chatGPTNotices[visibleNotice]}</p>}
       {connection.status === "permission_granted" && <ConnectionTest savedResult={connection.testResult} />}
       {connection.status !== "permission_granted" && (

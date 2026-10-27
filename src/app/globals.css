@@ -211,7 +211,7 @@ label, summary {
   font-weight: 700;
 }
 
-input, select, button {
+input, select, button, textarea {
   min-height: 46px;
   width: 100%;
   padding: 12px;
@@ -220,6 +220,11 @@ input, select, button {
   background: #fff;
   color: inherit;
   font: inherit;
+}
+
+textarea {
+  resize: vertical;
+  line-height: 1.6;
 }
 
 button {

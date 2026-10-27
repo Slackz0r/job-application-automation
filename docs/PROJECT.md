@@ -2,7 +2,7 @@
 
 **Version:** 0.4  
 **Status:** MVP Implementation — Discovery and Initial Live Evaluation
-**Last updated:** 2026-10-23
+**Last updated:** 2026-10-27
 
 ## 1. Vision
 
@@ -159,9 +159,11 @@ These hypotheses have not yet been fully validated.
 
 ## 10. Current Focus & Next Steps
 
-**Current phase:** MVP implementation — opportunity discovery and initial live evaluation.
+**Current phase:** MVP implementation — discovery, live evaluation, and initial application drafting.
 
 The local application supports Platsbanken searches, an optional location picker with multiple selections, SQLite persistence, and browsing saved advertisement locations, text, and original-source links. **Load more** extends a search in batches of 20 while retaining displayed results and the submitted criteria. The initial foundation and opportunity-discovery milestones are implemented. After ChatGPT sign-in, one saved advertisement can be evaluated explicitly against the approved professional profile sections using GPT-6.1 Sol and the subscription. Valid completed results are stored locally with the model and date; older samples remain labelled until replaced successfully. Credentials stay in memory and a new sign-in is required after restart. Manual testing has verified sign-in, model discovery, and the fixed-message subscription response. A first real opportunity evaluation has completed, persisted, and been checked against its source advertisement and approved profile. Its reasoning was supported in this case; broader quality validation remains open. Following a reviewed two-case model comparison, Sol remains the evaluation model and the temporary Luna comparison feature has been removed. Broader model quality and usage savings remain unverified; see D020.
+
+The first application-generation slice is implemented: a manually supplied question and saved advertisement can produce one editable Swedish motivation through the Sol subscription connection. Drafts are explicitly saved locally, copied for manual use, and protected against accidental replacement and stale saves. Live draft quality still needs review. See D023 for the agreed scope.
 
 The MVP will support job discovery, opportunity evaluation, AI-assisted application generation, manual application submission, and tracking.
 

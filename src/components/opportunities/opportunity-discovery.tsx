@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useCallback, useState } from "react";
 import type { Municipality } from "@/schemas/job-search";
 import type { Opportunity } from "@/schemas/opportunity";
 import type { EvaluationMap } from "@/schemas/opportunity-evaluation";
@@ -47,6 +47,15 @@ export function OpportunityDiscovery({ municipalities, savedOpportunities, saved
     } };
   }, initialState);
   const [query, setQuery] = useState("");
+  const [dirtyDrafts, setDirtyDrafts] = useState<Set<number>>(() => new Set());
+  const onDraftDirtyChange = useCallback((id: number, dirty: boolean) => {
+    setDirtyDrafts((current) => {
+      if (current.has(id) === dirty) return current;
+      const next = new Set(current);
+      if (dirty) next.add(id); else next.delete(id);
+      return next;
+    });
+  }, []);
   const result = state.result;
   const opportunities = result ? result.opportunities : savedOpportunities;
   const evaluations = result ? result.evaluations ?? {} : savedEvaluations;
@@ -58,7 +67,7 @@ export function OpportunityDiscovery({ municipalities, savedOpportunities, saved
       <h2 id="search-heading">Find opportunities</h2>
       {/* Keep the search criteria when React resets a completed action form. */}
       <form action={formAction} onReset={(event) => event.preventDefault()}>
-        <fieldset className="search-fields" disabled={pending}>
+        <fieldset className="search-fields" disabled={pending || dirtyDrafts.size > 0}>
           <div className="field">
             <label htmlFor="query">Search term</label>
             <input id="query" name="query" type="search" placeholder="For example, developer or support"
@@ -73,6 +82,7 @@ export function OpportunityDiscovery({ municipalities, savedOpportunities, saved
             : "Load 20 advertisements at a time. Results are saved on this computer."}
         </p>
       </form>
+      {dirtyDrafts.size > 0 && <p className="muted">Save or reopen unsaved application drafts below before starting a new search.</p>}
 
       <div aria-live="polite" aria-atomic="true">
         {pending && <p className="status">Loading advertisements and saving results…</p>}
@@ -88,7 +98,7 @@ export function OpportunityDiscovery({ municipalities, savedOpportunities, saved
       <div className="search-results" aria-busy={pending}>
         <h3>{result ? "Search results" : "Recently saved"}</h3>
         {!result && savedError && <p className="error-message">{savedError}</p>}
-        <OpportunityList opportunities={opportunities} evaluations={evaluations} evaluationError={evaluationsError} emptyMessage={result
+        <OpportunityList opportunities={opportunities} evaluations={evaluations} evaluationError={evaluationsError} onDraftDirtyChange={onDraftDirtyChange} emptyMessage={result
           ? result.total === 0 ? "No matching advertisements. Try another search term or location."
             : "No usable advertisements loaded so far. Load more or try another search."
           : "No saved opportunities yet. Run a search to get started."} />

@@ -1,15 +1,17 @@
 import type { Opportunity } from "@/schemas/opportunity";
 import type { EvaluationMap } from "@/schemas/opportunity-evaluation";
 import { OpportunityEvaluation } from "./opportunity-evaluation";
+import { ApplicationDraft } from "./application-draft";
 
 type OpportunityListProps = {
   opportunities: Opportunity[];
   emptyMessage: string;
   evaluations: EvaluationMap;
   evaluationError?: string | null;
+  onDraftDirtyChange: (id: number, dirty: boolean) => void;
 };
 
-export function OpportunityList({ opportunities, emptyMessage, evaluations, evaluationError }: OpportunityListProps) {
+export function OpportunityList({ opportunities, emptyMessage, evaluations, evaluationError, onDraftDirtyChange }: OpportunityListProps) {
   if (opportunities.length === 0) {
     return <p className="muted">{emptyMessage}</p>;
   }
@@ -37,6 +39,7 @@ export function OpportunityList({ opportunities, emptyMessage, evaluations, eval
             savedEvaluation={evaluations[opportunity.id]}
             loadError={evaluationError}
           />
+          <ApplicationDraft opportunityId={opportunity.id} hasDescription={Boolean(opportunity.description?.trim())} onDirtyChange={onDraftDirtyChange} />
         </li>
       ))}
     </ul>
