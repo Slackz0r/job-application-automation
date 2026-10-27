@@ -194,7 +194,7 @@ Database interactions should remain reasonably separate from business logic with
 
 Initial database access uses direct SQL through `better-sqlite3`. The server-only connection module, `src/lib/db.ts`, opens `data/app.sqlite` on demand and creates its directory if necessary. The caller closes the connection after use. The entire `data/` directory is local operational data and is excluded from Git.
 
-Schema changes are versioned as numbered SQL files in `migrations/` and applied explicitly with `npm run db:migrate`. The runner in `scripts/migrate.ts` records completed files in `schema_migrations`. Each file's SQL and its tracking entry run in the same transaction; a failure rolls back that file and stops further processing.
+Schema changes are versioned as numbered SQL files in `migrations/` and applied explicitly with `npm run db:migrate`. The runner in `scripts/migrate.ts` records completed files in `schema_migrations`. Each file's SQL and its tracking entry run in the same transaction; a failure rolls back that file and stops further processing. Repeating the command skips recorded files. Run it after pulling schema changes, keep applied migrations unchanged, and add a new numbered SQL file for each later change; the runner owns the transaction.
 
 The initial `opportunities` table stores advertisement facts, with a unique `(source, source_id)` pair. Source identifiers, title, URL, and discovery time are required and checked for empty or ordinary-space-only values. Company, location, description, publication date, and application deadline may be unknown. Migration `002-add-opportunity-location.sql` adds the nullable location column to existing databases. The connector derives display text from supplied workplace addresses, preferring municipality, then city, region, or country; distinct names are combined. Missing or malformed location data remains unknown, independently of the search filters.
 
@@ -266,6 +266,10 @@ These exclusions define the initial scope, not permanent architectural limitatio
 Significant unresolved technical choices and their current evaluation status are maintained in [DECISIONS.md](DECISIONS.md).
 
 Implementation details should be determined when concrete requirements emerge, prioritizing simplicity and avoiding premature complexity.
+
+### Tooling Maintenance
+
+Previously recorded tooling limitation: ESLint 9 was retained for compatibility with the Next.js lint plugins. The earlier development-dependency audit reported five high-severity entries from one [braces advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm), while the production-dependency audit reported none. This preserves the prior README's audit note, not a fresh security assessment. Recheck dependency status when compatible upgrades are considered.
 
 ## 10. Future Evolution
 

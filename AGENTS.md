@@ -70,6 +70,7 @@ For small, clearly defined tasks, execute efficiently without introducing unnece
 - Record significant decisions and their rationale in `docs/DECISIONS.md`.
 - Keep the architecture and roadmap consistent with established decisions.
 - Avoid duplicating detailed information across documents.
+- Keep README.md concise: overview, current capabilities, setup, core commands, privacy, Git workflow, and documentation links. Put detailed technical behavior in the existing project documents.
 - Preserve existing content where possible and keep updates focused.
 
 Do not create additional documentation or extensively rewrite existing documents unless the task justifies it.
