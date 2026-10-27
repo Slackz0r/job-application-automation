@@ -1,7 +1,7 @@
 # Development Roadmap
 
 **Version:** 0.1  
-**Status:** Milestones 1–2 implemented — Milestone 3 live evaluations reviewed — Milestone 4 first drafting flow implemented
+**Status:** Initial discovery, evaluation, motivation drafting, and tracking flows implemented — hands-on end-to-end validation continues
 **Last updated:** 2026-10-27
 
 ## 1. Purpose
@@ -132,6 +132,8 @@ The initial generation process should remain straightforward. Additional steps s
 ### Milestone 5 — Application Tracking and Review
 
 **Goal:** Make the system useful for managing ongoing job applications.
+
+**Current progress:** The first tracking slice is implemented with manual statuses, optional editable application dates, private notes, and persistent status-change history. A separate paginated list filters tracked records and exposes older unmarked ads through To review. Saved advertisements, evaluations and drafts can be reopened from that list. Atomic saves and revisions protect current tracking and history; notes/date corrections do not generate status events, and unsaved editors are protected during searches and list changes. Focused tests and browser checks cover the initial workflow. The user plans a separate UI/dashboard pass after tracking; no dashboard graphs or statistics are implemented yet. History preserves the records needed to define those metrics later. Broader end-to-end use remains the next validation step.
 
 Scope:
 

@@ -134,6 +134,14 @@ Generation returns a candidate to the editor without writing the database. `src/
 
 The generation workflow should initially favor a simple LLM-based approach. Additional processing or validation steps should only be introduced when they provide meaningful improvements.
 
+### Application Tracking
+
+The manual tracking workflow uses `src/schemas/opportunity-tracking.ts`, `src/lib/opportunity-tracking.ts` and Server Actions in `src/app/actions/tracking-actions.ts`. Migration 006 adds a current row per explicitly tracked opportunity and separate status-history rows. A missing current row means To review, without a write or fabricated timestamp. Current tracking saves and actual status events share one immediate transaction, with optimistic revision checks. Notes/date edits update current metadata without creating status events. Identical writes do nothing. Application dates are optional calendar dates; history dates are UTC recording timestamps.
+
+`OpportunityTracking` displays status, editable fields and recent history in the existing opportunity component folder. Discovery reads tracking metadata in one batch so previously pursued roles are recognizable. `TrackedOpportunities` reads a separate filtered, paginated list; To review includes unmarked saved ads, while All tracked requires a current tracking row. Expanding an item reuses `OpportunityList` and its evaluation/draft controls. `OpportunityWorkspace` shares fresh tracking metadata and a change counter between discovery and the list. List refreshes wait for dirty/busy editors to finish; searches and filters cannot silently remove unsaved work. Revision conflicts also protect duplicate editors and other tabs.
+
+Tracking does not read the private profile, require subscription sign-in, contact employers, or invoke AI. Notes are local data and are excluded from generation/evaluation inputs. Tests remain in the existing application, discovery and database groups. D024 defines the statuses, date meanings and future dashboard boundary.
+
 ### 4.5 Workflow Orchestration
 
 Coordinates the processing of opportunities through discovery, evaluation, generation, and persistence.

@@ -5,7 +5,9 @@ import { listOpportunities } from "@/lib/opportunities";
 import { getEvaluations } from "@/lib/opportunity-evaluations";
 import type { Opportunity } from "@/schemas/opportunity";
 import type { EvaluationMap } from "@/schemas/opportunity-evaluation";
-import { OpportunityDiscovery } from "@/components/opportunities/opportunity-discovery";
+import { OpportunityWorkspace } from "@/components/opportunities/opportunity-workspace";
+import { getTrackingMap } from "@/lib/opportunity-tracking";
+import type { TrackingMap } from "@/schemas/opportunity-tracking";
 import { cookies } from "next/headers";
 import { getChatGPTAuth } from "@/lib/chatgpt-auth";
 import { ChatGPTConnectionCard } from "@/components/chatgpt/connection";
@@ -37,10 +39,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
   let savedError: string | null = null;
   let savedEvaluations: EvaluationMap = {};
   let evaluationError: string | null = null;
+  let savedTracking: TrackingMap = {};
+  let trackingError: string | null = null;
   try {
     const db = openDatabase();
     try {
       savedOpportunities = listOpportunities(db);
+      try { savedTracking = getTrackingMap(db, savedOpportunities.map((opportunity) => opportunity.id)); }
+      catch { trackingError = "Tracking could not be loaded. Run npm run db:migrate if needed, then refresh."; }
       try {
         savedEvaluations = getEvaluations(db, savedOpportunities.map((opportunity) => opportunity.id));
       } catch {
@@ -61,16 +67,22 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
         <p className="intro">
           Discover opportunities. Prepare thoughtful applications. Keep track of progress.
         </p>
+        <nav className="opportunity-navigation" aria-label="Opportunity navigation">
+          <a href="#search-heading">Browse advertisements</a>
+          <a href="#tracking-heading">Tracked opportunities</a>
+        </nav>
       </header>
 
       <ChatGPTConnectionCard connection={connection} notice={notice} />
 
-      <OpportunityDiscovery
+      <OpportunityWorkspace
         municipalities={municipalities}
         savedOpportunities={savedOpportunities}
         savedError={savedError}
         savedEvaluations={savedEvaluations}
         evaluationError={evaluationError}
+        savedTracking={savedTracking}
+        trackingError={trackingError}
       />
 
       <section aria-labelledby="profile-heading" className="card">

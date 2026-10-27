@@ -25,7 +25,7 @@ Technical decisions are driven by actual requirements and validated assumptions 
 
 ## Current Status
 
-**Phase:** MVP Implementation — Discovery, Evaluation, and Initial Application Drafting
+**Phase:** MVP Implementation — Discovery, Evaluation, Drafting, and Tracking
 
 The local application now searches Platsbanken, saves valid advertisements in SQLite, and shows their locations alongside the text and original-source links. Load 20 advertisements at a time with **Load more**, keeping earlier results visible. Search by free text and optionally choose one or more locations. The homepage shows recently saved opportunities after refresh or restart. The private professional profile remains on the server, with only its loading status and professional-experience and education counts shown in the interface.
 
@@ -35,6 +35,10 @@ Each saved advertisement offers **Evaluate with ChatGPT**. After sign-in, an exp
 
 Each advertisement also offers **Prepare application**. Opening it loads the current saved motivation without an AI request. Enter or paste the employer's question, then explicitly generate a Swedish draft with GPT-6.1 Sol, or write one manually. Generation uses the same approved profile sections as evaluation plus the question and advertisement; generated text is placed in the editor without replacing the saved draft. Review it, use **Save changes** to keep one current version locally, and **Copy draft** for the employer's form. Existing editor text requires confirmation before generation or reopening. Stale saves from another tab are rejected. Unsaved or in-progress drafts block starting a new search; refresh warns about unsaved work. CV uploads, availability, salary, eligibility answers and submission stay manual. Automated generation tests use synthetic replies. The first live motivation has been reviewed, saved and reopened successfully; broader quality review continues through use. See D023 in the decisions document.
 
+Each advertisement includes **Manage tracking** for a manual status, optional application date, and notes. Choose **Applied** only after submitting yourself; draft generation and evaluation do not change tracking. Selecting Applied suggests today's local date, which you can change or clear. Later status changes retain the application date. Explicit saves append real status changes to history; notes and date corrections do not add status events. The editor shows the latest 25 changes, with all history retained locally. Stale saves from another tab are rejected.
+
+**Tracked opportunities** is a separate list with status filters and 20 records per page. **All tracked** shows records you have explicitly tracked; **To review** also includes unmarked saved advertisements, so older roles remain reachable beyond the latest 20 search results. Open a saved opportunity to revisit its advertisement, evaluation, draft and tracking. Tracking updates refresh the list while unsaved editors are protected. Tracking requires no AI request, and notes are not sent to models. Run `npm.cmd run db:migrate` to apply migration 006 before using it. See D024 for status and date semantics.
+
 The **ChatGPT subscription** card offers **Continue with ChatGPT** for a separate permission check. Open the local app using `http://127.0.0.1:3000` (or the displayed port). Clicking the button opens OpenAI's sign-in and consent page; the callback verifies identity and whether subscription usage permission was granted. Sign-in does not make a model request or send job/profile data. Credentials stay in server memory, so restart or expiry requires sign-in again. Only registration identifiers are kept in the ignored `data/chatgpt-registration.json`; local sign-out clears credentials without revoking the app's permission in ChatGPT settings. One registered account/workspace is supported in this first local version. Manual sign-in and subscription permission have been verified; automated tests use synthetic tokens and mocked token responses.
 
 After sign-in, **Test subscription connection** fetches the account's visible model list and, if `gpt-6.1-sol` is listed, sends only `Reply with exactly: Subscription connection works.` using the subscription. It shows model choices and the reply after a completed response. No job or profile data is loaded by this test. There is at most one model request per attempt, no automatic retries or paid API fallback, and a successful test is reused until the connection ends. No test runs on sign-in or page load. If the agreed model is absent, no inference request is made. Manual testing has verified model discovery and the fixed-message response; automated tests use synthetic streams.
@@ -42,7 +46,7 @@ After sign-in, **Test subscription connection** fetches the account's visible mo
 ## Source Structure
 
 - `src/app/` contains route files and server entry points. Feature-named Server Actions live in `src/app/actions/`.
-- `src/components/opportunities/` contains `OpportunityDiscovery` for the search flow, `LocationPicker` for location selection, `OpportunityList` for advertisement display, `OpportunityEvaluation` for reviewing and explicitly running evaluations, and `ApplicationDraft` for editing, saving and copying motivation text.
+- `src/components/opportunities/` contains `OpportunityDiscovery` for the search flow, `LocationPicker` for location selection, `OpportunityList` for advertisement display, `OpportunityEvaluation` for reviewing and explicitly running evaluations, `ApplicationDraft` for editing, saving and copying motivation text, and tracking controls plus a filtered tracking list. `OpportunityWorkspace` shares tracking updates between discovery and the tracking list.
 - `src/components/chatgpt/` contains the subscription connection card. `src/app/auth/callback/` receives OpenAI's sign-in reply; the related Server Actions, integration logic, and validation use the existing action, library, and schema folders.
 - `src/schemas/` contains validation rules and related TypeScript types, grouped by workflow or shared data model. The job-search module includes search criteria and JobTech API response checks; opportunity and professional-profile schemas have their own modules.
 - `src/lib/` contains database access, the Platsbanken connector, and profile loading. SQL table changes live in `migrations/`.
@@ -84,7 +88,7 @@ Choose verification according to the change. Discussion and documentation-only e
 | `npm.cmd run test:chatgpt` | Subscription sign-in and the connection test |
 | `npm.cmd run test:profile` | Professional profile loading and validation |
 | `npm.cmd run test:database` | SQL migrations |
-| `npm.cmd run test:application` | Motivation generation, draft persistence, and save conflicts |
+| `npm.cmd run test:application` | Motivation drafts, manual tracking, status history, and save conflicts |
 | `npm.cmd test` | All groups |
 
 To run one file, for example: `node --conditions=react-server --test tests/discovery/job-search.test.ts`. Node.js discovers test files from the quoted patterns in `package.json`, so new files in these groups require no command changes. Tests use sanitized fixtures, temporary databases, and mocked AI replies; they do not make live model calls.

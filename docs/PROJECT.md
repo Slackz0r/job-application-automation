@@ -159,13 +159,15 @@ These hypotheses have not yet been fully validated.
 
 ## 10. Current Focus & Next Steps
 
-**Current phase:** MVP implementation — discovery, live evaluation, and initial application drafting.
+**Current phase:** MVP implementation — initial discovery-to-tracking workflow ready for hands-on use.
 
 The local application supports Platsbanken searches, an optional location picker with multiple selections, SQLite persistence, and browsing saved advertisement locations, text, and original-source links. **Load more** extends a search in batches of 20 while retaining displayed results and the submitted criteria. The initial foundation and opportunity-discovery milestones are implemented. After ChatGPT sign-in, one saved advertisement can be evaluated explicitly against the approved professional profile sections using GPT-6.1 Sol and the subscription. Valid completed results are stored locally with the model and date; older samples remain labelled until replaced successfully. Credentials stay in memory and a new sign-in is required after restart. Manual testing has verified sign-in, model discovery, and the fixed-message subscription response. A first real opportunity evaluation has completed, persisted, and been checked against its source advertisement and approved profile. Its reasoning was supported in this case; broader quality validation remains open. Following a reviewed two-case model comparison, Sol remains the evaluation model and the temporary Luna comparison feature has been removed. Broader model quality and usage savings remain unverified; see D020.
 
 The first application-generation slice is implemented: a manually supplied question and saved advertisement can produce one editable Swedish motivation through the Sol subscription connection. Drafts are explicitly saved locally, copied for manual use, and protected against accidental replacement and stale saves. The first live motivation has been reviewed, saved, reopened and checked against profile evidence; broader quality review remains ongoing. See D023 for the agreed scope.
 
-The MVP will support job discovery, opportunity evaluation, AI-assisted application generation, manual application submission, and tracking.
+The first tracking slice adds manual status, an optional application date, notes and recorded status changes. A filtered list keeps tracked roles and older saved advertisements accessible alongside their evaluations and drafts. Tracking and history do not use AI or alter saved application material. The planned UI/dashboard work follows this functional foundation; charts and statistics are not yet implemented. See D024.
+
+The initial workflow now connects job discovery, opportunity evaluation, Swedish motivation drafting, manual application submission, and tracking. Broader writing formats, visual polish and end-to-end usage validation remain ongoing.
 
 It will also provide a practical environment for evaluating and improving matching behavior, application quality, and overall efficiency.
 

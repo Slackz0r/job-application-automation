@@ -328,6 +328,29 @@ summary {
   line-height: 1.65;
 }
 
+.tracking-history {
+  margin-top: 20px;
+}
+
+.tracking-pages {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.opportunity-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.opportunity-navigation a {
+  color: #234d3d;
+  font-weight: 700;
+  padding: 8px 0;
+  text-underline-offset: 3px;
+}
+
 @media (max-width: 480px) {
   main {
     padding: 40px 20px;
