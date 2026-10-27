@@ -4,6 +4,8 @@ import { openDatabase } from "../../lib/db.ts";
 import { searchJobs } from "../../lib/job-search.ts";
 import { saveOpportunity } from "../../lib/opportunities.ts";
 import { getEvaluations } from "../../lib/opportunity-evaluations.ts";
+import { getTrackingMap } from "../../lib/opportunity-tracking.ts";
+import type { TrackingMap } from "../../schemas/opportunity-tracking.ts";
 import type { Opportunity } from "../../schemas/opportunity.ts";
 import type { EvaluationMap } from "../../schemas/opportunity-evaluation.ts";
 import { searchInputSchema, type JobSearchResult } from "../../schemas/job-search.ts";
@@ -11,6 +13,7 @@ import { searchInputSchema, type JobSearchResult } from "../../schemas/job-searc
 export type SearchState =
   | (Omit<JobSearchResult, "opportunities"> & {
     status: "success"; opportunities: Opportunity[]; evaluations?: EvaluationMap; evaluationError?: string;
+    tracking?: TrackingMap; trackingError?: string;
     criteria: { query: string; municipalities: string[] }; offset: number;
   })
   | { status: "error"; message: string };
@@ -54,12 +57,17 @@ export async function searchOpportunities(
       // Save this search together: a database failure leaves no partial batch.
       const saveResults = db.transaction(() => result.opportunities.map((opportunity) => saveOpportunity(db, opportunity)));
       const opportunities = saveResults.immediate();
+      let tracking: TrackingMap = {};
+      let trackingError: string | undefined;
+      try { tracking = getTrackingMap(db, opportunities.map((opportunity) => opportunity.id)); }
+      catch { trackingError = "Tracking could not be loaded. Run npm run db:migrate if needed, then refresh."; }
+      const trackingData = { tracking, ...(trackingError ? { trackingError } : {}) };
       try {
-        return { status: "success", ...result, criteria, offset, opportunities, evaluations: getEvaluations(db, opportunities.map((opportunity) => opportunity.id)) };
+        return { status: "success", ...result, ...trackingData, criteria, offset, opportunities, evaluations: getEvaluations(db, opportunities.map((opportunity) => opportunity.id)) };
       } catch {
         // Evaluation setup must not prevent discovery or undo a saved search.
         return {
-          status: "success", ...result, criteria, offset, opportunities,
+          status: "success", ...result, ...trackingData, criteria, offset, opportunities,
           evaluationError: "Saved evaluations could not be loaded. Run npm run db:migrate if needed, then refresh.",
         };
       }

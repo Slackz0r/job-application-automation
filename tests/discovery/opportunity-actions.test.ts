@@ -7,11 +7,13 @@ import Database from "better-sqlite3";
 import { listOpportunities } from "../../src/lib/opportunities.ts";
 import { getEvaluation, saveEvaluation } from "../../src/lib/opportunity-evaluations.ts";
 import { searchOpportunities } from "../../src/app/actions/opportunity-actions.ts";
+import { saveTracking } from "../../src/lib/opportunity-tracking.ts";
 
 const migration = readFileSync(new URL("../../migrations/001-create-opportunities.sql", import.meta.url), "utf8");
 const locationMigration = readFileSync(new URL("../../migrations/002-add-opportunity-location.sql", import.meta.url), "utf8");
 const evaluationMigration = readFileSync(new URL("../../migrations/003-create-opportunity-evaluations.sql", import.meta.url), "utf8");
 const liveEvaluationMigration = readFileSync(new URL("../../migrations/004-enable-live-opportunity-evaluations.sql", import.meta.url), "utf8");
+const trackingMigration = readFileSync(new URL("../../migrations/006-create-opportunity-tracking.sql", import.meta.url), "utf8");
 const advertisement = {
   id: "example-001", headline: "Example Developer", webpage_url: "https://example.test/jobs/001",
   description: { text: "Example advertisement text." },
@@ -31,7 +33,7 @@ function createFixture(t: TestContext) {
   mkdirSync(join(directory, "data"));
   const path = join(directory, "data", "app.sqlite");
   const db = new Database(path);
-  try { db.exec(migration); db.exec(locationMigration); db.exec(evaluationMigration); db.exec(liveEvaluationMigration); } finally { db.close(); }
+  try { db.exec(migration); db.exec(locationMigration); db.exec(evaluationMigration); db.exec(liveEvaluationMigration); db.exec(trackingMigration); } finally { db.close(); }
   process.chdir(directory);
   return path;
 }
@@ -229,4 +231,24 @@ test("evaluation setup failure leaves discovery and saved advertisements usable"
   }
   const reopened = new Database(path);
   try { assert.equal(listOpportunities(reopened).length, 1); } finally { reopened.close(); }
+});
+
+test("rediscovery returns manual tracking unchanged and tracking setup failures do not block discovery", async (t) => {
+  const path = createFixture(t);
+  t.mock.method(globalThis, "fetch", async () => Response.json({ total: { value: 1 }, hits: [advertisement] }));
+  const first = await searchOpportunities(null, searchForm());
+  assert.equal(first.status, "success");
+  if (first.status !== "success") return;
+  const db = new Database(path);
+  let saved;
+  try { saved = saveTracking(db, first.opportunities[0].id, { status: "applied", appliedOn: "2026-10-20", notes: "Manually applied." }, 0); }
+  finally { db.close(); }
+  const repeat = await searchOpportunities(null, searchForm());
+  assert.equal(repeat.status, "success");
+  if (repeat.status === "success") assert.deepEqual(repeat.tracking, { [saved.tracking.opportunityId]: saved.tracking });
+  const broken = new Database(path);
+  try { broken.exec("DROP TABLE opportunity_tracking"); } finally { broken.close(); }
+  const usable = await searchOpportunities(null, searchForm());
+  assert.equal(usable.status, "success");
+  if (usable.status === "success") assert.match(usable.trackingError!, /db:migrate/);
 });

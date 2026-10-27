@@ -18,6 +18,7 @@ const locationMigration = await readFile(
 const evaluationMigration = await readFile(new URL("../../migrations/003-create-opportunity-evaluations.sql", import.meta.url), "utf8");
 const liveEvaluationMigration = await readFile(new URL("../../migrations/004-enable-live-opportunity-evaluations.sql", import.meta.url), "utf8");
 const draftMigration = await readFile(new URL("../../migrations/005-create-application-drafts.sql", import.meta.url), "utf8");
+const trackingMigration = await readFile(new URL("../../migrations/006-create-opportunity-tracking.sql", import.meta.url), "utf8");
 
 async function createFixture(t: TestContext, migrations: Record<string, string>) {
   const directory = await mkdtemp(join(tmpdir(), "job-migrations-"));
@@ -225,5 +226,45 @@ test("adds application drafts without changing advertisements or evaluations and
     reopened.exec("INSERT INTO application_drafts VALUES (1, 'Question', 'Applicant edits', NULL, 1, '2026-10-27T12:00:00.000Z')");
     reopened.exec("DELETE FROM opportunities WHERE id = 1");
     assert.equal(reopened.prepare("SELECT * FROM application_drafts").all().length, 0);
+  } finally { reopened.close(); }
+});
+
+test("adds tracking and history without backfilling events or changing saved application data", async (t) => {
+  const directory = await createFixture(t, {
+    "001-create-opportunities.sql": initialMigration, "002-add-opportunity-location.sql": locationMigration,
+    "003-create-opportunity-evaluations.sql": evaluationMigration, "004-enable-live-opportunity-evaluations.sql": liveEvaluationMigration,
+    "005-create-application-drafts.sql": draftMigration,
+  });
+  assert.equal(runMigrations(directory).status, 0);
+  const path = join(directory, "data", "app.sqlite");
+  const db = new Database(path);
+  let ads, evaluations, drafts;
+  try {
+    db.exec("INSERT INTO opportunities (source, source_id, title, url, discovered_at) VALUES ('example', '001', 'Saved role', 'https://example.test/job', '2026-10-27T12:00:00.000Z')");
+    db.prepare("INSERT INTO opportunity_evaluations VALUES (1, 'live', 'gpt-6.1-sol', ?, '2026-10-27T12:00:00.000Z')")
+      .run(JSON.stringify({ recommendation: "worth_considering", summary: "Saved review.", supportingEvidence: [], gapsAndUnknowns: [] }));
+    db.exec("INSERT INTO application_drafts VALUES (1, 'Question', 'User edits', NULL, 1, '2026-10-27T12:00:00.000Z')");
+    ads = db.prepare("SELECT * FROM opportunities").all();
+    evaluations = db.prepare("SELECT * FROM opportunity_evaluations").all();
+    drafts = db.prepare("SELECT * FROM application_drafts").all();
+  } finally { db.close(); }
+  await writeFile(join(directory, "migrations", "006-create-opportunity-tracking.sql"), trackingMigration);
+  const applied = runMigrations(directory);
+  assert.equal(applied.status, 0, applied.stderr);
+  const repeated = runMigrations(directory);
+  assert.equal(repeated.status, 0, repeated.stderr);
+  assert.match(repeated.stdout, /Already run: 006-create-opportunity-tracking/);
+  const reopened = new Database(path);
+  try {
+    assert.deepEqual(reopened.prepare("SELECT * FROM opportunities").all(), ads);
+    assert.deepEqual(reopened.prepare("SELECT * FROM opportunity_evaluations").all(), evaluations);
+    assert.deepEqual(reopened.prepare("SELECT * FROM application_drafts").all(), drafts);
+    assert.deepEqual(reopened.prepare("SELECT * FROM opportunity_tracking").all(), []);
+    assert.deepEqual(reopened.prepare("SELECT * FROM opportunity_status_history").all(), []);
+    reopened.exec("INSERT INTO opportunity_tracking VALUES (1, 'interested', NULL, 'Note', 1, '2026-10-27T12:00:00.000Z')");
+    reopened.exec("INSERT INTO opportunity_status_history VALUES (1, 1, 'to_review', 'interested', '2026-10-27T12:00:00.000Z', 1)");
+    reopened.exec("DELETE FROM opportunities WHERE id = 1");
+    assert.deepEqual(reopened.prepare("SELECT * FROM opportunity_tracking").all(), []);
+    assert.deepEqual(reopened.prepare("SELECT * FROM opportunity_status_history").all(), []);
   } finally { reopened.close(); }
 });
