@@ -121,9 +121,9 @@ export function OpportunityTracking({
   }
 
   return (
-    <section className="evaluation" aria-label="Opportunity tracking" aria-busy={pending}>
-      <p className="eyebrow">Your tracking</p>
-      <p className="status">Status: {trackingLabels[displayTracking?.status ?? "to_review"]}</p>
+    <section className="workflow-section opportunity-tracking" aria-label="Opportunity tracking" aria-busy={pending}>
+      <h5 className="workflow-heading">Your tracking</h5>
+      <p className="status">Status: <span className="status-badge">{trackingLabels[displayTracking?.status ?? "to_review"]}</span></p>
 
       {loadError && <p className="error-message">{loadError}</p>}
 
@@ -196,7 +196,7 @@ export function OpportunityTracking({
 
             {dirty && (
               <>
-                <p className="status">Unsaved tracking changes.</p>
+                <p className="notice-message">Unsaved tracking changes.</p>
                 <label className="location-option">
                   <input
                     type="checkbox"
@@ -208,11 +208,11 @@ export function OpportunityTracking({
               </>
             )}
 
-            <button type="button" disabled={!dirty} onClick={save}>
+            <button className="button-primary" type="button" disabled={!dirty} onClick={save}>
               {pending ? "Saving…" : "Save tracking"}
             </button>
 
-            <button type="button" onClick={open} disabled={dirty && !allowReopen}>
+            <button className="button-ghost" type="button" onClick={open} disabled={dirty && !allowReopen}>
               Reopen saved tracking
             </button>
           </fieldset>
@@ -245,8 +245,9 @@ export function OpportunityTracking({
       )}
 
       <div aria-live="polite">
+        {pending && <p className="status status-running">Updating tracking…</p>}
         {error && <p className="error-message" role="alert">{error}</p>}
-        {message && <p className="status">{message}</p>}
+        {message && <p className="status status-success">{message}</p>}
       </div>
     </section>
   );

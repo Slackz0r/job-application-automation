@@ -122,10 +122,10 @@ export function OpportunityDiscovery({
   return (
     <section aria-labelledby="search-heading" className="card">
       <p className="eyebrow">Platsbanken</p>
-      <h2 id="search-heading">Find opportunities</h2>
+      <h2 id="search-heading" tabIndex={-1}>Find opportunities</h2>
 
       {/* Keep the search criteria when React resets a completed action form. */}
-      <form action={formAction} onReset={(event) => event.preventDefault()}>
+      <form className="search-form" action={formAction} onReset={(event) => event.preventDefault()}>
         <fieldset className="search-fields" disabled={pending || hasUnsaved}>
           <div className="field">
             <label htmlFor="query">Search term</label>
@@ -142,7 +142,7 @@ export function OpportunityDiscovery({
 
           <LocationPicker municipalities={municipalities} />
 
-          <button type="submit">Search Platsbanken</button>
+          <button className="button-primary" type="submit">Search Platsbanken</button>
         </fieldset>
 
         <p className="muted">
@@ -153,13 +153,13 @@ export function OpportunityDiscovery({
       </form>
 
       {hasUnsaved && (
-        <p className="muted">
+        <p className="notice-message">
           Finish saving or reopen unsaved draft and tracking edits below before starting a new search.
         </p>
       )}
 
       <div aria-live="polite" aria-atomic="true">
-        {pending && <p className="status">Loading advertisements and saving results…</p>}
+        {pending && <p className="status status-running">Loading advertisements and saving results…</p>}
         {state.error && <p className="error-message" role="alert">{state.error}</p>}
 
         {result && !pending && (

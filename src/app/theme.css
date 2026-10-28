@@ -1,0 +1,58 @@
+/* Ember foundations. Fonts are served locally, including in the production build. */
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/inter-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url("/fonts/geist-mono-latin.woff2") format("woff2");
+}
+
+:root {
+  color-scheme: dark;
+
+  --color-background: #0d1116;
+  --color-surface: #151c23;
+  --color-elevated: #29343d;
+  --color-input: #141c23;
+  --color-border: #35404a;
+  --color-input-border: #5c6e7c;
+  --color-text: #f2f4f6;
+  --color-muted: #a6b2be;
+  --color-accent: #ff914d;
+  --color-accent-hover: #ffb17b;
+  --color-running: #90d5f7;
+  --color-success: #76e7af;
+  --color-warning: #f3c56b;
+  --color-error: #ff858d;
+
+  --font-body: Inter, Arial, Helvetica, sans-serif;
+  --font-technical: "Geist Mono", Consolas, monospace;
+  --text-small: 0.875rem;
+  --leading-body: 1.7;
+  --leading-heading: 1.25;
+  --reading-width: 70ch;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  --radius-control: 8px;
+  --radius-panel: 12px;
+  --radius-pill: 999px;
+  --transition-interaction: 160ms ease;
+  --shadow-accent: 0 0 18px rgb(255 145 77 / 18%);
+  --ring-focus: 0 0 0 3px var(--color-accent);
+}

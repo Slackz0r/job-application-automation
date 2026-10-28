@@ -74,52 +74,39 @@ export default async function Home({
   }
 
   return (
-    <main>
-      <header>
-        <p className="eyebrow">Local workspace</p>
-        <h1>Job Opportunity Automation</h1>
-        <p className="intro">
-          Discover opportunities. Prepare thoughtful applications. Keep track of progress.
-        </p>
+    <OpportunityWorkspace
+      municipalities={municipalities}
+      savedOpportunities={savedOpportunities}
+      savedError={savedError}
+      savedEvaluations={savedEvaluations}
+      evaluationError={evaluationError}
+      savedTracking={savedTracking}
+      trackingError={trackingError}
+      connectionStatus={connection.status}
+      initialView={notice ? "connection" : "discovery"}
+      connection={<ChatGPTConnectionCard connection={connection} notice={notice} />}
+      profile={(
+        <section aria-labelledby="profile-heading" className="card">
+          <p className="eyebrow">Project foundation</p>
+          <h2 id="profile-heading" tabIndex={-1}>Professional profile</h2>
 
-        <nav className="opportunity-navigation" aria-label="Opportunity navigation">
-          <a href="#search-heading">Browse advertisements</a>
-          <a href="#tracking-heading">Tracked opportunities</a>
-        </nav>
-      </header>
-
-      <ChatGPTConnectionCard connection={connection} notice={notice} />
-
-      <OpportunityWorkspace
-        municipalities={municipalities}
-        savedOpportunities={savedOpportunities}
-        savedError={savedError}
-        savedEvaluations={savedEvaluations}
-        evaluationError={evaluationError}
-        savedTracking={savedTracking}
-        trackingError={trackingError}
-      />
-
-      <section aria-labelledby="profile-heading" className="card">
-        <p className="eyebrow">Project foundation</p>
-        <h2 id="profile-heading">Professional profile</h2>
-
-        {result.status === "ready" ? (
-          <>
-            <p className="status">Profile loaded</p>
-            <p>
-              Professional experiences: {result.profile.experiences.professional.length}.
-              {" "}Education entries: {result.profile.experiences.education.length}.
-            </p>
-            <p className="muted">The full profile is available to server-side application logic.</p>
-          </>
-        ) : (
-          <>
-            <p className="status">Profile needs attention</p>
-            <p>{setupMessages[result.status]}</p>
-          </>
-        )}
-      </section>
-    </main>
+          {result.status === "ready" ? (
+            <>
+              <p className="status status-success">Profile loaded</p>
+              <p>
+                Professional experiences: {result.profile.experiences.professional.length}.
+                {" "}Education entries: {result.profile.experiences.education.length}.
+              </p>
+              <p className="muted">The full profile is available to server-side application logic.</p>
+            </>
+          ) : (
+            <>
+              <p className="notice-message">Profile needs attention</p>
+              <p>{setupMessages[result.status]}</p>
+            </>
+          )}
+        </section>
+      )}
+    />
   );
 }

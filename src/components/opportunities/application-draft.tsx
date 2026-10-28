@@ -133,8 +133,8 @@ export function ApplicationDraft({
   }
 
   return (
-    <section className="evaluation application-draft" aria-label="Application draft" aria-busy={pending}>
-      <p className="eyebrow">Application draft</p>
+    <section className="workflow-section application-draft" aria-label="Application draft" aria-busy={pending}>
+      <h5 className="workflow-heading">Application draft</h5>
 
       {!loaded && (
         <>
@@ -154,11 +154,15 @@ export function ApplicationDraft({
             Paste the employer’s question or use the suggested prompt. Generate with GPT-6.1 Sol using your subscription,
             then review the text before copying it.
           </p>
-          <p className="muted">
-            Sends this question, the advertisement, skills and competencies, professional experience, education,
-            and career preferences. Personality and interests are excluded. One request per attempt; no automatic
-            retries or paid API fallback.
-          </p>
+
+          <details className="request-details">
+            <summary>About this generation</summary>
+            <p className="muted">
+              Sends this question, the advertisement, skills and competencies, professional experience, education,
+              and career preferences. Personality and interests are excluded. One request per attempt; no automatic
+              retries or paid API fallback.
+            </p>
+          </details>
 
           <fieldset className="search-fields" disabled={pending}>
             <div className="field">
@@ -196,7 +200,7 @@ export function ApplicationDraft({
             </p>
 
             {dirty && (
-              <p className="status">
+              <p className="notice-message">
                 Unsaved changes. Save or reopen the saved version before starting a new search.
               </p>
             )}
@@ -219,25 +223,28 @@ export function ApplicationDraft({
               </label>
             )}
 
-            <button
-              type="button"
-              onClick={generate}
-              disabled={!hasDescription || !question.trim() || Boolean(text.trim() && !allowReplace)}
-            >
-              {pending ? "Working…" : text.trim() ? "Generate again with ChatGPT" : "Generate with ChatGPT"}
-            </button>
+            <div className="action-row">
+              <button
+                className={text.trim() ? undefined : "button-primary"}
+                type="button"
+                onClick={generate}
+                disabled={!hasDescription || !question.trim() || Boolean(text.trim() && !allowReplace)}
+              >
+                {pending ? "Working…" : text.trim() ? "Generate again with ChatGPT" : "Generate with ChatGPT"}
+              </button>
 
-            <button type="button" onClick={save} disabled={!dirty || !question.trim() || !text.trim()}>
-              Save changes
-            </button>
+              <button className={dirty ? "button-primary" : undefined} type="button" onClick={save} disabled={!dirty || !question.trim() || !text.trim()}>
+                Save changes
+              </button>
 
-            <button type="button" disabled={!text.trim()} onClick={copy}>
-              Copy draft
-            </button>
+              <button type="button" disabled={!text.trim()} onClick={copy}>
+                Copy draft
+              </button>
 
-            <button type="button" onClick={open} disabled={dirty && !allowReplace}>
-              Reopen saved draft
-            </button>
+              <button className="button-ghost" type="button" onClick={open} disabled={dirty && !allowReplace}>
+                Reopen saved draft
+              </button>
+            </div>
           </fieldset>
 
           {!hasDescription && (
@@ -249,8 +256,8 @@ export function ApplicationDraft({
       )}
 
       <div aria-live="polite">
-        {pending && loaded && <p className="status">Working… Your saved draft stays unchanged until a save succeeds.</p>}
-        {message && <p className="status">{message}</p>}
+        {pending && loaded && <p className="status status-running">Working… Your saved draft stays unchanged until a save succeeds.</p>}
+        {message && <p className="status status-success">{message}</p>}
         {error && <p className="error-message" role="alert">{error}</p>}
       </div>
     </section>

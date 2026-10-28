@@ -36,17 +36,22 @@ export function OpportunityList({
     <ul className="opportunity-list">
       {opportunities.map((opportunity) => (
         <li key={opportunity.id} className="opportunity">
-          <h4>{opportunity.title}</h4>
-          <p className="company">{opportunity.company || "Company not provided"}</p>
-          <p className="location muted">Location: {opportunity.location || "Not provided"}</p>
-          {opportunity.applicationDeadline && (
-            <p className="muted">
-              Apply by <time dateTime={opportunity.applicationDeadline}>{opportunity.applicationDeadline.replace("T", " ")}</time>
-            </p>
-          )}
+          <header className="opportunity-header">
+            <h4>{opportunity.title}</h4>
+            <p className="company">{opportunity.company || "Company not provided"}</p>
+
+            <div className="opportunity-meta">
+              <p>Location: {opportunity.location || "Not provided"}</p>
+              {opportunity.applicationDeadline && (
+                <p>
+                  Apply by <time dateTime={opportunity.applicationDeadline}>{opportunity.applicationDeadline.replace("T", " ")}</time>
+                </p>
+              )}
+            </div>
+          </header>
 
           {opportunity.description ? (
-            <details>
+            <details className="advertisement">
               <summary>Read advertisement</summary>
               <p className="ad-description">{opportunity.description}</p>
             </details>
@@ -54,30 +59,34 @@ export function OpportunityList({
             <p className="muted">Advertisement text is available at the original source.</p>
           )}
 
-          <a href={opportunity.url} target="_blank" rel="noopener noreferrer">
+          <a className="source-link" href={opportunity.url} target="_blank" rel="noopener noreferrer">
             Open original advertisement <span aria-hidden="true">↗</span>
           </a>
 
-          <OpportunityTracking
-            opportunityId={opportunity.id}
-            savedTracking={tracking[opportunity.id]}
-            loadError={trackingError}
-            onSaved={onTrackingSaved}
-            onDirtyChange={onTrackingDirtyChange}
-          />
+          <div className="opportunity-workflow">
+            <div className="opportunity-preparation">
+              <OpportunityEvaluation
+                opportunityId={opportunity.id}
+                hasDescription={Boolean(opportunity.description?.trim())}
+                savedEvaluation={evaluations[opportunity.id]}
+                loadError={evaluationError}
+              />
 
-          <OpportunityEvaluation
-            opportunityId={opportunity.id}
-            hasDescription={Boolean(opportunity.description?.trim())}
-            savedEvaluation={evaluations[opportunity.id]}
-            loadError={evaluationError}
-          />
+              <ApplicationDraft
+                opportunityId={opportunity.id}
+                hasDescription={Boolean(opportunity.description?.trim())}
+                onDirtyChange={onDraftDirtyChange}
+              />
+            </div>
 
-          <ApplicationDraft
-            opportunityId={opportunity.id}
-            hasDescription={Boolean(opportunity.description?.trim())}
-            onDirtyChange={onDraftDirtyChange}
-          />
+            <OpportunityTracking
+              opportunityId={opportunity.id}
+              savedTracking={tracking[opportunity.id]}
+              loadError={trackingError}
+              onSaved={onTrackingSaved}
+              onDirtyChange={onTrackingDirtyChange}
+            />
+          </div>
         </li>
       ))}
     </ul>

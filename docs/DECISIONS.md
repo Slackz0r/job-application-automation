@@ -246,6 +246,22 @@ Applied migration files remain unchanged; subsequent changes use new files. Migr
 
 **Organization and validation:** Use existing source folders and `tests/application/`; no new folders, dependencies, background tasks, dashboards or graph libraries are introduced. Focused tests cover atomic history, stale writes, date corrections, no-op saves, status filters, pagination, rediscovery and preservation of saved application data. Browser checks use a disposable record and no live AI calls. The existing styling is intentionally retained for the upcoming UI chat.
 
+### D025 - Ember Visual Foundation and Opportunity Workspace
+
+**Decision (2026-10-28):** Use the user's Ember draft as the foundation for a dark, spacious interface with restrained orange primary actions, flat sections and clear typography. Begin with shared design variables and the existing opportunity view before redesigning wider navigation. Keep regular CSS, introduce `src/app/theme.css` for design variables and font declarations, and retain shared/control styles in `globals.css`. Add component-specific styles when real isolation needs justify them; no styling framework or component library is introduced.
+
+**Presentation:** Use locally hosted Inter for interface text and Geist Mono for timestamps, with the font licenses included. Separate opportunity metadata, advertisement reading, evaluation, drafting and manual tracking through headings and borders. Preparation and tracking sit alongside each other on wider screens and stack on mobile. Keep request/data-use explanations available through native disclosures. Use dark text on orange buttons, visible keyboard focus with a forced-colors fallback, and reduced-motion support. Input borders are slightly lighter than the draft palette to make field boundaries clearer. Running feedback uses ice blue; completed operations use mint. Application statuses and evaluation recommendations retain their own explicit labels rather than inheriting processing-state meaning.
+
+**Boundary:** This slice changes presentation only. Search, AI request boundaries, persistence, manual tracking, draft protection and submission behavior remain unchanged. Existing navigation remains in place for review before a separate layout/navigation pass.
+
+### D026 - Separate Workspace Views with Persistent Editors
+
+**Decision (2026-10-28):** Make discovery the default view and provide separate navigation to tracking, AI connection and profile setup. Use the Ember draft's compact desktop sidebar, with expanded and collapsed widths of 168px and 60px, and an in-flow mobile menu. Keep the product header small so searching and opportunity content appear immediately. A small connection-status link leads to setup when needed.
+
+**Navigation and state:** Keep the current route and data flow. Native fragment links select the view and support bookmarks, reloads and browser Back/Forward; existing heading fragments and the sign-in callback's `#chatgpt` remain usable. Authentication notices open the connection view by default. Inactive views use `hidden` and stay mounted, preserving search criteria, draft edits, tracking editors and pending operations. Navigation does not save or discard edits. Move keyboard focus to the selected heading and provide a skip link and accessible names for collapsed icons.
+
+**Organization and verification:** Keep shell markup/navigation in `src/components/workspace-shell.tsx` and its layout styles in a colocated CSS Module; shared design variables and controls remain in the existing CSS files. Business logic, storage, AI boundaries and submission behavior are unchanged. Verify this slice through focused lint/type checks and browser checks for navigation, responsive layout, focus and retained edits; a full automated test run is unnecessary for this presentation change.
+
 ## 3. Under Evaluation
 
 ### AI Integration

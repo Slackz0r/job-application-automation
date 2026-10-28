@@ -4,10 +4,18 @@ import { useCallback, useState } from "react";
 import { OpportunityDiscovery, type OpportunityDiscoveryProps } from "./opportunity-discovery";
 import { TrackedOpportunities } from "./tracked-opportunities";
 import type { Tracking, TrackingMap } from "@/schemas/opportunity-tracking";
+import { WorkspaceShell, type WorkspaceShellProps } from "@/components/workspace-shell";
 
-export function OpportunityWorkspace(
-  props: Omit<OpportunityDiscoveryProps, "trackingUpdates" | "onTrackingSaved">,
-) {
+type OpportunityWorkspaceProps = Omit<OpportunityDiscoveryProps, "trackingUpdates" | "onTrackingSaved"> &
+  Pick<WorkspaceShellProps, "connection" | "profile" | "connectionStatus" | "initialView">;
+
+export function OpportunityWorkspace({
+  connection,
+  profile,
+  connectionStatus,
+  initialView,
+  ...props
+}: OpportunityWorkspaceProps) {
   const [updates, setUpdates] = useState<TrackingMap>({});
   const [version, setVersion] = useState(0);
 
@@ -18,10 +26,13 @@ export function OpportunityWorkspace(
   }, []);
 
   return (
-    <>
-      <OpportunityDiscovery {...props} trackingUpdates={updates} onTrackingSaved={saved} />
-
-      <TrackedOpportunities changeVersion={version} updates={updates} onTrackingSaved={saved} />
-    </>
+    <WorkspaceShell
+      initialView={initialView}
+      connectionStatus={connectionStatus}
+      discovery={<OpportunityDiscovery {...props} trackingUpdates={updates} onTrackingSaved={saved} />}
+      tracking={<TrackedOpportunities changeVersion={version} updates={updates} onTrackingSaved={saved} />}
+      connection={connection}
+      profile={profile}
+    />
   );
 }

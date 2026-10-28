@@ -32,11 +32,11 @@ function ConnectionTest({ savedResult }: { savedResult?: ChatGPTConnectionTestSt
       <p className="muted">Test message: “{chatGPTTestPrompt}”</p>
 
       <div aria-live="polite">
-        {pending && <p className="status">Checking models and sending the test message…</p>}
+        {pending && <p className="status status-running">Checking models and sending the test message…</p>}
         {result?.status === "error" && <p className="error-message" role="alert">{result.message}</p>}
         {result?.status === "success" && (
           <>
-            <p className="status">Subscription response verified</p>
+            <p className="status status-success">Subscription response verified</p>
             <p>Reply: {result.reply}</p>
             <p className="muted">
               Model: {result.model}. Completed <time dateTime={result.testedAt}>{result.testedAt.replace("T", " ").replace(/\.\d+Z$/, " UTC")}</time>.
@@ -94,7 +94,7 @@ export function ChatGPTConnectionCard({
   return (
     <section id="chatgpt" className="card" aria-labelledby="chatgpt-heading">
       <p className="eyebrow">AI connection</p>
-      <h2 id="chatgpt-heading">ChatGPT subscription</h2>
+      <h2 id="chatgpt-heading" tabIndex={-1}>ChatGPT subscription</h2>
 
       <p className="status">
         {connection.status === "permission_granted" ? "Subscription permission granted"

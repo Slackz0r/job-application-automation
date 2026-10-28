@@ -1,0 +1,306 @@
+/* Desktop navigation stays compact while the main workspace has room to breathe. */
+.shell {
+  display: grid;
+  grid-template-columns: 168px minmax(0, 1fr);
+  min-height: 100dvh;
+}
+
+.shell[data-collapsed="true"] {
+  grid-template-columns: 60px minmax(0, 1fr);
+}
+
+.skipLink {
+  position: fixed;
+  top: -100px;
+  left: var(--space-4);
+  z-index: 50;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--color-accent);
+  color: var(--color-background);
+}
+
+.skipLink:focus {
+  top: var(--space-4);
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  padding: var(--space-5) var(--space-3) var(--space-3);
+  border-right: 1px solid var(--color-border);
+  background: var(--color-background);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 32px;
+  margin-bottom: var(--space-8);
+}
+
+.brandMark {
+  display: grid;
+  flex: 0 0 32px;
+  place-items: center;
+  height: 32px;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-control);
+  color: var(--color-accent);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.brandName {
+  white-space: nowrap;
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+
+.sidebarContent {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.navigationGroup + .navigationGroup {
+  margin-top: var(--space-8);
+}
+
+.groupLabel {
+  margin: 0 0 var(--space-2);
+  padding-left: var(--space-2);
+  color: var(--color-muted);
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.navigationLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 10px var(--space-2);
+  border-left: 2px solid transparent;
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
+  color: var(--color-muted);
+  font-size: var(--text-small);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.navigationLink svg {
+  flex-shrink: 0;
+}
+
+.navigationLink[aria-current="page"] {
+  border-left-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.navigationLink:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.navigationLink:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+
+.sidebarFooter {
+  margin-top: auto;
+  padding-top: var(--space-8);
+}
+
+.localLabel {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-2);
+  color: var(--color-muted);
+  font-size: 0.6875rem;
+}
+
+.collapseToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2);
+  background: transparent;
+  color: var(--color-muted);
+  font-size: var(--text-small);
+  font-weight: 400;
+}
+
+.mobileToggle {
+  display: none;
+}
+
+.body {
+  min-width: 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 72px;
+  padding: var(--space-4) var(--space-8);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-small);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-wrap: auto;
+}
+
+.connectionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  text-decoration: none;
+}
+
+.connectionDot {
+  flex: 0 0 5px;
+  height: 5px;
+  border-radius: var(--radius-pill);
+  background: currentColor;
+}
+
+.content {
+  max-width: 1200px;
+  padding: var(--space-8) var(--space-8) 80px;
+}
+
+.content:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+.panel > section {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.panel > section > p {
+  max-width: var(--reading-width);
+}
+
+/* Collapsing changes navigation density without hiding accessible link names. */
+@media (min-width: 801px) {
+  .shell[data-collapsed="true"] .brandName,
+  .shell[data-collapsed="true"] .itemLabel,
+  .shell[data-collapsed="true"] .groupLabel,
+  .shell[data-collapsed="true"] .localLabel {
+    display: none;
+  }
+
+  .shell[data-collapsed="true"] .sidebar {
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+
+  .shell[data-collapsed="true"] .brand {
+    justify-content: center;
+  }
+
+  .shell[data-collapsed="true"] .navigationLink,
+  .shell[data-collapsed="true"] .collapseToggle {
+    justify-content: center;
+    padding: var(--space-2);
+  }
+}
+
+/* Mobile navigation is a disclosure above the page, with no obscured controls. */
+@media (max-width: 800px) {
+  .shell, .shell[data-collapsed="true"] {
+    display: block;
+  }
+
+  .sidebar {
+    position: sticky;
+    z-index: 20;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    height: auto;
+    padding: var(--space-3) var(--space-5);
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .brand {
+    margin: 0;
+  }
+
+  .mobileToggle {
+    display: block;
+    min-height: 40px;
+    padding: var(--space-2) var(--space-3);
+    background: transparent;
+  }
+
+  .sidebarContent {
+    display: none;
+    flex: 1 0 100%;
+    max-height: calc(100dvh - 80px);
+    padding-top: var(--space-5);
+  }
+
+  .sidebar[data-mobile-open="true"] .sidebarContent {
+    display: flex;
+  }
+
+  .navigationGroup + .navigationGroup {
+    margin-top: var(--space-4);
+  }
+
+  .sidebarFooter {
+    padding-top: var(--space-4);
+  }
+
+  .localLabel {
+    margin-bottom: 0;
+  }
+
+  .collapseToggle {
+    display: none;
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-5);
+  }
+
+  .content {
+    padding: var(--space-6) var(--space-5) var(--space-12);
+  }
+}
+
+@media (forced-colors: active) {
+  .navigationLink:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+    box-shadow: none;
+  }
+}

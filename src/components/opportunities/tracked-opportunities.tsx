@@ -81,14 +81,14 @@ export function TrackedOpportunities({
   return (
     <section className="card" aria-labelledby="tracking-heading" aria-busy={pending}>
       <p className="eyebrow">Your job search</p>
-      <h2 id="tracking-heading">Tracked opportunities</h2>
+      <h2 id="tracking-heading" tabIndex={-1}>Tracked opportunities</h2>
 
       <p className="muted">
         Revisit saved opportunities, applications and drafts independently of your latest search.
         To review includes saved ads you have not marked yet.
       </p>
 
-      <fieldset className="search-fields" disabled={pending || hasDirty}>
+      <fieldset className="search-fields tracking-filters" disabled={pending || hasDirty}>
         <div className="field">
           <label htmlFor="tracking-filter">Filter by status</label>
           <select
@@ -111,10 +111,10 @@ export function TrackedOpportunities({
         </button>
       </fieldset>
 
-      {hasDirty && <p className="muted">Finish saving or reopen your unsaved edits below before changing this list.</p>}
+      {hasDirty && <p className="notice-message">Finish saving or reopen your unsaved edits below before changing this list.</p>}
 
       <div aria-live="polite">
-        {pending && <p className="status">Loading tracking…</p>}
+        {pending && <p className="status status-running">Loading tracking…</p>}
         {error && <p className="error-message" role="alert">{error}</p>}
         {page && (
           <p className="status">
