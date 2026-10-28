@@ -101,32 +101,102 @@
 }
 
 .body {
-  padding: var(--space-5);
   border-top: 1px solid var(--color-border);
   background: var(--color-background);
 }
 
-.body[hidden] {
+.body[hidden], .panel[hidden] {
   display: none;
 }
 
-/* Expanded workflows adapt to the card's width, including beside the desktop sidebar. */
-@container opportunity (max-width: 760px) {
-  .body :global(.opportunity-workflow) {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .body :global(.opportunity-tracking) {
-    padding: var(--space-6) 0 0;
-    border-top: 1px solid var(--color-border);
-    border-left: 0;
-  }
+.tabs {
+  display: flex;
+  gap: var(--space-6);
+  padding: 0 var(--space-6);
+  border-bottom: 1px solid var(--color-border);
 }
 
-@container opportunity (max-width: 600px) {
-  .body :global(.evidence-columns) {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0;
+.tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: var(--space-3) 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.tab[aria-selected="true"] {
+  border-bottom-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.tab:hover:not(:disabled) {
+  background: transparent;
+  border-bottom-color: var(--color-accent-hover);
+  color: var(--color-accent-hover);
+  box-shadow: none;
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -4px;
+  box-shadow: none;
+}
+
+.activityMarker {
+  color: var(--color-warning);
+}
+
+.panel {
+  padding: var(--space-6);
+}
+
+.panel > section, .readingContent {
+  max-width: var(--reading-width);
+}
+
+.advertisementHeading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.advertisementHeading h5 {
+  margin: 0;
+}
+
+.sourceLink {
+  font-size: var(--text-small);
+}
+
+.readingContent > :last-child {
+  margin-bottom: 0;
+}
+
+@container opportunity (max-width: 540px) {
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 var(--space-3);
+    padding: 0 var(--space-4);
+  }
+
+  .tab {
+    width: 100%;
+  }
+
+  .panel {
+    padding: var(--space-4);
   }
 }
 
@@ -142,13 +212,10 @@
     align-items: center;
   }
 
-  .body {
-    padding: var(--space-4);
-  }
 }
 
 @media (forced-colors: active) {
-  .toggle:focus-visible {
+  .toggle:focus-visible, .tab:focus-visible {
     outline-color: Highlight;
   }
 

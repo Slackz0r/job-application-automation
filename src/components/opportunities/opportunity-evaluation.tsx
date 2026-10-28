@@ -24,19 +24,6 @@ export function OpportunityEvaluation({
     <section className="workflow-section opportunity-evaluation" aria-label="Opportunity evaluation" aria-busy={pending}>
       <h5 className="workflow-heading">Opportunity evaluation</h5>
 
-      <p className="muted">
-        Evaluate this advertisement with GPT-6.1 Sol using your ChatGPT subscription.
-        Review the result before deciding whether to apply.
-      </p>
-
-      <details className="request-details">
-        <summary>About this evaluation</summary>
-        <p className="muted">
-          Sends skills and competencies, professional experience, education, and career preferences.
-          Personality and interests are excluded. One request per attempt. No automatic retries or paid API fallback.
-        </p>
-      </details>
-
       {loadError && <p className="error-message" role="alert">{loadError}</p>}
 
       <div aria-live="polite">
@@ -46,16 +33,15 @@ export function OpportunityEvaluation({
         {evaluation && (
           <>
             {evaluation.mode === "simulated" && <p className="notice-message">Saved sample — no suitability assessment was made.</p>}
-            {evaluation.mode === "live" && <p className="status status-success">AI evaluation · {evaluation.model}</p>}
 
             <p className="recommendation" data-recommendation={evaluation.mode === "live" ? evaluation.result.recommendation : undefined}>
               {recommendationLabels[evaluation.result.recommendation]} {evaluation.mode === "simulated" && <span className="muted">(sample)</span>}
             </p>
             <p>{evaluation.result.summary}</p>
 
-            <div className="evidence-columns">
-              <div>
-                <p className="status">Supporting evidence</p>
+            <div className="evaluation-evidence">
+              <details>
+                <summary>Supporting evidence ({evaluation.result.supportingEvidence.length})</summary>
                 {evaluation.result.supportingEvidence.length > 0 ? (
                   <ul>
                     {evaluation.result.supportingEvidence.map((item, index) => (
@@ -65,10 +51,10 @@ export function OpportunityEvaluation({
                 ) : (
                   <p className="muted">No supporting evidence listed.</p>
                 )}
-              </div>
+              </details>
 
-              <div>
-                <p className="status">Gaps and unknowns</p>
+              <details>
+                <summary>Gaps and unknowns ({evaluation.result.gapsAndUnknowns.length})</summary>
                 {evaluation.result.gapsAndUnknowns.length > 0 ? (
                   <ul>
                     {evaluation.result.gapsAndUnknowns.map((item, index) => (
@@ -78,15 +64,24 @@ export function OpportunityEvaluation({
                 ) : (
                   <p className="muted">No gaps or unknowns listed.</p>
                 )}
-              </div>
+              </details>
             </div>
 
-            <p className="muted">Saved <time dateTime={evaluation.evaluatedAt}>{evaluation.evaluatedAt.replace("T", " ").replace(/\.\d+Z$/, " UTC")}</time></p>
+            <p className="muted evaluation-meta">
+              {evaluation.mode === "live" && <>AI evaluation · {evaluation.model} · </>}
+              Saved <time dateTime={evaluation.evaluatedAt}>{evaluation.evaluatedAt.replace("T", " ").replace(/\.\d+Z$/, " UTC")}</time>
+            </p>
           </>
         )}
       </div>
 
-      <form action={formAction}>
+      {!evaluation && (
+        <p className="muted">
+          Evaluate this advertisement against your professional profile. Review the result before deciding whether to apply.
+        </p>
+      )}
+
+      <form className="workflow-actions" action={formAction}>
         {evaluation && <input type="hidden" name="reevaluate" value="true" />}
 
         <button className={evaluation?.mode === "live" ? undefined : "button-primary"} type="submit" disabled={pending || !hasDescription || Boolean(loadError)}>
@@ -95,6 +90,15 @@ export function OpportunityEvaluation({
       </form>
 
       {!hasDescription && <p className="muted">Advertisement text is required for evaluation.</p>}
+
+      <details className="request-details">
+        <summary>About this evaluation</summary>
+        <p className="muted">
+          Uses GPT-6.1 Sol through your ChatGPT subscription. Sends skills and competencies, professional experience,
+          education, and career preferences. Personality and interests are excluded. One request per attempt.
+          No automatic retries or paid API fallback. Review the result before deciding whether to apply.
+        </p>
+      </details>
     </section>
   );
 }

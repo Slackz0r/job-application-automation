@@ -145,41 +145,46 @@ export function OpportunityTracking({
           </p>
 
           <fieldset className="search-fields" disabled={pending}>
-            <div className="field">
-              <label htmlFor={`${id}-status`}>Application status</label>
-              <select
-                id={`${id}-status`}
-                value={status}
-                onChange={(event) => {
-                  const next = event.target.value as TrackingStatus;
+            <div className="tracking-fields">
+              <div className="field">
+                <label htmlFor={`${id}-status`}>Application status</label>
+                <select
+                  id={`${id}-status`}
+                  value={status}
+                  onChange={(event) => {
+                    const next = event.target.value as TrackingStatus;
 
-                  setStatus(next);
-                  setAllowReopen(false);
+                    setStatus(next);
+                    setAllowReopen(false);
 
-                  if (next === "applied" && !appliedOn) setAppliedOn(today());
-                }}
-              >
-                {Object.entries(trackingLabels).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-            </div>
+                    if (next === "applied" && !appliedOn) setAppliedOn(today());
+                  }}
+                >
+                  {Object.entries(trackingLabels).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="field">
-              <label htmlFor={`${id}-date`}>Date applied (optional)</label>
-              <input
-                id={`${id}-date`}
-                type="date"
-                value={appliedOn}
-                onChange={(event) => {
-                  setAppliedOn(event.target.value);
-                  setAllowReopen(false);
-                }}
-              />
-              <p className="muted">
-                Applied suggests today. Change it for an earlier application, or clear it if the date is unknown.
-                Later status changes keep this date.
-              </p>
+              <div className="field">
+                <label htmlFor={`${id}-date`}>Date applied (optional)</label>
+                <input
+                  id={`${id}-date`}
+                  type="date"
+                  value={appliedOn}
+                  onChange={(event) => {
+                    setAppliedOn(event.target.value);
+                    setAllowReopen(false);
+                  }}
+                />
+                <details className="field-help">
+                  <summary>About this date</summary>
+                  <p className="muted">
+                    Applied suggests today. Change it for an earlier application, or clear it if the date is unknown.
+                    Later status changes keep this date.
+                  </p>
+                </details>
+              </div>
             </div>
 
             <div className="field">
@@ -213,13 +218,15 @@ export function OpportunityTracking({
               </>
             )}
 
-            <button className="button-primary" type="button" disabled={!dirty} onClick={save}>
-              {pending ? "Saving…" : "Save tracking"}
-            </button>
+            <div className="action-row">
+              <button className="button-primary" type="button" disabled={!dirty} onClick={save}>
+                {pending ? "Saving…" : "Save tracking"}
+              </button>
 
-            <button className="button-ghost" type="button" onClick={open} disabled={dirty && !allowReopen}>
-              Reopen saved tracking
-            </button>
+              <button className="button-ghost" type="button" onClick={open} disabled={dirty && !allowReopen}>
+                Reopen saved tracking
+              </button>
+            </div>
           </fieldset>
 
           <details className="tracking-history">

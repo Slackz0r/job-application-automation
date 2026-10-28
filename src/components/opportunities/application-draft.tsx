@@ -151,18 +151,9 @@ export function ApplicationDraft({
       {loaded && (
         <>
           <p className="muted">
-            Paste the employer’s question or use the suggested prompt. Generate with GPT-6.1 Sol using your subscription,
-            then review the text before copying it.
+            Use the employer’s question or the suggested prompt. Generate a motivation or write your own,
+            then review and save the text.
           </p>
-
-          <details className="request-details">
-            <summary>About this generation</summary>
-            <p className="muted">
-              Sends this question, the advertisement, skills and competencies, professional experience, education,
-              and career preferences. Personality and interests are excluded. One request per attempt; no automatic
-              retries or paid API fallback.
-            </p>
-          </details>
 
           <fieldset className="search-fields" disabled={pending}>
             <div className="field">
@@ -177,6 +168,29 @@ export function ApplicationDraft({
                   setAllowReplace(false);
                 }}
               />
+              <p className="muted">{question.length}/3,000 characters</p>
+            </div>
+
+            <div className="draft-generation">
+              {(text.trim() || dirty) && (
+                <label className="location-option">
+                  <input
+                    type="checkbox"
+                    checked={allowReplace}
+                    onChange={(event) => setAllowReplace(event.target.checked)}
+                  />
+                  Allow replacing the editor text when generating again or reopening. The saved draft changes only when I save.
+                </label>
+              )}
+
+              <button
+                className={text.trim() ? undefined : "button-primary"}
+                type="button"
+                onClick={generate}
+                disabled={!hasDescription || !question.trim() || Boolean(text.trim() && !allowReplace)}
+              >
+                {pending ? "Working…" : text.trim() ? "Generate again with ChatGPT" : "Generate with ChatGPT"}
+              </button>
             </div>
 
             <div className="field">
@@ -192,11 +206,11 @@ export function ApplicationDraft({
                   setMessage("");
                 }}
               />
+              <p className="muted">{text.length}/12,000 characters. Review all claims before using the draft.</p>
             </div>
 
             <p className="muted">
-              Question: {question.length}/3,000 characters. Draft: {text.length}/12,000 characters.
-              Review all claims. Supply availability, salary and requirement checkboxes yourself.
+              Supply availability, salary and requirement checkboxes yourself.
             </p>
 
             {dirty && (
@@ -212,27 +226,7 @@ export function ApplicationDraft({
               </p>
             )}
 
-            {(text.trim() || dirty) && (
-              <label className="location-option">
-                <input
-                  type="checkbox"
-                  checked={allowReplace}
-                  onChange={(event) => setAllowReplace(event.target.checked)}
-                />
-                Allow replacing the editor text when generating again or reopening. The saved draft changes only when I save.
-              </label>
-            )}
-
             <div className="action-row">
-              <button
-                className={text.trim() ? undefined : "button-primary"}
-                type="button"
-                onClick={generate}
-                disabled={!hasDescription || !question.trim() || Boolean(text.trim() && !allowReplace)}
-              >
-                {pending ? "Working…" : text.trim() ? "Generate again with ChatGPT" : "Generate with ChatGPT"}
-              </button>
-
               <button className={dirty ? "button-primary" : undefined} type="button" onClick={save} disabled={!dirty || !question.trim() || !text.trim()}>
                 Save changes
               </button>
@@ -252,6 +246,15 @@ export function ApplicationDraft({
               Advertisement text is required for generation. You can still edit and save a draft manually.
             </p>
           )}
+
+          <details className="request-details">
+            <summary>About this generation</summary>
+            <p className="muted">
+              Uses GPT-6.1 Sol through your ChatGPT subscription. Sends this question, the advertisement, skills and
+              competencies, professional experience, education, and career preferences. Personality and interests
+              are excluded. One request per attempt; no automatic retries or paid API fallback.
+            </p>
+          </details>
         </>
       )}
 

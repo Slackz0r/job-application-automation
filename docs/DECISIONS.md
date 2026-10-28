@@ -272,6 +272,14 @@ Applied migration files remain unchanged; subsequent changes use new files. Migr
 
 **Interaction refinement (2026-10-28):** The whole summary surface toggles the card through one keyboard-accessible button, replacing the visible Show/Hide details control with a chevron. Expanded content keeps its own independent controls. Strengthen the electric feel through card hover/focus illumination and shared navigation, button and input effects. Retain calm surfaces at rest, status accents, reduced-motion support and no hover movement or scaling.
 
+### D028 - Focused Task Panels Inside Opportunity Cards
+
+**Decision (2026-10-28):** Refine the established expanded-card workflow now through four tabs: Advertisement, Evaluation, Application and Tracking. Start with Advertisement and preserve the last selected tab when a card closes. Keep the summary visible above the panels. Use one readable content column for each task, with supporting evidence and uncertainties in evaluation foldouts, generation beside the application question, save/copy actions after the draft, and grouped tracking fields/actions. Remove the superseded side-by-side preparation/tracking layout.
+
+**State and access:** Hide inactive panels without unmounting their existing components. Switching tabs and collapsing cards preserve drafts, notes, request state and the existing unsaved/busy guards. Mark tabs whose editors report unfinished work. Provide unique tab/panel associations and keyboard navigation with Left/Right arrows, Home and End. Small cards show the four tabs in two rows. Changing tabs performs no reads, saves or model requests; existing explicit actions retain their request and persistence behavior.
+
+**Scope and verification:** This is an information-hierarchy and presentation change. It adds no provider, schema, storage, generation format or submission behavior. Use focused lint/type checking and browser checks for panels, keyboard access, responsive layout and retained edits; a full test-suite run is unnecessary.
+
 ## 3. Under Evaluation
 
 ### AI Integration
