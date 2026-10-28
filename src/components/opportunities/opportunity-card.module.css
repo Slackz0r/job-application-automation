@@ -1,0 +1,124 @@
+/* A quiet surface and complete border make each result a distinct, scannable unit. */
+.card {
+  container: opportunity / inline-size;
+  min-width: 0;
+  overflow: clip;
+  border: 1px solid var(--color-border);
+  border-left: 3px solid color-mix(in srgb, var(--tracking-color, var(--color-muted)) 70%, var(--color-border));
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+}
+
+.header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-6);
+  padding: var(--space-5);
+}
+
+.identity {
+  min-width: 0;
+}
+
+.title {
+  margin: 0 0 var(--space-2);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  letter-spacing: -0.015em;
+  text-wrap: auto;
+}
+
+.company {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-small);
+}
+
+.metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-5);
+  color: var(--color-muted);
+  font-size: 0.75rem;
+}
+
+.metadata time {
+  font-size: inherit;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-right: -8px;
+  padding: var(--space-2);
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.toggle svg {
+  flex-shrink: 0;
+}
+
+.editorNotice {
+  margin: var(--space-2) 0 0;
+  color: var(--color-warning);
+  font-size: 0.75rem;
+}
+
+.body {
+  padding: var(--space-5);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-background);
+}
+
+.body[hidden] {
+  display: none;
+}
+
+/* Expanded workflows adapt to the card's width, including beside the desktop sidebar. */
+@container opportunity (max-width: 760px) {
+  .body :global(.opportunity-workflow) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .body :global(.opportunity-tracking) {
+    padding: var(--space-6) 0 0;
+    border-top: 1px solid var(--color-border);
+    border-left: 0;
+  }
+}
+
+@container opportunity (max-width: 600px) {
+  .body :global(.evidence-columns) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}
+
+@media (max-width: 540px) {
+  .header {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-4);
+  }
+
+  .controls {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .body {
+    padding: var(--space-4);
+  }
+}

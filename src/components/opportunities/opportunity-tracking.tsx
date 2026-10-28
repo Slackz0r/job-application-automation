@@ -42,6 +42,7 @@ export function OpportunityTracking({
   const displayTracking = details && details.tracking.revision >= (savedTracking?.revision ?? 0)
     ? details.tracking
     : savedTracking;
+  const displayStatus = displayTracking?.status ?? (loadError ? undefined : "to_review");
 
   // Protect editor work when the surrounding list changes or the browser closes.
   useEffect(() => {
@@ -123,7 +124,11 @@ export function OpportunityTracking({
   return (
     <section className="workflow-section opportunity-tracking" aria-label="Opportunity tracking" aria-busy={pending}>
       <h5 className="workflow-heading">Your tracking</h5>
-      <p className="status">Status: <span className="status-badge">{trackingLabels[displayTracking?.status ?? "to_review"]}</span></p>
+      <p className="status">
+        Status: <span className="status-badge" data-tracking-status={displayStatus}>
+          {displayStatus ? trackingLabels[displayStatus] : "Status unavailable"}
+        </span>
+      </p>
 
       {loadError && <p className="error-message">{loadError}</p>}
 

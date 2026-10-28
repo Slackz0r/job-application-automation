@@ -1,8 +1,6 @@
 import type { Opportunity } from "@/schemas/opportunity";
 import type { EvaluationMap } from "@/schemas/opportunity-evaluation";
-import { OpportunityEvaluation } from "./opportunity-evaluation";
-import { ApplicationDraft } from "./application-draft";
-import { OpportunityTracking } from "./opportunity-tracking";
+import { OpportunityCard } from "./opportunity-card";
 import type { Tracking, TrackingMap } from "@/schemas/opportunity-tracking";
 
 type OpportunityListProps = {
@@ -15,6 +13,7 @@ type OpportunityListProps = {
   trackingError?: string | null;
   onTrackingDirtyChange: (id: number, dirty: boolean) => void;
   onTrackingSaved: (tracking: Tracking) => void;
+  headingLevel?: "h3" | "h4";
 };
 
 export function OpportunityList({
@@ -27,66 +26,27 @@ export function OpportunityList({
   trackingError,
   onTrackingDirtyChange,
   onTrackingSaved,
+  headingLevel,
 }: OpportunityListProps) {
   if (opportunities.length === 0) {
-    return <p className="muted">{emptyMessage}</p>;
+    return emptyMessage ? <p className="muted">{emptyMessage}</p> : null;
   }
 
   return (
     <ul className="opportunity-list">
       {opportunities.map((opportunity) => (
         <li key={opportunity.id} className="opportunity">
-          <header className="opportunity-header">
-            <h4>{opportunity.title}</h4>
-            <p className="company">{opportunity.company || "Company not provided"}</p>
-
-            <div className="opportunity-meta">
-              <p>Location: {opportunity.location || "Not provided"}</p>
-              {opportunity.applicationDeadline && (
-                <p>
-                  Apply by <time dateTime={opportunity.applicationDeadline}>{opportunity.applicationDeadline.replace("T", " ")}</time>
-                </p>
-              )}
-            </div>
-          </header>
-
-          {opportunity.description ? (
-            <details className="advertisement">
-              <summary>Read advertisement</summary>
-              <p className="ad-description">{opportunity.description}</p>
-            </details>
-          ) : (
-            <p className="muted">Advertisement text is available at the original source.</p>
-          )}
-
-          <a className="source-link" href={opportunity.url} target="_blank" rel="noopener noreferrer">
-            Open original advertisement <span aria-hidden="true">↗</span>
-          </a>
-
-          <div className="opportunity-workflow">
-            <div className="opportunity-preparation">
-              <OpportunityEvaluation
-                opportunityId={opportunity.id}
-                hasDescription={Boolean(opportunity.description?.trim())}
-                savedEvaluation={evaluations[opportunity.id]}
-                loadError={evaluationError}
-              />
-
-              <ApplicationDraft
-                opportunityId={opportunity.id}
-                hasDescription={Boolean(opportunity.description?.trim())}
-                onDirtyChange={onDraftDirtyChange}
-              />
-            </div>
-
-            <OpportunityTracking
-              opportunityId={opportunity.id}
-              savedTracking={tracking[opportunity.id]}
-              loadError={trackingError}
-              onSaved={onTrackingSaved}
-              onDirtyChange={onTrackingDirtyChange}
-            />
-          </div>
+          <OpportunityCard
+            opportunity={opportunity}
+            savedEvaluation={evaluations[opportunity.id]}
+            evaluationError={evaluationError}
+            tracking={tracking[opportunity.id]}
+            trackingError={trackingError}
+            headingLevel={headingLevel}
+            onDraftDirtyChange={onDraftDirtyChange}
+            onTrackingDirtyChange={onTrackingDirtyChange}
+            onTrackingSaved={onTrackingSaved}
+          />
         </li>
       ))}
     </ul>

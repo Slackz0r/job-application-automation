@@ -367,6 +367,8 @@ button:disabled, fieldset:disabled button {
 }
 
 .opportunity-list {
+  display: grid;
+  gap: var(--space-4);
   list-style: none;
   margin: 0;
   padding: 0;
@@ -375,44 +377,7 @@ button:disabled, fieldset:disabled button {
 .opportunity {
   min-width: 0;
   margin: 0;
-  padding: var(--space-8) 0;
-  border-bottom: 1px solid var(--color-border);
   overflow-wrap: anywhere;
-}
-
-.opportunity:first-child {
-  padding-top: var(--space-2);
-}
-
-.opportunity:last-child {
-  border-bottom: 0;
-  padding-bottom: 0;
-}
-
-.opportunity-header {
-  margin-bottom: var(--space-5);
-}
-
-.opportunity h4 {
-  margin: 0 0 var(--space-2);
-  font-size: 1.375rem;
-  letter-spacing: -0.02em;
-}
-
-.company {
-  margin-bottom: var(--space-2);
-}
-
-.opportunity-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-6);
-  color: var(--color-muted);
-}
-
-.opportunity-meta p {
-  margin: 0;
-  font-size: var(--text-small);
 }
 
 summary {
@@ -513,11 +478,35 @@ summary:hover {
 .status-badge {
   display: inline-block;
   padding: 2px 10px;
-  border: 1px solid var(--color-input-border);
+  border: 1px solid color-mix(in srgb, var(--tracking-color, var(--color-muted)) 35%, var(--color-border));
   border-radius: var(--radius-pill);
-  color: var(--color-muted);
+  background: color-mix(in srgb, var(--tracking-color, var(--color-muted)) 8%, transparent);
+  color: var(--tracking-color, var(--color-muted));
   font-size: var(--text-small);
   font-weight: 500;
+}
+
+/* Manual application stages are labelled separately from running/success feedback. */
+[data-tracking-status="to_review"],
+[data-tracking-status="closed"],
+[data-tracking-status="skipped"] {
+  --tracking-color: var(--color-muted);
+}
+
+[data-tracking-status="interested"] {
+  --tracking-color: var(--color-accent);
+}
+
+[data-tracking-status="applied"] {
+  --tracking-color: var(--color-running);
+}
+
+[data-tracking-status="interview"] {
+  --tracking-color: var(--color-interview);
+}
+
+[data-tracking-status="offer"] {
+  --tracking-color: var(--color-success);
 }
 
 .tracking-history, .tracking-pages {

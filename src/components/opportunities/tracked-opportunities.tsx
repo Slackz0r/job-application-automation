@@ -129,35 +129,17 @@ export function TrackedOpportunities({
         </p>
       )}
 
-      <ul className="opportunity-list">
-        {page?.items.map(({ opportunity }) => (
-          <li key={opportunity.id} className="opportunity">
-            <h3>{opportunity.title}</h3>
-            <p>{opportunity.company ?? "Company not provided"} · {trackingLabels[tracking[opportunity.id].status]}</p>
-            {tracking[opportunity.id].appliedOn && (
-              <p className="muted">Applied: {tracking[opportunity.id].appliedOn}</p>
-            )}
-            {opportunity.applicationDeadline && (
-              <p className="muted">Deadline: {opportunity.applicationDeadline.replace("T", " ")}</p>
-            )}
-
-            <details>
-              <summary>Open saved opportunity</summary>
-
-              <OpportunityList
-                opportunities={[opportunity]}
-                evaluations={page.evaluations}
-                evaluationError={page.evaluationError}
-                tracking={tracking}
-                onTrackingSaved={onTrackingSaved}
-                onTrackingDirtyChange={onTrackingDirtyChange}
-                onDraftDirtyChange={onDraftDirtyChange}
-                emptyMessage=""
-              />
-            </details>
-          </li>
-        ))}
-      </ul>
+      <OpportunityList
+        opportunities={page?.items.map(({ opportunity }) => opportunity) ?? []}
+        evaluations={page?.evaluations ?? {}}
+        evaluationError={page?.evaluationError}
+        tracking={tracking}
+        onTrackingSaved={onTrackingSaved}
+        onTrackingDirtyChange={onTrackingDirtyChange}
+        onDraftDirtyChange={onDraftDirtyChange}
+        headingLevel="h3"
+        emptyMessage=""
+      />
 
       {page && (
         <div className="tracking-pages">

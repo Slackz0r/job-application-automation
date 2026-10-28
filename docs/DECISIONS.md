@@ -262,6 +262,14 @@ Applied migration files remain unchanged; subsequent changes use new files. Migr
 
 **Organization and verification:** Keep shell markup/navigation in `src/components/workspace-shell.tsx` and its layout styles in a colocated CSS Module; shared design variables and controls remain in the existing CSS files. Business logic, storage, AI boundaries and submission behavior are unchanged. Verify this slice through focused lint/type checks and browser checks for navigation, responsive layout, focus and retained edits; a full automated test run is unnecessary for this presentation change.
 
+### D027 - Consolidated, Collapsible Opportunity Cards
+
+**Decision (2026-10-28):** Replace the long, visually continuous advertisement list with clearly bounded cards that start collapsed. Show title, company, location, deadline date, saved application date when known, and a labelled tracking status in the summary. Expand a card to read the advertisement and access evaluation, drafting and tracking. Use the same card in discovery and tracking, removing the latter's duplicated title/metadata and nested opportunity list.
+
+**Visual meaning:** Give cards a subtle surface, complete border and status-colored left edge. To review, Closed and Skipped use neutral gray; Interested uses orange, Applied blue, Interview violet and Offer mint. Always retain the text label. Colors describe saved manual application stages, independently of AI recommendations or running-operation feedback. Unsaved status selection does not change the summary's saved status. If tracking could not be loaded, show Status unavailable rather than inventing a To review state.
+
+**Editor protection:** Collapsing hides details without unmounting the existing components, resetting edits or cancelling operations. Show Editor in progress in the summary when a draft or tracking editor reports unsaved/busy work, and keep the existing list/search guards active. Multiple cards may remain open for comparison. Expanding or collapsing makes no AI request and performs no save. Scope remains presentation and component organization, without storage or request-policy changes.
+
 ## 3. Under Evaluation
 
 ### AI Integration
