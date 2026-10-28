@@ -25,28 +25,42 @@ const setupMessages = {
   unavailable: "The profile file could not be read. Check its file permissions and try again.",
 };
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ chatgpt?: string | string[] }> }) {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ chatgpt?: string | string[] }>;
+}) {
   const noticeValue = (await searchParams).chatgpt;
   const notice = typeof noticeValue === "string" && Object.hasOwn(chatGPTNotices, noticeValue)
-    ? noticeValue as ChatGPTNotice : undefined;
+    ? noticeValue as ChatGPTNotice
+    : undefined;
   const browserId = (await cookies()).get("chatgpt_session")?.value ?? "";
   const connection = getChatGPTAuth().status(browserId);
+
   const [result, municipalities] = await Promise.all([
     loadProfessionalProfile(),
     getMunicipalities().catch(() => []),
   ]);
+
   let savedOpportunities: Opportunity[] = [];
   let savedError: string | null = null;
   let savedEvaluations: EvaluationMap = {};
   let evaluationError: string | null = null;
   let savedTracking: TrackingMap = {};
   let trackingError: string | null = null;
+
   try {
     const db = openDatabase();
+
     try {
       savedOpportunities = listOpportunities(db);
-      try { savedTracking = getTrackingMap(db, savedOpportunities.map((opportunity) => opportunity.id)); }
-      catch { trackingError = "Tracking could not be loaded. Run npm run db:migrate if needed, then refresh."; }
+
+      try {
+        savedTracking = getTrackingMap(db, savedOpportunities.map((opportunity) => opportunity.id));
+      } catch {
+        trackingError = "Tracking could not be loaded. Run npm run db:migrate if needed, then refresh.";
+      }
+
       try {
         savedEvaluations = getEvaluations(db, savedOpportunities.map((opportunity) => opportunity.id));
       } catch {
@@ -67,6 +81,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
         <p className="intro">
           Discover opportunities. Prepare thoughtful applications. Keep track of progress.
         </p>
+
         <nav className="opportunity-navigation" aria-label="Opportunity navigation">
           <a href="#search-heading">Browse advertisements</a>
           <a href="#tracking-heading">Tracked opportunities</a>
@@ -88,6 +103,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
       <section aria-labelledby="profile-heading" className="card">
         <p className="eyebrow">Project foundation</p>
         <h2 id="profile-heading">Professional profile</h2>
+
         {result.status === "ready" ? (
           <>
             <p className="status">Profile loaded</p>

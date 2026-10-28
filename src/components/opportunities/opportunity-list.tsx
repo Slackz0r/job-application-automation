@@ -17,7 +17,17 @@ type OpportunityListProps = {
   onTrackingSaved: (tracking: Tracking) => void;
 };
 
-export function OpportunityList({ opportunities, emptyMessage, evaluations, evaluationError, onDraftDirtyChange, tracking, trackingError, onTrackingDirtyChange, onTrackingSaved }: OpportunityListProps) {
+export function OpportunityList({
+  opportunities,
+  emptyMessage,
+  evaluations,
+  evaluationError,
+  onDraftDirtyChange,
+  tracking,
+  trackingError,
+  onTrackingDirtyChange,
+  onTrackingSaved,
+}: OpportunityListProps) {
   if (opportunities.length === 0) {
     return <p className="muted">{emptyMessage}</p>;
   }
@@ -29,25 +39,45 @@ export function OpportunityList({ opportunities, emptyMessage, evaluations, eval
           <h4>{opportunity.title}</h4>
           <p className="company">{opportunity.company || "Company not provided"}</p>
           <p className="location muted">Location: {opportunity.location || "Not provided"}</p>
-          {opportunity.applicationDeadline && <p className="muted">
-            Apply by <time dateTime={opportunity.applicationDeadline}>{opportunity.applicationDeadline.replace("T", " ")}</time>
-          </p>}
+          {opportunity.applicationDeadline && (
+            <p className="muted">
+              Apply by <time dateTime={opportunity.applicationDeadline}>{opportunity.applicationDeadline.replace("T", " ")}</time>
+            </p>
+          )}
+
           {opportunity.description ? (
             <details>
               <summary>Read advertisement</summary>
               <p className="ad-description">{opportunity.description}</p>
             </details>
-          ) : <p className="muted">Advertisement text is available at the original source.</p>}
-          <a href={opportunity.url} target="_blank" rel="noopener noreferrer">Open original advertisement <span aria-hidden="true">↗</span></a>
-          <OpportunityTracking opportunityId={opportunity.id} savedTracking={tracking[opportunity.id]} loadError={trackingError}
-            onSaved={onTrackingSaved} onDirtyChange={onTrackingDirtyChange} />
+          ) : (
+            <p className="muted">Advertisement text is available at the original source.</p>
+          )}
+
+          <a href={opportunity.url} target="_blank" rel="noopener noreferrer">
+            Open original advertisement <span aria-hidden="true">↗</span>
+          </a>
+
+          <OpportunityTracking
+            opportunityId={opportunity.id}
+            savedTracking={tracking[opportunity.id]}
+            loadError={trackingError}
+            onSaved={onTrackingSaved}
+            onDirtyChange={onTrackingDirtyChange}
+          />
+
           <OpportunityEvaluation
             opportunityId={opportunity.id}
             hasDescription={Boolean(opportunity.description?.trim())}
             savedEvaluation={evaluations[opportunity.id]}
             loadError={evaluationError}
           />
-          <ApplicationDraft opportunityId={opportunity.id} hasDescription={Boolean(opportunity.description?.trim())} onDirtyChange={onDraftDirtyChange} />
+
+          <ApplicationDraft
+            opportunityId={opportunity.id}
+            hasDescription={Boolean(opportunity.description?.trim())}
+            onDirtyChange={onDraftDirtyChange}
+          />
         </li>
       ))}
     </ul>
