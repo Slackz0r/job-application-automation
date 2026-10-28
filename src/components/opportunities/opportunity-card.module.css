@@ -23,7 +23,7 @@
 
 .title {
   margin: 0 0 var(--space-2);
-  font-size: 1.0625rem;
+  font-size: 1.25rem;
   line-height: 1.45;
   letter-spacing: -0.015em;
   text-wrap: auto;
@@ -31,7 +31,7 @@
 
 .company {
   margin: 0 0 var(--space-2);
-  font-size: var(--text-small);
+  font-size: 1rem;
 }
 
 .metadata {
@@ -39,7 +39,7 @@
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-5);
   color: var(--color-muted);
-  font-size: 0.75rem;
+  font-size: var(--text-small);
 }
 
 .metadata time {
@@ -97,7 +97,7 @@
 .editorNotice {
   margin: var(--space-2) 0 0;
   color: var(--color-warning);
-  font-size: 0.75rem;
+  font-size: var(--text-small);
 }
 
 .body {
