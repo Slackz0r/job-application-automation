@@ -270,6 +270,8 @@ Applied migration files remain unchanged; subsequent changes use new files. Migr
 
 **Editor protection:** Collapsing hides details without unmounting the existing components, resetting edits or cancelling operations. Show Editor in progress in the summary when a draft or tracking editor reports unsaved/busy work, and keep the existing list/search guards active. Multiple cards may remain open for comparison. Expanding or collapsing makes no AI request and performs no save. Scope remains presentation and component organization, without storage or request-policy changes.
 
+**Interaction refinement (2026-10-28):** The whole summary surface toggles the card through one keyboard-accessible button, replacing the visible Show/Hide details control with a chevron. Expanded content keeps its own independent controls. Strengthen the electric feel through card hover/focus illumination and shared navigation, button and input effects. Retain calm surfaces at rest, status accents, reduced-motion support and no hover movement or scaling.
+
 ## 3. Under Evaluation
 
 ### AI Integration

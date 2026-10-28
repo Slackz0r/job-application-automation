@@ -80,20 +80,20 @@ export function OpportunityCard({
             {status ? trackingLabels[status] : "Status unavailable"}
           </span>
 
-          <button
-            className={`button-ghost ${styles.toggle}`}
-            type="button"
-            aria-expanded={expanded}
-            aria-controls={`${id}-details`}
-            aria-label={`${expanded ? "Hide" : "Show"} details for ${opportunity.title}`}
-            onClick={() => setExpanded((value) => !value)}
-          >
-            {expanded ? "Hide details" : "Show details"}
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d={expanded ? "m6 15 6-6 6 6" : "m6 9 6 6 6-6"} />
-            </svg>
-          </button>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d={expanded ? "m6 15 6-6 6 6" : "m6 9 6 6 6-6"} />
+          </svg>
         </div>
+
+        {/* One button covers the summary; controls in the expanded body remain independent. */}
+        <button
+          className={styles.toggle}
+          type="button"
+          aria-expanded={expanded}
+          aria-controls={`${id}-details`}
+          aria-label={`${expanded ? "Collapse" : "Expand"} ${opportunity.title}`}
+          onClick={() => setExpanded((value) => !value)}
+        />
       </header>
 
       {/* Keep editors mounted when collapsed so closing a card never discards work. */}

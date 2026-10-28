@@ -205,7 +205,7 @@ button:disabled, fieldset:disabled button {
   button:hover:not(:disabled) {
     background: var(--color-input-border);
     border-color: var(--color-muted);
-    box-shadow: 0 0 12px rgb(255 145 77 / 8%);
+    box-shadow: var(--shadow-interactive);
   }
 
   .button-primary:hover:not(:disabled) {
@@ -219,6 +219,11 @@ button:disabled, fieldset:disabled button {
     border-color: var(--color-border);
     color: var(--color-text);
   }
+}
+
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: var(--ring-focus), var(--shadow-interactive);
 }
 
 :focus-visible {
@@ -623,7 +628,7 @@ summary:hover {
 }
 
 @media (forced-colors: active) {
-  :focus-visible {
+  :focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
     outline: 2px solid Highlight;
     box-shadow: none;
   }

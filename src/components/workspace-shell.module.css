@@ -94,6 +94,8 @@
   font-size: var(--text-small);
   font-weight: 500;
   text-decoration: none;
+  transition: color var(--transition-interaction), background-color var(--transition-interaction),
+    box-shadow var(--transition-interaction);
 }
 
 .navigationLink svg {
@@ -107,7 +109,8 @@
 
 .navigationLink:hover {
   background: var(--color-surface);
-  color: var(--color-text);
+  color: var(--color-accent-hover);
+  box-shadow: var(--shadow-navigation);
 }
 
 .navigationLink:focus-visible {

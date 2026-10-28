@@ -54,6 +54,10 @@
   --radius-panel: 12px;
   --radius-pill: 999px;
   --transition-interaction: 160ms ease;
-  --shadow-accent: 0 0 18px rgb(255 145 77 / 18%);
+  --shadow-accent: 0 0 22px rgb(255 145 77 / 28%), 0 0 8px rgb(255 145 77 / 18%);
+  --shadow-interactive: 0 0 16px rgb(255 145 77 / 16%);
+  --shadow-card: 0 0 0 1px rgb(255 145 77 / 24%), 0 0 28px rgb(255 145 77 / 18%),
+    inset 0 0 24px rgb(255 145 77 / 3%);
+  --shadow-navigation: inset 0 0 0 1px rgb(255 145 77 / 35%), inset 0 0 18px rgb(255 145 77 / 8%);
   --ring-focus: 0 0 0 3px var(--color-accent);
 }
