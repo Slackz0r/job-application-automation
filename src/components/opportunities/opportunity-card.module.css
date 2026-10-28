@@ -4,7 +4,6 @@
   min-width: 0;
   overflow: clip;
   border: 1px solid var(--color-border);
-  border-left: 3px solid color-mix(in srgb, var(--tracking-color, var(--color-muted)) 70%, var(--color-border));
   border-radius: var(--radius-panel);
   background: var(--color-surface);
   transition: border-color var(--transition-interaction), box-shadow var(--transition-interaction);
@@ -85,14 +84,12 @@
 /* Illuminate the click target without recoloring the saved status or moving the card. */
 .card:has(.toggle:focus-visible) {
   border-color: var(--color-accent);
-  border-left-color: var(--tracking-color, var(--color-muted));
   box-shadow: var(--shadow-card);
 }
 
 @media (hover: hover) {
   .card:has(.toggle:hover) {
     border-color: var(--color-accent);
-    border-left-color: var(--tracking-color, var(--color-muted));
     box-shadow: var(--shadow-card);
   }
 }

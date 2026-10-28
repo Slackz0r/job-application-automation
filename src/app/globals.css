@@ -373,7 +373,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 
 .opportunity-list {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-6);
   list-style: none;
   margin: 0;
   padding: 0;
